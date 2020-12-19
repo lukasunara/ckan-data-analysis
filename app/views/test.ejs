@@ -9,51 +9,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="./vendor/normalize.css">
     <link rel="stylesheet" type="text/css" href="./styles/main.css">
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="http://code.jquery.com/jquery-3.5.1.js"></script>
 </head>
 
 <body>
 
     <main>
-        <div class="myPanel"></div>
+        <div>
+            <pre class="myPanel"><%= JSON.stringify(data, undefined, 2); %></pre>
+        </div>
+
         <script>
 
+            /* ovo radi
             $(document).ready(function () {
                 // ovo ispise json u console barem
                 $.getJSON('http://data.rijeka.hr/api/3/action/package_list?callback=?', function (data) {
                     console.log(data);
-                    $(".mypanel").html(data.result);
+                    $(".myPanel").html(JSON.stringify(data, undefined, 2));
                 });
             });
-
+            */
 
             /*
+            // ovo radi
             $(document).ready(function () {
                 $.ajax({
                     url: 'http://data.rijeka.hr/api/action/package_list',
                     dataType: 'jsonp',
-                    jsonpCallback: function (data) {
-                        alert(data);
+                    success: function (data) {
                         console.log(data);
+                        $(".myPanel").html(JSON.stringify(data, undefined, 2));
                     },
-                    jsonp: 'callback'
                 });
             })
             */
 
             /*
-            // ne radi iako je tako zadano na data.rijeka.hr
+            // ne radi, ne znam predati parametre kako spada u request query
             $(document).ready(function () {
                 var data = {
                     resource_id: '76231ce7-e776-4220-ada1-1542f06cc8b4', // the resource id
                 };
                 $.ajax({
-                    url: 'http://data.rijeka.hr/api/action/datastore_search',
-                    data: data,
+                    url: 'http://data.rijeka.hr/api/action/datastore_search?' + $.param(data),
                     dataType: 'jsonp',
-                    success: function (data) {
-                        alert('Total results found: ' + data.result.length)
-                        $(".mypanel").html(data);
+                    success: function (res) {
+                        alert('Total results found: ' + res.result.length)
+                        $(".myPanel").html(JSON.stringify(res, undefined, 2));
                     }
                 });
             });
