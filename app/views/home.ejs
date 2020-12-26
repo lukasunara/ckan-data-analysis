@@ -9,22 +9,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="./vendor/normalize.css">
     <link rel="stylesheet" type="text/css" href="./styles/main.css">
+    <link rel="stylesheet" type="text/css" href="./styles/home.css">
 </head>
 
-<body>
-
+<body class="primary-color-bg">
     <main>
-        <div>
-            <form action="/package_list" method="GET">
-                <button type="submit" value="package_list">Package list</button>
-            </form>
-            <form action="/package_show" method="GET">
-                <button type="submit" value="resource">Info o paketu</button>
-            </form>
-            <form action="/resource" method="GET">
-                <button type="submit" value="resource">Resource</button>
-            </form>
-        </div>
+        <section class="tabs-with-circles">
+            <div class="tab goldish-color-bg">
+                <div class="image-container">
+                    <img class="circle-image" src="./images/data_analysis.jpg" alt="data_analysis.jpg" />
+                </div>
+                <div class="tab-text">
+                    <h2 class="redish-font bigger-font">
+                        <a class="tab-link" href="./menu">Analyse portals</a>
+                    </h2>
+                    <p class="tab-paragraph">
+                        Analyse the quality of open datasets available on CKAN platform in just a few steps.<br>
+                        Choose between analysing:<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp; - portals<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp; - datasets<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp; - organizations<br>
+                    </p>
+                </div>
+            </div>
+            <div class="tab goldish-bg tab-reversed">
+                <div class="image-container">
+                    <img class="circle-image" src="./images/question_marks.jpg" alt="question_marks.jpg" />
+                </div>
+                <div class="tab-text">
+                    <h2 class="redish-font bigger-font">
+                        <a class="tab-link" href="https://ckan.org/">About CKAN</a>
+                    </h2>
+                    <p class="tab-paragraph">
+                        CKAN is the world’s leading Open Source data portal platform.<br>
+                        It is a powerful data management system that makes data easily accessible.
+                        CKAN collects data all around the world and has simplified its publishig,
+                        sharing, finding and using.
+                    </p>
+                </div>
+            </div>
+        </section>
     </main>
-
 </body>

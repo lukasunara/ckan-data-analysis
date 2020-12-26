@@ -1,6 +1,6 @@
 const express = require('express');
-const fetch = require('node-fetch');
-const { URL, URLSearchParams } = require('url');
+// const fetch = require('node-fetch');
+// const { URL, URLSearchParams } = require('url');
 const router = express.Router();
 
 
@@ -10,6 +10,7 @@ router.get('/', function (req, res) {
     });
 });
 
+/*
 router.get('/package_list', async function (req, res) {
     let url = 'http://data.rijeka.hr/api/action/package_list';
     let data;
@@ -71,5 +72,6 @@ router.get('/resource', async function (req, res) {
         title: "Test"
     });
 });
+*/
 
 module.exports = router;

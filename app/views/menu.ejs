@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        <%= title %>
+    </title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="./vendor/normalize.css">
+    <link rel="stylesheet" type="text/css" href="./styles/main.css">
+    <link rel="stylesheet" type="text/css" href="./styles/menu.css">
+</head>
+
+<body class="primary-color-bg">
+
+    <main class="centered-main">
+        <section class="intro">
+            <p class="intro-text">
+
+            </p>
+        </section>
+        <section class="forms goldish-color-bg">
+            <h3 class="redish-font">Choose analysis option</h2>
+                <div class="menu-form">
+                    <form action="/menu/results_portal" method="GET">
+                        <label for="url">URL of a CKAN portal</label>
+                        <input type="text" id="url" name="url" placeholder="Insert URL...">
+                        <button type="submit" value="package_list">Start analysis</button>
+                    </form>
+                </div>
+                <div class="menu-form">
+                    <form action="/menu/results_dataset" method="GET">
+                        <label for="url">URL of a single dataset</label>
+                        <input type="text" id="url" name="url" placeholder="Insert URL...">
+                        <button type="submit" value="package_list">Start analysis</button>
+                    </form>
+                </div>
+                <div class="menu-form">
+                    <form action="/menu/results_organization" method="GET">
+                        <label for="url">URL of a CKAN organization</label>
+                        <input type="text" id="url" name="url" placeholder="Insert URL...">
+                        <button type="submit" value="package_list">Start analysis</button>
+                    </form>
+                </div>
+        </section>
+    </main>
+
+</body>

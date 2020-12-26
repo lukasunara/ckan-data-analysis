@@ -1,0 +1,17 @@
+section.forms {
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+input[type=text] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid rgb(129, 2, 2);
+    border-radius: 4px;
+    box-sizing: border-box;
+}
