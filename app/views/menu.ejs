@@ -15,35 +15,39 @@
 <body class="primary-color-bg">
 
     <main class="centered-main">
-        <section class="intro">
-            <p class="intro-text">
-
-            </p>
-        </section>
-        <section class="forms goldish-color-bg">
-            <h3 class="redish-font">Choose analysis option</h2>
-                <div class="menu-form">
-                    <form action="/menu/results_portal" method="GET">
-                        <label for="url">URL of a CKAN portal</label>
-                        <input type="text" id="url" name="url" placeholder="Insert URL...">
-                        <button type="submit" value="package_list">Start analysis</button>
-                    </form>
-                </div>
-                <div class="menu-form">
-                    <form action="/menu/results_dataset" method="GET">
-                        <label for="url">URL of a single dataset</label>
-                        <input type="text" id="url" name="url" placeholder="Insert URL...">
-                        <button type="submit" value="package_list">Start analysis</button>
-                    </form>
-                </div>
-                <div class="menu-form">
-                    <form action="/menu/results_organization" method="GET">
-                        <label for="url">URL of a CKAN organization</label>
-                        <input type="text" id="url" name="url" placeholder="Insert URL...">
-                        <button type="submit" value="package_list">Start analysis</button>
-                    </form>
-                </div>
-        </section>
+        <% if(errors) { %>
+            <section>
+                <span>
+                    <%= errors[0] %>
+                </span>
+            </section>
+            <% } %>
+                <section class="forms container goldish-color-bg darkpurple-font">
+                    <span class="form-title redish-font">Choose analysis option</span>
+                    <div class="menu-form">
+                        <form action="/menu/results_portal" method="POST">
+                            <label for="url">URL of a CKAN portal</label>
+                            <input type="text" id="url" name="url" placeholder="Insert URL...">
+                            <input class="darkpurple-font" type="submit" value="Start analysis">
+                        </form>
+                    </div>
+                    <hr class="dotted" />
+                    <div class="menu-form">
+                        <form action="/menu/results_dataset" method="POST">
+                            <label for="url">URL of a single dataset</label>
+                            <input type="text" id="url" name="url" placeholder="Insert URL...">
+                            <input class="darkpurple-font" type="submit" value="Start analysis">
+                        </form>
+                    </div>
+                    <hr class="dotted" />
+                    <div class="menu-form">
+                        <form action="/menu/results_organization" method="POST">
+                            <label for="url">URL of a organization</label>
+                            <input type="text" id="url" name="url" placeholder="Insert URL...">
+                            <input class="darkpurple-font" type="submit" value="Start analysis">
+                        </form>
+                    </div>
+                </section>
     </main>
 
 </body>

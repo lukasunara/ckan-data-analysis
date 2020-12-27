@@ -18,8 +18,26 @@ body {
     color: rgb(129, 2, 2);
 }
 
+.darkpurple-font {
+    color: rgb(43, 22, 63);
+}
+
+span.bigger-font {
+    font-size: 2em;
+}
+
+.container {
+    border-radius: 15px;
+    box-shadow: 0 4px 8px 0 rgba(14, 14, 14, 0.342), 0 6px 20px 0 rgba(14, 14, 14, 0.342);
+}
+
 .centered-main {
     display: flex;
     align-content: center;
     justify-content: center;
+}
+
+hr.dotted {
+    border-top: 2px dotted rgba(110, 243, 243, 0.801);
+    width: 100%;
 }
