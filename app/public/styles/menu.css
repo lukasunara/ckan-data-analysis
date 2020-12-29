@@ -48,3 +48,9 @@ input[type=submit] {
 input[type=submit]:hover {
     background-color: #28662bd2;
 }
+
+section.errors {
+    font-weight: bold;
+    padding: 20px;
+    margin-top: 1.5em;
+}

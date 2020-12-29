@@ -10,12 +10,20 @@ body {
     background-color: rgba(231, 231, 231, 0.89);
 }
 
+.secondary-color-bg {
+    background-color: white;
+}
+
 .goldish-color-bg {
     background-color: rgba(226, 195, 117, 0.712);
 }
 
 .redish-font {
     color: rgb(129, 2, 2);
+}
+
+.error-font {
+    color: red;
 }
 
 .darkpurple-font {
@@ -31,13 +39,17 @@ span.bigger-font {
     box-shadow: 0 4px 8px 0 rgba(14, 14, 14, 0.342), 0 6px 20px 0 rgba(14, 14, 14, 0.342);
 }
 
-.centered-main {
+.centered-flex {
     display: flex;
-    align-content: center;
-    justify-content: center;
+    align-items: center;
+    justify-items: center;
 }
 
 hr.dotted {
     border-top: 2px dotted rgba(110, 243, 243, 0.801);
     width: 100%;
+}
+
+.vertical-flex {
+    flex-direction: column;
 }

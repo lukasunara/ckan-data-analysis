@@ -2,19 +2,43 @@
 <html>
 
 <head>
-    <title>
-        <%= title %>
-    </title>
+    <title><%= title %></title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="./vendor/normalize.css">
-    <link rel="stylesheet" type="text/css" href="./styles/main.css">
+    <link rel="stylesheet" type="text/css" href="../vendor/normalize.css">
+    <link rel="stylesheet" type="text/css" href="../styles/main.css">
+    <link rel="stylesheet" type="text/css" href="../styles/results.css">
+    <script src="../scripts/dataset.js"></script>
 </head>
 
-<body>
-    <main>
-        <div>
-            <pre class="myPanel"><%= JSON.stringify(data, undefined, 2); %></pre>
+<body class="primary-color-bg">
+    <main class="centered-flex vertical-flex">
+        <div class="dataset-title centered-flex vertical-flex container goldish-color-bg">
+            <h1 class="redish-font"><%= data.title %></h1>
+            <div class="dataset-basic-info darkpurple-font">
+                <span>
+                    <span class="info-name">Organization: </span>
+                    <%= data.organization.title ? data.organization.title : "unknown" %>
+                </span>
+                <span>
+                    <span class="info-name">State: </span>
+                    <%= data.state ? data.state : "unknown" %>
+                </span>
+                <span>
+                    <span class="info-name">License: </span>
+                    <a class="license-link darkpurple-font" href="<%= data.license_url %>">
+                        <%= data.license_title ? data.license_title : "unknown" %>
+                    </a>
+                </span>
+            </div>
         </div>
     </main>
+
+    <script>
+        console.log("hello");
+        console.log("<%= data.title %>");
+        var data = "<%= data %>";
+        console.log(data);
+        doSomethingWithData(data);
+    </script>
 </body>

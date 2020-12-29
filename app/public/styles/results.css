@@ -1,0 +1,23 @@
+div.dataset-title {
+    width: 90vw;
+    margin: 20px;
+    padding: 10px;
+    padding-top: 0;
+}
+
+.dataset-basic-info {
+    display: flex;
+    width: 80%;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.2em;
+}
+
+.info-name {
+    font-weight: bold;
+    color: blue;
+}
+
+.license-link:hover {
+    opacity: 0.6;
+}
