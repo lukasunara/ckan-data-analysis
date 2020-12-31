@@ -5,21 +5,24 @@
     <title><%= title %></title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="./vendor/normalize.css">
-    <link rel="stylesheet" type="text/css" href="./styles/main.css">
-    <link rel="stylesheet" type="text/css" href="./styles/home.css">
+    <link rel="stylesheet" type="text/css" href="/vendor/normalize.css">
+    <link rel="stylesheet" type="text/css" href="/styles/main.css">
+    <link rel="stylesheet" type="text/css" href="/styles/home.css">
 </head>
 
 <body class="primary-color-bg">
+    
     <main>
         <section class="tabs-with-circles">
             <div class="tab container goldish-color-bg">
                 <div class="image-container">
-                    <img class="circle-image" src="./images/data_analysis.jpg" alt="data_analysis.jpg" />
+                    <img class="circle-image" src="/images/data_analysis.jpg" alt="data_analysis.jpg" />
                 </div>
                 <div class="tab-text">
                     <span class="bigger-font">
-                        <a class="tab-link redish-font" href="./menu">Analyse portals</a>
+                        <a class="tab-link redish-font" href="/menu" title="Start analysing data">
+                            Analyse portals
+                        </a>
                     </span>
                     <p class="tab-paragraph darkpurple-font">
                         Analyse the quality of open datasets available on CKAN platform in just a few steps.<br>
@@ -32,11 +35,15 @@
             </div>
             <div class="tab container goldish-color-bg tab-reversed">
                 <div class="image-container">
-                    <img class="circle-image" src="./images/question_marks.jpg" alt="question_marks.jpg" />
+                    <img class="circle-image" src="/images/question_marks.jpg" alt="question_marks.jpg" />
                 </div>
                 <div class="tab-text">
                     <span class="bigger-font">
-                        <a class="tab-link redish-font" href="https://ckan.org/">About CKAN</a>
+                        <a class="tab-link redish-font" href="https://ckan.org/" 
+                            title="Go to CKAN website" target="_blank"
+                        >
+                            About CKAN
+                        </a>
                     </span>
                     <p class="tab-paragraph darkpurple-font">
                         CKAN is the world’s leading Open Source data portal platform.<br>
@@ -48,4 +55,5 @@
             </div>
         </section>
     </main>
+
 </body>

@@ -34,6 +34,10 @@ span.bigger-font {
     font-size: 2em;
 }
 
+.slightly-bigger-text {
+    font-size: 1.2em;
+}
+
 .container {
     border-radius: 15px;
     box-shadow: 0 4px 8px 0 rgba(14, 14, 14, 0.342), 0 6px 20px 0 rgba(14, 14, 14, 0.342);
@@ -52,4 +56,16 @@ hr.dotted {
 
 .vertical-flex {
     flex-direction: column;
+}
+
+.pre-not-styled {
+    font-family: inherit;
+}
+
+li {
+    list-style-type: square;
+}
+
+ul.list-in-two-columns {
+    column-count: 2;
 }

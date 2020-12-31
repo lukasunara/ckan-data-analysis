@@ -18,8 +18,9 @@ router.get('/', function (req, res) {
 });
 
 router.post('/results_portal', [
-    body('url', 'Invalid URL')
+    body('url', 'Invalid URL!')
         .trim()
+        .not().isEmpty().withMessage('URL is empty!')
         .isURL()
 ], async function (req, res) {
     const errors = validationResult(req);
@@ -32,84 +33,107 @@ router.post('/results_portal', [
         req.session.success = true;
 
         let reqUrl = new URL(req.body.url);
-        // get all datasets and then analyze one by one
-        let newUrl = reqUrl.protocol + '//' + reqUrl.host + '/api/3/action/package_list';
+        let portalName = reqUrl.host;
 
-        let data;
-        await fetch(newUrl)
+        let datasetsUrl = reqUrl.protocol + '//' + portalName + '/api/3/action/package_list';
+        let datasets;
+        await fetch(datasetsUrl)
             .then(res => res.json())
             .then((out) => {
-                data = out;
+                datasets = out;
             })
             .catch(err => { throw err });
 
+        let organizationsUrl = reqUrl.protocol + '//' + portalName + '/api/3/action/organization_list';
+        let organizations;
+        await fetch(organizationsUrl)
+            .then(res => res.json())
+            .then((out) => {
+                organizations = out;
+            })
+            .catch(err => { throw err });
 
-        res.render('results', {
-            data: data.result,
-            title: "Results"
+        res.render('resultsPortal', {
+            portalName: portalName,
+            datasets: datasets.result,
+            organizations: organizations.result,
+            title: "Portal analysis results"
         });
     }
 });
 
 router.post('/results_dataset', [
-    body('url', 'Invalid URL')
+    body('url', 'Invalid URL!')
         .trim()
+        .not().isEmpty().withMessage('URL is empty!')
         .isURL()
 ], async function (req, res) {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
         req.session.errors = errors.array();
+        req.session.success = false;
         res.redirect('/menu');
     } else {
+        req.session.success = true;
+
         let reqUrl = new URL(req.body.url);
+        let portalName = reqUrl.host;
         let pathName = reqUrl.pathname.split('/');
-        let newUrl = reqUrl.protocol + '//' + reqUrl.host
+
+        let newUrl = reqUrl.protocol + '//' + portalName
             + '/api/3/action/package_show?id=' + pathName[pathName.length - 1];
 
-        let data;
+        let dataset;
         await fetch(newUrl)
             .then(res => res.json())
             .then((out) => {
-                data = out;
+                dataset = out;
             })
             .catch(err => { throw err });
 
-        // res.set('Content-Type', 'text/css');
-        res.render('results', {
-            data: data.result,
-            title: "Results"
+        res.render('resultsDataset', {
+            portalName: portalName,
+            dataset: dataset.result,
+            title: "Dataset analysis results"
         });
     }
 });
 
 router.post('/results_organization', [
-    body('url', 'Invalid URL')
+    body('url', 'Invalid URL!')
         .trim()
+        .not().isEmpty().withMessage('URL is empty!')
         .isURL()
 ], async function (req, res) {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
         req.session.errors = errors.array();
+        req.session.success = false;
         res.redirect('/menu');
     } else {
+        req.session.success = true;
+
         let reqUrl = new URL(req.body.url);
+        let portalName = reqUrl.host;
         let pathName = reqUrl.pathname.split('/');
-        let newUrl = reqUrl.protocol + '//' + reqUrl.host
+
+        let newUrl = reqUrl.protocol + '//' + portalName
             + '/api/3/action/organization_show?id=' + pathName[pathName.length - 1];
 
-        let data;
+        let organization;
         await fetch(newUrl)
             .then(res => res.json())
             .then((out) => {
-                data = out;
+                organization = out;
             })
             .catch(err => { throw err });
 
-        res.render('results', {
-            data: data.result,
-            title: "Results"
+        res.render('resultsOrganization', {
+            portalName: portalName,
+            organization: organization.result,
+            title: "Organization analysis results"
         });
     }
 });

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title><%= title %></title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/vendor/normalize.css">
+    <link rel="stylesheet" type="text/css" href="/styles/main.css">
+    <link rel="stylesheet" type="text/css" href="/styles/results.css">
+</head>
+
+<body class="primary-color-bg darkpurple-font">
+    <main class="centered-flex vertical-flex">
+        <div class="results-title centered-flex vertical-flex container goldish-color-bg">
+            <h1 class="centered-text redish-font"><%= organization.title ? organization.title : "Unknown" %></h1>
+            <% if(organization.image_display_url) { %>
+                <div class="image-organization-container">
+                    <img class="organization-image" src="<%= data.image_display_url %>" alt="organization.jpg" />
+                </div>
+            <% } %>
+            <div class="basic-info slightly-bigger-text">
+                <span>
+                    <span class="info-name">Number of members: </span>
+                    <%= organization.users.length %>
+                </span>
+                <span>
+                    <span class="info-name">Approved: </span>
+                    <%= organization.approved ? organization.approved : (organization.approval_status ? organization.approval_status : "unknown") %>
+                </span>
+            </div>
+            <p class="description-container">
+                <span class="description info-name slightly-bigger-text">Description: </span>
+                <%= organization.description ? organization.description : "Description is empty" %>
+            </p>
+        </div>
+
+        <div class="datasets-list datasets-list-org centered-flex vertical-flex container goldish-color-bg">
+            <h2 class="redish-font">Datasets</h2>
+            <% if(organization.packages.length==0) { %>
+                <span>Portal hasn't got any datasets.</span>
+            <% } else { %>
+                <span>
+                    <span class="info-name">Number of datasets: </span>
+                    <%= organization.packages.length %>
+                </span>
+                <ul class="list-in-two-columns">
+                    <% for(let dataset of organization.packages) { %>
+                        <li class="equally-spaced-columns">
+                            <form action="/menu/results_organization/results_dataset" method="POST">
+                                <input type="hidden" name="datasetID" value="<%= dataset.id %>">
+                                <button class="link-btn" type="submit" name="urlHost" value="<%= portalName %>">
+                                    <%= dataset.title ? dataset.title : (dataset.name ? dataset.name : dataset.id) %>
+                                </button>
+                            </form>
+                        </li>
+                    <% } %>
+                </ul>
+            <% } %>
+        </div>
+    </main>
+
+</body>

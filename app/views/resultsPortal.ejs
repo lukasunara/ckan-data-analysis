@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title><%= title %></title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/vendor/normalize.css">
+    <link rel="stylesheet" type="text/css" href="/styles/main.css">
+    <link rel="stylesheet" type="text/css" href="/styles/results.css">
+</head>
+
+<body class="primary-color-bg darkpurple-font">
+    <main class="centered-flex vertical-flex">
+        <div class="portal-title centered-flex vertical-flex container goldish-color-bg">
+            <h1 class="redish-font"><%= portalName %></h1>
+        </div>
+
+        <div class="list-container">
+            <div class="datasets-list container goldish-color-bg">
+                <h2 class="redish-font">Datasets</h2>
+                <% if(datasets.length == 0) { %>
+                    <span>Portal hasn't got any datasets.</span>
+                <% } else { %>
+                    <span class="info-name">Number of datasets: </span><%= datasets.length %>
+                    <ul>
+                        <% for(let dataset of datasets) { %>
+                            <li>
+                                <form action="/menu/results_portal/results_dataset" method="POST">
+                                    <input type="hidden" name="datasetID" value="<%= dataset %>">
+                                    <button class="link-btn" type="submit" name="urlHost" value="<%= portalName %>">
+                                        <%= dataset %>
+                                    </button>
+                                </form>
+                            </li>
+                        <% } %>
+                    </ul>
+                <% } %>
+            </div>
+            <div class="organizations-list container goldish-color-bg">
+                <h2 class="centered-text redish-font">Organizations</h2>
+                <% if(organizations.length == 0) { %>
+                    <span>Portal hasn't got any organizations.</span>
+                <% } else { %>
+                    <span class="info-name">Number of organizations: </span><%= organizations.length %>
+                    <ul>
+                        <% for(let organization of organizations) { %>
+                            <li>
+                                <form action="/menu/results_portal/results_organization" method="POST">
+                                    <input type="hidden" name="organizationID" value="<%= organization %>">
+                                    <button class="link-btn" type="submit" name="urlHost" value="<%= portalName %>">
+                                        <%= organization %>
+                                    </button>
+                                </form>
+                            </li>
+                        <% } %>
+                    </ul>
+                <% } %>
+            </div>
+        </div>
+    </main>
+
+</body>

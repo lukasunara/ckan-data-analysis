@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title><%= title %></title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/vendor/normalize.css">
+    <link rel="stylesheet" type="text/css" href="/styles/main.css">
+    <link rel="stylesheet" type="text/css" href="/styles/results.css">
+    <script src="/scripts/dataset.js"></script>
+</head>
+
+<body class="primary-color-bg darkpurple-font">
+    <main class="centered-flex vertical-flex">
+        <div class="results-title centered-flex vertical-flex container goldish-color-bg">
+            <h1 class="centered-text redish-font"><%= dataset.title ? dataset.title : "Unknown" %></h1>
+            <div class="dataset-basic-info slightly-bigger-text">
+                <span>
+                    <span class="info-name">Organization: </span>
+                    <%= dataset.organization.title ? dataset.organization.title : "Unknown" %>
+                </span>
+                <span>
+                    <span class="info-name">State: </span>
+                    <%= dataset.state ? dataset.state : "unknown" %>
+                </span>
+                <span>
+                    <span class="info-name">License: </span>
+                    <a class="license-link darkpurple-font" title="Go to license website (if exists)"
+                        href="<%= dataset.license_url ? dataset.license_url : '#' %>" target="_blank"
+                    >
+                        <%= dataset.license_title ? dataset.license_title : "unknown" %>
+                    </a>
+                </span>
+            </div>
+            <p class="notes-container">
+                <span class="notes info-name slightly-bigger-text">Notes: </span>
+                <%= dataset.notes ? dataset.notes : "Notes are empty" %>
+            </p>
+        </div>
+        <div class="resources-list centered-flex vertical-flex container goldish-color-bg">
+            <h2 class="redish-font">Resources</h2>
+            <% if(dataset.resources.length==0) { %>
+                <span>Dataset does not contain any resources.</span>
+            <% } else { %>
+                <span>
+                    <span class="info-name">Number of resources: </span>
+                    <%= dataset.resources.length %>
+                </span>
+                <ul class="list-in-two-columns">
+                    <% for(let resource of dataset.resources) { %>
+                        <li class="equally-spaced-columns">
+                            <form action="/menu/results_dataset/resource" method="POST">
+                                <input type="hidden" name="resourceID" value="<%= resource.id %>">
+                                <button class="link-btn" type="submit" name="urlHost" value="<%= portalName %>">
+                                    <%= resource.id %>
+                                </button>
+                            </form>
+                        </li>
+                    <% } %>
+                </ul>
+            <% } %>
+        </div>
+    </main>
+
+    <script>
+        console.log("hello");
+        console.log("<%= dataset.title %>");
+        var data = "<%= dataset %>";
+        console.log(data);
+        doSomethingWithData(data);
+    </script>
+</body>

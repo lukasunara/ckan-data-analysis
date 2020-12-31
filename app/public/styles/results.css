@@ -1,16 +1,24 @@
-div.dataset-title {
+div.results-title {
     width: 90vw;
     margin: 20px;
-    padding: 10px;
+    padding: 20px;
     padding-top: 0;
 }
 
-.dataset-basic-info {
+div.portal-title {
+    width: 50vw;
+    margin: 20px;
+}
+
+.basic-info {
     display: flex;
     width: 80%;
-    justify-content: space-between;
+    justify-content: space-evenly;
     align-items: center;
-    font-size: 1.2em;
+}
+
+.centered-text {
+    text-align: center;
 }
 
 .info-name {
@@ -20,4 +28,74 @@ div.dataset-title {
 
 .license-link:hover {
     opacity: 0.6;
+}
+
+span.description,
+span.notes {
+    display: block;
+}
+
+p.description-container,
+p.notes-container {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.image-organization-container {
+    margin-bottom: 1em;
+    height: auto;
+    max-width: 10%;
+}
+
+.organization-image {
+    display: block;
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px 0 rgba(14, 14, 14, 0.342),
+        0 6px 20px 0 rgba(14, 14, 14, 0.342);
+}
+
+.list-container {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.resources-list,
+.datasets-list,
+.organizations-list {
+    padding: 20px;
+    margin: 20px 0;
+    width: 40%;
+    height: fit-content;
+}
+
+.datasets-list-org,
+.resources-list {
+    width: 80%;
+}
+
+.link-btn {
+    display: inline;
+    background: none;
+    border: none;
+    text-decoration: underline;
+    cursor: pointer;
+    color: inherit;
+    text-align: left;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+ul.list-in-two-columns {
+    width: 100%;
+    padding: 0;
+}
+
+.equally-spaced-columns {
+    width: 60%;
+    margin: 0 30%;
 }
