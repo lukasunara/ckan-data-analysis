@@ -16,7 +16,7 @@
             <h1 class="centered-text redish-font"><%= organization.title ? organization.title : "Unknown" %></h1>
             <% if(organization.image_display_url) { %>
                 <div class="image-organization-container">
-                    <img class="organization-image" src="<%= data.image_display_url %>" alt="organization.jpg" />
+                    <img class="organization-image" src="<%= organization.image_display_url %>" alt="organization.jpg" />
                 </div>
             <% } %>
             <div class="basic-info slightly-bigger-text">

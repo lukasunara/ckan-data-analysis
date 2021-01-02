@@ -30,5 +30,6 @@ app.use('/menu', menuRouter);
 app.use('/menu/results_portal', portalRouter);
 app.use('/menu/results_dataset', datasetRouter);
 app.use('/menu/results_organization', organizationRouter);
+app.use('/menu/results_portal/results_dataset', datasetRouter)
 
 app.listen(port, () => console.log(`Server started on port ${port}!`));

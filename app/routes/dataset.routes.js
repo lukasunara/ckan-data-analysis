@@ -2,8 +2,8 @@ const express = require('express');
 const fetch = require('node-fetch');
 const router = express.Router();
 
-router.post('/results_resource', async (req, res) => {
-    let newUrl = 'http://' + req.body.urlHost + '/api/3/action/resource_search?id='
+router.post('/resource', async (req, res) => {
+    let newUrl = 'http://' + req.body.urlHost + '/api/3/action/resource_show?id='
         + req.body.resourceID;
 
     let resource;

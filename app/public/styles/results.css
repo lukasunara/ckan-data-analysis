@@ -26,7 +26,8 @@ div.portal-title {
     color: blue;
 }
 
-.license-link:hover {
+.url-link::hover,
+.license-link::hover {
     opacity: 0.6;
 }
 
@@ -58,6 +59,7 @@ p.notes-container {
 }
 
 .list-container {
+    width: 100%;
     display: flex;
     justify-content: space-evenly;
 }

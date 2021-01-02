@@ -13,6 +13,7 @@ router.post('/results_dataset', async (req, res) => {
         .catch(err => { throw err });
 
     res.render('resultsDataset', {
+        portalName: req.body.urlHost,
         dataset: dataset.result,
         title: "Dataset analysis results"
     });
@@ -29,6 +30,7 @@ router.post('/results_organization', async (req, res) => {
         .catch(err => { throw err });
 
     res.render('resultsOrganization', {
+        portalName: req.body.urlHost,
         organization: organization.result,
         title: "Organization analysis results"
     });
