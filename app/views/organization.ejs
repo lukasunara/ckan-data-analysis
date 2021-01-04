@@ -47,12 +47,11 @@
                 <ul class="list-in-two-columns">
                     <% for(let dataset of organization.packages) { %>
                         <li class="equally-spaced-columns">
-                            <form action="/menu/results_organization/results_dataset" method="POST">
-                                <input type="hidden" name="datasetID" value="<%= dataset.id %>">
-                                <button class="link-btn" type="submit" name="urlHost" value="<%= portalName %>">
-                                    <%= dataset.title ? dataset.title : (dataset.name ? dataset.name : dataset.id) %>
-                                </button>
-                            </form>
+                            <a class="darkpurple-font"
+                               href="/portal/<%= portalName %>/dataset/<%= dataset.id %>"
+                            >
+                                <%= dataset.title ? dataset.title : (dataset.name ? dataset.name : dataset.id) %>
+                            </a>
                         </li>
                     <% } %>
                 </ul>

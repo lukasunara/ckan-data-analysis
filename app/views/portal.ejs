@@ -26,12 +26,11 @@
                     <ul>
                         <% for(let dataset of datasets) { %>
                             <li>
-                                <form action="/menu/results_portal/results_dataset" method="POST">
-                                    <input type="hidden" name="datasetID" value="<%= dataset %>">
-                                    <button class="link-btn" type="submit" name="urlHost" value="<%= portalName %>">
-                                        <%= dataset %>
-                                    </button>
-                                </form>
+                                <a class="darkpurple-font"
+                                   href="/portal/<%= portalName %>/dataset/<%= dataset %>"
+                                >
+                                    <%= dataset %>
+                                </a>
                             </li>
                         <% } %>
                     </ul>
@@ -46,12 +45,11 @@
                     <ul>
                         <% for(let organization of organizations) { %>
                             <li>
-                                <form action="/menu/results_portal/results_organization" method="POST">
-                                    <input type="hidden" name="organizationID" value="<%= organization %>">
-                                    <button class="link-btn" type="submit" name="urlHost" value="<%= portalName %>">
-                                        <%= organization %>
-                                    </button>
-                                </form>
+                                <a class="darkpurple-font"
+                                   href="/portal/<%= portalName %>/organization/<%= organization %>"
+                                >
+                                    <%= organization %>
+                                </a>
                             </li>
                         <% } %>
                     </ul>

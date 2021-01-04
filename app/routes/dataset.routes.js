@@ -1,10 +1,10 @@
 const express = require('express');
 const fetch = require('node-fetch');
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
-router.post('/resource', async (req, res) => {
-    let newUrl = 'http://' + req.body.urlHost + '/api/3/action/resource_show?id='
-        + req.body.resourceID;
+router.get('/resource/:resourceID', async (req, res) => {
+    let newUrl = 'http://' + req.params.portalName + '/api/3/action/resource_show?id='
+        + req.params.resourceID;
 
     let resource;
     await fetch(newUrl)
@@ -14,7 +14,7 @@ router.post('/resource', async (req, res) => {
         })
         .catch(err => { throw err });
 
-    res.render('resultsResource', {
+    res.render('resource', {
         resource: resource.result,
         title: "Resource analysis results"
     });

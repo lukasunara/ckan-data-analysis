@@ -8,7 +8,6 @@
     <link rel="stylesheet" type="text/css" href="/vendor/normalize.css">
     <link rel="stylesheet" type="text/css" href="/styles/main.css">
     <link rel="stylesheet" type="text/css" href="/styles/results.css">
-    <script src="/scripts/dataset.js"></script>
 </head>
 
 <body class="primary-color-bg darkpurple-font">
@@ -50,12 +49,11 @@
                 <ul class="list-in-two-columns">
                     <% for(let resource of dataset.resources) { %>
                         <li class="equally-spaced-columns">
-                            <form action="/menu/results_dataset/resource" method="POST">
-                                <input type="hidden" name="resourceID" value="<%= resource.id %>">
-                                <button class="link-btn" type="submit" name="urlHost" value="<%= portalName %>">
-                                    <%= resource.id %>
-                                </button>
-                            </form>
+                            <span class="redish-font"><%= resource.format ? resource.format : "unknown" %></span>: 
+                            <a class="darkpurple-font"
+                               href="/portal/<%= portalName %>/resource/<%= resource.id %>">
+                                <%= resource.name ? resource.name : resource.id %>
+                            </a>
                         </li>
                     <% } %>
                 </ul>
@@ -63,11 +61,4 @@
         </div>
     </main>
 
-    <script>
-        console.log("hello");
-        console.log("<%= dataset.title %>");
-        var data = "<%= dataset %>";
-        console.log(data);
-        doSomethingWithData(data);
-    </script>
 </body>
