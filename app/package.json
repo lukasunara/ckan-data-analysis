@@ -28,6 +28,7 @@
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "express-validator": "^6.9.0",
+    "mime-types": "^2.1.28",
     "node-fetch": "^2.6.1",
     "prettier": "^2.2.1"
   }
