@@ -1,3 +1,4 @@
+const { fetchData } = require('./fetching.js');
 const {
     analyseParam,
     analyseParamWithOption,
@@ -6,26 +7,49 @@ const {
     checkArray
 } = require('./analysis.js');
 
-var analyseDataset = (dataset) => {
-    numOfParams = 0, numOfBadParams = 0;
-    numOfURLs = 0, numOfBadURLs = 0;
+var numOfParams, numOfBadParams;
+var index;
+var missingParams = [];
+
+// sends param to a check function 
+var sendParam = (checkFunction, key, param1, param2) => {
+    numOfParams++;
+
+    let exists;
+    if (!param2) {
+        exists = analyseParam(param1, checkFunction);
+    } else {
+        exists = analyseParamWithOption(param1, param2, checkFunction);
+    }
+
+    if (!exists) {
+        missingParams[index++] = key;
+        numOfBadParams++;
+    }
+
+    return exists;
+}
+
+var analyseDataset = async (dataset) => {
+    numOfParams = 0;
+    numOfBadParams = 0;
     index = 0;
     missingParams = [];
 
-    analyseParam(dataset.title, 'title', checkParam);
-    analyseParam(dataset.name, 'name', checkParam);
-    analyseParam(dataset.id, 'id', checkParam);
-    analyseParam(dataset.author, 'author', checkParam);
-    analyseParam(dataset.maintainer, 'maintainer', checkParam);
-    analyseParam(dataset.license_title, 'license_title', checkParam);
-    analyseParam(dataset.state, 'state', checkParam);
-    analyseParamWithOption(dataset.notes, dataset.description, 'notes', checkParam);
-    analyseParamWithOption(dataset.owmner_org, dataset.organization, 'owmner_org', checkParam);
+    sendParam(checkParam, 'title', dataset.title);
+    sendParam(checkParam, 'name', dataset.name);
+    sendParam(checkParam, 'id', dataset.id);
+    sendParam(checkParam, 'author', dataset.author);
+    sendParam(checkParam, 'maintainer', dataset.maintainer);
+    sendParam(checkParam, 'license_title', dataset.license_title);
+    sendParam(checkParam, 'state', dataset.state);
+    sendParam(checkParam, 'notes', dataset.notes, dataset.description);
+    sendParam(checkParam, 'owmner_org', dataset.owmner_org, dataset.organization);
 
-    analyseParam(dataset.groups, 'groups', checkArray);
-    analyseParam(dataset.extras, 'extras', checkArray);
-    analyseParam(dataset.resources, 'resources', checkArray);
-    analyseParamWithOption(dataset.tags, dataset.keywords, 'tags', checkArray);
+    sendParam(checkArray, 'groups', dataset.groups);
+    sendParam(checkArray, 'extras', dataset.extras);
+    sendParam(checkArray, 'resources', dataset.resources);
+    sendParam(checkArray, 'tags', dataset.tags, dataset.keywords);
 
     // get when was the metadata last modified
     let metadataLastModified;
@@ -34,7 +58,12 @@ var analyseDataset = (dataset) => {
         metadataLastModified = analyseDate(dataset.metadata_created);
     }
 
-    // analyseUrl(dataset.license_url);
+    // send(dataset.license_url);
+    let licenseUrlExists = sendParam(checkParam, 'image_display_url', dataset.license_url);
+    if (licenseUrlExists) {
+        var license = await fetchData(dataset.license_url);
+    }
+
     // analyseUrl(dataset.url);
 
     /*
@@ -43,18 +72,18 @@ var analyseDataset = (dataset) => {
     }
     */
 
-    console.log("missingParams: " + missingParams);
-    console.log("numOfParams: " + numOfParams);
-    console.log("numOfBadParams: " + numOfBadParams);
-    console.log("numOfURLs: " + numOfURLs);
-    console.log("numOfBadURLs: " + numOfBadURLs);
-    console.log();
-
     return {
-        numOfParams: numOfParams,
-        numOfBadParams: numOfBadParams,
-        numOfURLs: numOfURLs,
-        numOfBadURLs: numOfBadURLs
+        numbers: {
+            numOfParams: numOfParams,
+            numOfBadParams: numOfBadParams,
+            numOfURLs: numOfURLs,
+            numOfBadURLs: numOfBadURLs
+        },
+        missingParams: missingParams,
+        lastModified: metadataLastModified,
+        license: {
+            status: license.status
+        }
     };
 }
 

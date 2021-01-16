@@ -17,6 +17,10 @@ div.portal-title {
     align-items: center;
 }
 
+.analysis-results {
+    padding: 20px;
+}
+
 .centered-text {
     text-align: center;
 }
@@ -36,6 +40,8 @@ span.notes {
     display: block;
 }
 
+p.info-container,
+p.last-modified-container,
 p.description-container,
 p.notes-container {
     width: 100%;
@@ -92,6 +98,7 @@ h2 {
     margin-top: 0;
 }
 
+ul.list-in-five-columns,
 ul.list-in-two-columns {
     width: 100%;
     padding: 0;
@@ -100,4 +107,8 @@ ul.list-in-two-columns {
 .equally-spaced-columns {
     width: 60%;
     margin: 0 30%;
+}
+
+.missing-params {
+    width: 100%;
 }

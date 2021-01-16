@@ -14,15 +14,19 @@
     <main class="centered-flex vertical-flex">
         <div class="results-title centered-flex vertical-flex container goldish-color-bg">
             <h1 class="centered-text redish-font"><%= organization.title ? organization.title : "Unknown" %></h1>
-            <% if(organization.image_display_url) { %>
+            <% if(results.imageDisplayURL) { %>
                 <div class="image-organization-container">
-                    <img class="organization-image" src="<%= organization.image_display_url %>" alt="organization.jpg" />
+                    <img class="organization-image" src="<%= results.imageDisplayURL %>" alt="organization.jpg" />
                 </div>
             <% } %>
             <div class="basic-info slightly-bigger-text">
                 <span>
                     <span class="info-name">Number of members: </span>
-                    <%= organization.users.length %>
+                    <%= organization.users ? organization.users.length : "unknown" %>
+                </span>
+                <span>
+                    <span class="info-name">Created: </span>
+                    <%= results.createdDate ? results.createdDate : "unknown" %>
                 </span>
                 <span>
                     <span class="info-name">Approved: </span>
@@ -35,26 +39,58 @@
             </p>
         </div>
 
+        <div class="analysis-results basic-info vertical-flex container goldish-color-bg">
+            <h2 class="redish-font">Analysis results</h2>
+            <div class="missing-params">
+                <% if(results.missingParams.length> 0) { %>
+                Metadata is missing <span class="redish-font"><%= results.numbers.numOfBadParams %> out of
+                <%= results.numbers.numOfParams %></span> useful parameters:
+                    <ul class="list-in-five-columns">
+                        <% for(let param of results.missingParams) { %>
+                            <li class="equally-spaced-columns italic-font">
+                                <%= param %>
+                            </li>
+                        <% } %>
+                    </ul>
+                <% } else { %>
+                    Metadata contains all useful parameters.
+                <% } %>
+            </div>
+        </div>
+
         <div class="datasets-list datasets-list-org centered-flex vertical-flex container goldish-color-bg">
             <h2 class="redish-font">Datasets</h2>
-            <% if(organization.packages.length==0) { %>
-                <span>Portal hasn't got any datasets.</span>
-            <% } else { %>
-                <span>
-                    <span class="info-name">Number of datasets: </span>
-                    <%= organization.packages.length %>
-                </span>
-                <ul class="list-in-two-columns">
-                    <% for(let dataset of organization.packages) { %>
-                        <li class="equally-spaced-columns">
-                            <a class="darkpurple-font"
-                               href="/portal/<%= portalName %>/dataset/<%= dataset.id %>"
-                            >
-                                <%= dataset.title ? dataset.title : (dataset.name ? dataset.name : dataset.id) %>
-                            </a>
-                        </li>
+            <% if(!organization.packages) { %>
+                <p class="description-container">
+                    Missing parameter <span class="info-name italic-font">packages</span>!<br><br>
+                    <% if(organization.package_count) { %>
+                        Instead there is parameter <span class="info-name italic-font">package_count</span>
+                        which shows that this organization authored
+                        <span class="info-name"><%= organization.package_count %></span> datasets.
+                    <% } else { %>
+                        Even the <span class="info-name italic-font">package_count</span> parameter is missing!
                     <% } %>
-                </ul>
+                </p>
+            <% } else { %>
+                <% if(organization.packages.length==0) { %>
+                    <span>Portal hasn't got any datasets.</span>
+                <% } else { %>
+                    <span>
+                        <span class="info-name">Number of datasets: </span>
+                        <%= organization.packages.length %>
+                    </span>
+                    <ul class="list-in-two-columns">
+                        <% for(let dataset of organization.packages) { %>
+                            <li class="equally-spaced-columns">
+                                <a class="darkpurple-font"
+                                href="/portal/<%= portalName %>/dataset/<%= dataset.id %>"
+                                >
+                                    <%= dataset.title ? dataset.title : (dataset.name ? dataset.name : dataset.id) %>
+                                </a>
+                            </li>
+                        <% } %>
+                    </ul>
+                <% } %>
             <% } %>
         </div>
     </main>

@@ -35,6 +35,37 @@
                 <%= resource.description ? resource.description : "Description is empty" %>
             </p>
         </div>
+
+        <div class="analysis-results basic-info vertical-flex container goldish-color-bg">
+            <h2 class="redish-font">Analysis results</h2>
+            <div class="missing-params">
+                <% if(results.missingParams.length > 0) { %>
+                Metadata is missing <span class="redish-font"><%= results.numbers.numOfBadParams %> out of
+                <%= results.numbers.numOfParams %></span> useful parameters:
+                    <ul class="list-in-five-columns">
+                        <% for(let param of results.missingParams) { %>
+                            <li class="equally-spaced-columns italic-font">
+                                <%= param %>
+                            </li>
+                        <% } %>
+                    </ul>
+                <% } else { %>
+                    Metadata contains all useful parameters.
+                <% } %>
+            </div>
+            <% if(results.download.status.code >= 400) { %>
+                <p class="info-container">
+                    Download URL responds with error: 
+                    <span class="redish-font italic-font">
+                        <%= results.download.status.code + " " + results.download.status.text %>
+                    </span>
+                </p>
+            <% } %>
+            <p class="info-container">
+                Download URL returns <span class="info-name"><%= results.download.format %></span> format
+                and the expected format from metadata was <span class="info-name"><%= resource.format %></span>.
+            </p>
+        </div>
     </main>
 
 </body>

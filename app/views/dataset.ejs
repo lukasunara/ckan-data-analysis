@@ -17,7 +17,11 @@
             <div class="basic-info slightly-bigger-text">
                 <span>
                     <span class="info-name">Organization: </span>
-                    <%= dataset.organization.title ? dataset.organization.title : "Unknown" %>
+                    <a class="license-link darkpurple-font" title="Go to license website (if exists)"
+                        href="<%= dataset.organization ? '/portal/' + portalName + '/organization/' + dataset.organization.id : '#' %>"
+                    >
+                    <%= dataset.organization ? dataset.organization.title : "unknown" %>
+                    </a>
                 </span>
                 <span>
                     <span class="info-name">State: </span>
@@ -37,6 +41,43 @@
                 <%= dataset.notes ? dataset.notes : "Notes are empty" %>
             </p>
         </div>
+
+        <div class="analysis-results basic-info vertical-flex container goldish-color-bg">
+            <h2 class="redish-font">Analysis results</h2>
+            <div class="missing-params">
+                <% if(results.missingParams.length > 0) { %>
+                    Metadata is missing <span class="redish-font"><%= results.numbers.numOfBadParams %> out of 
+                    <%= results.numbers.numOfParams %></span> useful parameters:
+                    <ul class="list-in-five-columns">
+                        <% for(let param of results.missingParams) { %>
+                            <li class="equally-spaced-columns italic-font">
+                                <%= param %>
+                            </li>
+                        <% } %>
+                    </ul>
+                <% } else { %>
+                    Metadata contains all useful parameters.
+                <% } %>
+            </div>
+            <p class="last-modified-container">
+                <% if (results.lastModified >= 0) { %>
+                    Metadata for this datased was last modified 
+                    <span class="info-name"><%= results.lastModified %></span> months ago.
+                <% } else { %>
+                    Parameter <span class="info-name italic-font">metadata_last_modified </span>
+                    is invalid (or missing)!
+                <% } %>
+            </p>
+            <% if(results.license.status.code >= 400) { %>
+                <p class="info-container">
+                    License URL responds with error:
+                    <span class="redish-font italic-font">
+                        <%= results.license.status.code + " " + results.license.status.text %>
+                    </span>
+                </p>
+            <% } %>
+        </div>
+
         <div class="resources-list centered-flex vertical-flex container goldish-color-bg">
             <h2 class="redish-font">Resources</h2>
             <% if(dataset.resources.length==0) { %>

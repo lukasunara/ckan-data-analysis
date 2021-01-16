@@ -30,6 +30,10 @@ body {
     color: rgb(43, 22, 63);
 }
 
+.italic-font {
+    font-style: italic;
+}
+
 span.bigger-font {
     font-size: 2em;
 }
@@ -66,6 +70,14 @@ li {
     list-style-type: square;
 }
 
+li::marker {
+    color: blue;
+}
+
 ul.list-in-two-columns {
     column-count: 2;
+}
+
+ul.list-in-five-columns {
+    column-count: 5;
 }

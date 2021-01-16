@@ -1,50 +1,84 @@
+const { fetchData } = require('./fetching.js');
 const {
     analyseParam,
     analyseParamWithOption,
-    analyseDate,
     checkParam,
     checkArray
 } = require('./analysis.js');
 
-var analyseOrganization = (organization) => {
-    numOfParams = 0, numOfBadParams = 0;
-    numOfURLs = 0, numOfBadURLs = 0;
+var numOfParams, numOfBadParams;
+var index;
+var missingParams = [];
+
+// sends param to a check function 
+var sendParam = (checkFunction, key, param1, param2) => {
+    numOfParams++;
+
+    var exists;
+    if (!param2) {
+        exists = analyseParam(param1, checkFunction);
+    } else {
+        exists = analyseParamWithOption(param1, param2, checkFunction);
+    }
+
+    if (!exists) {
+        missingParams[index++] = key;
+        numOfBadParams++;
+    }
+
+    return exists;
+}
+
+var analyseOrganization = async (organization) => {
+    numOfParams = 0;
+    numOfBadParams = 0;
     index = 0;
     missingParams = [];
 
-    analyseParam(organization.name, 'name', checkParam);
-    analyseParam(organization.id, 'id', checkParam);
-    analyseParam(organization.description, 'description', checkParam);
-    analyseParam(organization.state, 'state', checkParam);
-    analyseParam(organization.approval_status, 'approval_status', checkParam);
-    analyseParamWithOption(organization.display_name, organization.title, 'display_name', checkParam);
+    sendParam(checkParam, 'name', organization.name);
+    sendParam(checkParam, 'id', organization.id);
+    sendParam(checkParam, 'description', organization.description);
+    sendParam(checkParam, 'state', organization.state);
+    sendParam(checkParam, 'approval_status', organization.approval_status);
+    sendParam(checkParam, 'display_name', organization.display_name, organization.title);
 
-    analyseParam(organization.packages, 'packages', checkArray);
-    analyseParam(organization.extras, 'extras', checkArray);
-    analyseParam(organization.users, 'users', checkArray);
+    let packagesExist = sendParam(checkArray, 'packages', organization.packages);
+    sendParam(checkArray, 'extras', organization.extras);
+    sendParam(checkArray, 'users', organization.users);
 
-    analyseDate(dataset.created);
+    let dateExists = sendParam(checkParam, 'created', organization.created);
+    if (dateExists) {
+        var createdDate = new Date(organization.created).toLocaleString();
+    }
 
-    // analyseUrl(dataset.image_display_url);
+    let urlExists = sendParam(checkParam, 'image_display_url', organization.image_display_url);
+    if (urlExists) {
+        let blobImage = await fetchData(organization.image_display_url);
+        if (blobImage.data == 'extension' || blobImage.data.status) {
+            console.log(blobImage); // if error
+        } else {
+            var imageDisplayURL = organization.image_display_url;
+        }
+    }
 
     /*
-    for (let dataset in organization.packages) {
-        analyseDataset(dataset);
+    if(packagesExist) {
+        for (let dataset in organization.packages) {
+            analyseDataset(dataset);
+        }
     }
     */
 
-    console.log("missingParams: " + missingParams);
-    console.log("numOfParams: " + numOfParams);
-    console.log("numOfBadParams: " + numOfBadParams);
-    console.log("numOfURLs: " + numOfURLs);
-    console.log("numOfBadURLs: " + numOfBadURLs);
-    console.log();
-
     return {
-        numOfParams: numOfParams,
-        numOfBadParams: numOfBadParams,
-        numOfURLs: numOfURLs,
-        numOfBadURLs: numOfBadURLs
+        numbers: {
+            numOfParams: numOfParams,
+            numOfBadParams: numOfBadParams,
+            numOfURLs: numOfURLs,
+            numOfBadURLs: numOfBadURLs
+        },
+        missingParams: missingParams,
+        imageDisplayURL: imageDisplayURL,
+        createdDate: createdDate
     };
 }
 

@@ -1,39 +1,27 @@
-var numOfParams, numOfBadParams;
-var numOfURLs, numOfBadURLs;
-var index;
-var missingParams = [];
-
 // if checkParam returns false add key to the missingParams
-var analyseParam = (param, key, checkFunction) => {
-    numOfParams++;
+var analyseParam = (param, checkFunction) => {
+    let exists = true;
 
-    let exists = checkFunction(param);
-    if (!exists) {
-        missingParams[index++] = key;
-        numOfBadParams++;
+    if (!checkFunction(param)) {
+        exists = false;
     }
-
     return exists;
 }
 
 // if checkParam returns false add key to the missingParams
-var analyseParamWithOption = (param1, param2, key, checkFunction) => {
-    numOfParams++;
-
+var analyseParamWithOption = (param1, param2, checkFunction) => {
     let exists = true;
+
     if (!checkFunction(param1)) {
         if (!checkFunction(param2)) {
             exists = false;
-            missingParams[index++] = key;
-            numOfBadParams++;
         }
     }
-
     return exists;
 }
 
-var analyseDate = (param, key) => {
-    let exists = analyseParam(param, key, checkParam);
+var analyseDate = (param) => {
+    let exists = analyseParam(param, checkParam);
 
     if (exists) {
         let date = new Date(param);
@@ -54,12 +42,12 @@ var checkArray = (array) => {
 
 // count month difference between current and given date
 var monthDifference = (date) => {
-    let currentDate = Date.now();
+    let currentDate = new Date(Date.now());
     let months;
 
     months = (currentDate.getFullYear() - date.getFullYear()) * 12; // difference in years
-    months -= currentDate.getMonth(); // substitute so we reach the current month in this year
-    months += date.getMonth(); // add so we get month difference in previous year
+    months += currentDate.getMonth(); // add so we reach the current month in this year
+    months -= date.getMonth(); // substitute so we get month difference in previous year
 
     return months;
 }

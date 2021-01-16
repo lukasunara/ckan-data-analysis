@@ -1,10 +1,12 @@
+const fetch = require('node-fetch');
+const { URL } = require('url');
 const mime = require('mime-types');
-
-// let extension = mime.extension('content-type');
 
 var fetchData = async (url) => {
     let fetchedData;
     let fetchedError;
+
+    console.log(url);
 
     await fetch(url)
         .then(handleResponse)
@@ -13,27 +15,45 @@ var fetchData = async (url) => {
 
     if (fetchedError) {
         // TODO: do something with fetched error
-        console.log(fetchedError);
+        console.log(fetchedError.data + "\n");
+        return fetchedError;
     } else {
         // TODO: do something with fetched data
-        console.log(fetchedData);
+        console.log(fetchedData.data + "\n");
+        return fetchedData;
     }
 }
 
-var handleResponse = (response) => {
+var handleResponse = async (response) => {
     let contentType = response.headers.get('content-type');
+    let extension = mime.extension(contentType);
 
+    console.log(contentType);
+    console.log(extension);
+
+    var data;
     if (contentType.includes('application/json')) {
-        return handleJSONResponse(response);
-    } else if (contentType.includes('application/pdf')) {
-        // it's bad to only have a pdf file
-    } else if (contentType.includes('text/html')) {
-        return handleTextResponse(response);
-    } else if (contentType.includes('image/png') || contentType.includes('image/jpg')) {
-        return handleImageResponse(response);
+        data = await handleJSONResponse(response);
+    } else if (extension == 'xls' || extension == 'xlsx') {
+        data = await handleExcelResponse(response);
+    } else if (contentType.includes('text/csv')) {
+        data = await handleTextResponse(response);
+    } else if (contentType.includes('image/')) {
+        data = await handleImageResponse(response);
+    } else if (contentType.includes('application/vnd.ogc.se_xml')) {
+        extension = 'wms';
     } else {
-        // Other response types as necessary. I haven't found a need for them yet though.
-        throw new Error(`Sorry, content-type ${contentType} not supported`);
+        data = 'extension';
+        // throw new Error(`Sorry, content-type ${contentType} is not supported.`);
+    }
+
+    return {
+        data: data,
+        status: {
+            code: response.status,
+            text: response.statusText
+        },
+        extension: extension
     }
 }
 
@@ -80,7 +100,19 @@ var handleImageResponse = (response) => {
     return response.blob()
         .then(blob => {
             if (response.ok) {
-                return URL.createObjectURL(blob); // imageURL
+                return blob;
+            } else {
+                return handleError(response);
+            }
+        });
+}
+
+// handle response for content type json
+var handleExcelResponse = (response) => {
+    return response.arrayBuffer()
+        .then(array => {
+            if (response.ok) {
+                return array;
             } else {
                 return handleError(response);
             }
