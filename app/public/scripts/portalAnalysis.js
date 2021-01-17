@@ -17,12 +17,12 @@ var analysePortal = async (portalName, datasets, organizations) => {
 
         let dataset = await fetchData(datasetUrl);
 
-        if (dataset === undefined) {
+        if (dataset.data === undefined) {
             req.session.error = 'Not found';
             req.session.success = false;
             res.redirect('/portal/' + req.params.portalName);
         } else {
-            var results = analyseDataset(dataset.result);
+            var results = analyseDataset(dataset.data.result);
 
             datasetsNumOfParams += results.numOfParams;
             datasetsNumOfBadParams += results.numOfBadParams;
@@ -35,12 +35,12 @@ var analysePortal = async (portalName, datasets, organizations) => {
 
         let organization = await fetchData(organizationUrl);
 
-        if (organization === undefined) {
+        if (organization.data === undefined) {
             req.session.error = 'Not found';
             req.session.success = false;
             res.redirect('/portal/' + portalName);
         } else {
-            var results = analyseOrganization(organization.result);
+            var results = analyseOrganization(organization.data.result);
 
             organizationsNumOfParams += results.numOfParams;
             organizationsNumOfBadParams += results.numOfBadParams;

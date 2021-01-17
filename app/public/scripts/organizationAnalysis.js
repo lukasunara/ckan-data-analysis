@@ -54,10 +54,17 @@ var analyseOrganization = async (organization) => {
     let urlExists = sendParam(checkParam, 'image_display_url', organization.image_display_url);
     if (urlExists) {
         let blobImage = await fetchData(organization.image_display_url);
-        if (blobImage.data == 'extension' || blobImage.data.status) {
-            console.log(blobImage); // if error
+        if (blobImage.message) {
+            var imageDisplayURL = {
+                error: true,
+                message: urlData.message
+            }
         } else {
-            var imageDisplayURL = organization.image_display_url;
+            if (blobImage.data == 'extension' || blobImage.data.status) {
+                console.log(blobImage); // if error
+            } else {
+                var imageDisplayURL = organization.image_display_url;
+            }
         }
     }
 
@@ -72,9 +79,7 @@ var analyseOrganization = async (organization) => {
     return {
         numbers: {
             numOfParams: numOfParams,
-            numOfBadParams: numOfBadParams,
-            numOfURLs: numOfURLs,
-            numOfBadURLs: numOfBadURLs
+            numOfBadParams: numOfBadParams
         },
         missingParams: missingParams,
         imageDisplayURL: imageDisplayURL,

@@ -1,4 +1,5 @@
 const { fetchData } = require('./fetching.js');
+const { parseExcelFile, parseJSONFile } = require('./excelParsing.js');
 const {
     analyseParam,
     analyseDate,
@@ -51,21 +52,42 @@ var analyseResource = async (resource) => {
     let urlExists = sendParam(checkParam, 'url', resource.url);
     if (urlExists) {
         var urlData = await fetchData(resource.url);
+        if (urlData.message) {
+            var download = {
+                error: true,
+                message: urlData.message
+            }
+        } else {
+            // because .shp and .shx has the same content type
+            if (urlData.extension == 'shp' && resource.format.toLowerCase() == 'shx') {
+                urlData.extension = 'shx';
+            }
+            var download = {
+                format: urlData.extension,
+                status: urlData.status,
+                lastModified: urlData.lastModified
+            };
+
+            var fileStats;
+            if (urlData.extension == 'xls' || urlData.extension == 'xlsx' ||
+                urlData.extension == 'csv' || urlData.extension == 'xml'
+            ) {
+                fileStats = parseExcelFile(urlData.data, urlData.extension);
+            } else if (urlData.extension == 'json') {
+                fileStats = parseJSONFile(urlData.data, urlData.extension);
+            }
+        }
     }
 
     return {
         numbers: {
             numOfParams: numOfParams,
-            numOfBadParams: numOfBadParams,
-            numOfURLs: numOfURLs,
-            numOfBadURLs: numOfBadURLs
+            numOfBadParams: numOfBadParams
         },
         missingParams: missingParams,
         lastModified: metadataLastModified,
-        download: {
-            format: urlData.extension,
-            status: urlData.status
-        }
+        download: download,
+        fileStats: fileStats
     }
 }
 

@@ -13,10 +13,10 @@
 <body class="primary-color-bg">
 
     <main class="centered-flex vertical-flex">
-        <% if(success===false) { %>
+        <% if(success === false) { %>
         <section class="errors container secondary-color-bg error-font">
             <span>
-                Error: <%= errors[0].msg %> (please try again)
+                Error: <%= error ? error : errors[0].msg %> (please try again)
             </span>
         </section>
         <% } %>

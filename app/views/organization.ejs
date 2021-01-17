@@ -16,7 +16,10 @@
             <h1 class="centered-text redish-font"><%= organization.title ? organization.title : "Unknown" %></h1>
             <% if(results.imageDisplayURL) { %>
                 <div class="image-organization-container">
-                    <img class="organization-image" src="<%= results.imageDisplayURL %>" alt="organization.jpg" />
+                    <img class="organization-image"
+                        src="<%= results.imageDisplayURL.error ? '#' : results.imageDisplayURL %>"
+                        alt="organization.jpg"
+                    />
                 </div>
             <% } %>
             <div class="basic-info slightly-bigger-text">
@@ -54,6 +57,15 @@
                     </ul>
                 <% } else { %>
                     Metadata contains all useful parameters.
+                <% } %>
+
+                <% if(results.imageDisplayURL.error) { %>
+                    <p class="info-container">
+                        Image display URL does not represent a legal URL format:
+                        <span class="redish-font italic-font">
+                            <%= results.download.message %>
+                        </span>
+                    </p>
                 <% } %>
             </div>
         </div>

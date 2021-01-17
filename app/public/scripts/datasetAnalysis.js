@@ -58,13 +58,22 @@ var analyseDataset = async (dataset) => {
         metadataLastModified = analyseDate(dataset.metadata_created);
     }
 
-    // send(dataset.license_url);
-    let licenseUrlExists = sendParam(checkParam, 'image_display_url', dataset.license_url);
+    let licenseUrlExists = sendParam(checkParam, 'license_url', dataset.license_url);
     if (licenseUrlExists) {
         var license = await fetchData(dataset.license_url);
     }
 
-    // analyseUrl(dataset.url);
+    let urlExists = sendParam(checkParam, 'url', dataset.url);
+    if (urlExists) {
+        var urlData = await fetchData(dataset.url);
+        // if url does not work report it
+        if (urlData.message) {
+            var urlError = {
+                status: urlData.status,
+                message: urlData.message
+            }
+        }
+    }
 
     /*
     for (let resource in dataset.resources) {
@@ -75,15 +84,11 @@ var analyseDataset = async (dataset) => {
     return {
         numbers: {
             numOfParams: numOfParams,
-            numOfBadParams: numOfBadParams,
-            numOfURLs: numOfURLs,
-            numOfBadURLs: numOfBadURLs
+            numOfBadParams: numOfBadParams
         },
         missingParams: missingParams,
         lastModified: metadataLastModified,
-        license: {
-            status: license.status
-        }
+        license: license
     };
 }
 

@@ -68,13 +68,15 @@
                     is invalid (or missing)!
                 <% } %>
             </p>
-            <% if(results.license.status.code >= 400) { %>
-                <p class="info-container">
-                    License URL responds with error:
-                    <span class="redish-font italic-font">
-                        <%= results.license.status.code + " " + results.license.status.text %>
-                    </span>
-                </p>
+            <% if(results.license) { %>
+                <% if(results.license.status.code >= 400) { %>
+                    <p class="info-container">
+                        License URL responds with error:
+                        <span class="redish-font italic-font">
+                            <%= results.license.status.code + " " + results.license.status.text %>
+                        </span>
+                    </p>
+                <% } %>
             <% } %>
         </div>
 

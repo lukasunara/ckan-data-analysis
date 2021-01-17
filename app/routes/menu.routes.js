@@ -8,7 +8,8 @@ router.get('/', function (req, res) {
     res.render('menu', {
         title: 'Menu',
         success: req.session.success,
-        errors: req.session.errors
+        errors: req.session.errors,
+        error: req.session.error
     });
     // delete req.session['errors'];
     req.session.errors = null;

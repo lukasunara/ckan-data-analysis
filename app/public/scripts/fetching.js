@@ -1,5 +1,4 @@
 const fetch = require('node-fetch');
-const { URL } = require('url');
 const mime = require('mime-types');
 
 var fetchData = async (url) => {
@@ -15,37 +14,43 @@ var fetchData = async (url) => {
 
     if (fetchedError) {
         // TODO: do something with fetched error
-        console.log(fetchedError.data + "\n");
+        console.log(fetchedError.status + " " + fetchedError.statusText + "\n");
         return fetchedError;
     } else {
         // TODO: do something with fetched data
-        console.log(fetchedData.data + "\n");
+        // console.log(fetchedData.data + "\n");
         return fetchedData;
     }
 }
 
 var handleResponse = async (response) => {
     let contentType = response.headers.get('content-type');
+    let lastModified = response.headers.get('last-modified');
     let extension = mime.extension(contentType);
 
     console.log(contentType);
-    console.log(extension);
+    console.log('Last-Modified: ' + lastModified);
 
     var data;
     if (contentType.includes('application/json')) {
         data = await handleJSONResponse(response);
     } else if (extension == 'xls' || extension == 'xlsx') {
         data = await handleExcelResponse(response);
-    } else if (contentType.includes('text/csv')) {
+    } else if (extension == 'csv' || extension == 'xml') {
         data = await handleTextResponse(response);
     } else if (contentType.includes('image/')) {
         data = await handleImageResponse(response);
-    } else if (contentType.includes('application/vnd.ogc.se_xml')) {
-        extension = 'wms';
     } else {
+        if (contentType.includes('application/vnd.ogc.se_xml')) {
+            extension = 'wms';
+        } else if (contentType.includes('application/x-qgis')) {
+            extension = 'shp'; // or 'shx'
+        }
         data = 'extension';
         // throw new Error(`Sorry, content-type ${contentType} is not supported.`);
     }
+
+    console.log(extension);
 
     return {
         data: data,
@@ -53,7 +58,8 @@ var handleResponse = async (response) => {
             code: response.status,
             text: response.statusText
         },
-        extension: extension
+        extension: extension,
+        lastModified: lastModified
     }
 }
 

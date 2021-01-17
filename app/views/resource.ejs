@@ -53,7 +53,14 @@
                     Metadata contains all useful parameters.
                 <% } %>
             </div>
-            <% if(results.download.status.code >= 400) { %>
+            <% if(results.download.error) { %>
+                <p class="info-container">
+                    Download URL does not represent a legal URL format: 
+                    <span class="redish-font italic-font">
+                        <%= results.download.message %>
+                    </span>
+                </p>
+            <% } else if(results.download.status.code >= 400) { %>
                 <p class="info-container">
                     Download URL responds with error: 
                     <span class="redish-font italic-font">
