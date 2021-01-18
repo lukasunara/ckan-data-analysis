@@ -58,7 +58,7 @@ var analyseResource = async (resource) => {
     if (downloadUrlExists) {
         var urlData = await fetchData(resource.url);
 
-        if (urlData.error) {  // error while fetching resource
+        if (urlData.error || urlData.status.code >= 400) {  // error while fetching resource
             var download = {
                 error: true, // it is an error
                 status: urlData.status, // error status code
@@ -68,7 +68,8 @@ var analyseResource = async (resource) => {
             var download = {
                 format: urlData.extension, // actual format of fetched resource
                 status: urlData.status, // response status code
-                lastModified: urlData.lastModified // date when resource was actually last modified
+                lastModified: urlData.lastModified, // date when resource was actually last modified
+                lastModifiedMonths: analyseDate(urlData.lastModified) // date in months difference
             };
             // count blank rows in resource data
             var fileStats;
@@ -90,9 +91,11 @@ var analyseResource = async (resource) => {
             numOfBadParams: numOfBadParams // number of missing or "empty" parameters
         },
         missingParams: missingParams, // list of all missing parameters
-        lastModified: lastModified, // actual date
-        lastModifiedMonths: metadataLastModified, // date when the metadata was last modified
-        download: download, // info about downloadd url response
+        dates: {
+            lastModified: lastModified, // actual date
+            lastModifiedMonths: metadataLastModified, // date when the metadata was last modified
+        },
+        download: download, // info about download url response
         fileStats: fileStats // number of blank rows out of total number of rows
     }
 }

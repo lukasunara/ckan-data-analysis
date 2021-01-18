@@ -30,7 +30,7 @@ var sendParam = (checkFunction, key, param1, param2) => {
     return exists;
 }
 
-var analyseOrganization = async (portalName, organization) => {
+var analyseOrganization = async (portalName, organization, checkDatasets) => {
     numOfParams = 0;
     numOfBadParams = 0;
     index = 0;
@@ -75,29 +75,31 @@ var analyseOrganization = async (portalName, organization) => {
             }
         }
     }
-    // analyse all datasets
-    if (packagesExist) {
-        for (let i = 0; i < organization.packages.length; i++) {
-            let datasetUrl = 'http://' + portalName
-                + '/api/3/action/package_show?id=' + organization.packages[i].id;
+    if (checkDatasets) {
+        // analyse all datasets
+        if (packagesExist) {
+            for (let i = 0; i < organization.packages.length; i++) {
+                let datasetUrl = 'http://' + portalName
+                    + '/api/3/action/package_show?id=' + organization.packages[i].id;
 
-            let datasetData = await fetchData(datasetUrl);
+                let datasetData = await fetchData(datasetUrl);
 
-            if (datasetData.error) {
-                datasetsStats.differentModifiedDates++;
-            } else {
-                let result = await analyseDataset(portalName, datasetData.data.result);
-
-                datasetsStats.numOfParams += result.numbers.numOfParams;
-                datasetsStats.numOfBadParams += result.numbers.numOfBadParams;
-                if (result.urlError) {
-                    datasetsStats.numOfErrors++;
-                }
-                if (result.license.error) {
-                    datasetsStats.numOfErrors++;
-                }
-                if (result.metadataLastModified !== result.actuallyLastModified) {
+                if (datasetData.error) {
                     datasetsStats.differentModifiedDates++;
+                } else {
+                    let result = await analyseDataset(portalName, datasetData.data.result, true);
+
+                    datasetsStats.numOfParams += result.numbers.numOfParams;
+                    datasetsStats.numOfBadParams += result.numbers.numOfBadParams;
+                    if (result.urlError) {
+                        datasetsStats.numOfErrors++;
+                    }
+                    if (result.license.error) {
+                        datasetsStats.numOfErrors++;
+                    }
+                    if (result.metadataLastModified !== result.actuallyLastModified) {
+                        datasetsStats.differentModifiedDates++;
+                    }
                 }
             }
         }

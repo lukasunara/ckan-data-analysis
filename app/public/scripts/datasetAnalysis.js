@@ -32,7 +32,7 @@ var sendParam = (checkFunction, key, param1, param2) => {
 }
 
 // analyse one dataset
-var analyseDataset = async (portalName, dataset) => {
+var analyseDataset = async (portalName, dataset, checkResources) => {
     numOfParams = 0;
     numOfBadParams = 0;
     index = 0;
@@ -88,41 +88,44 @@ var analyseDataset = async (portalName, dataset) => {
         }
     }
 
-    let actuallyLastModified = dateLastModified;
-    // analyse all dataset resources
-    for (let i = 0; i < dataset.resources.length; i++) {
-        let resourceUrl = 'http://' + portalName
-            + '/api/3/action/resource_show?id=' + dataset.resources[i].id;
+    if (checkResources) {
+        var actuallyLastModified = dateLastModified;
+        // analyse all dataset resources
+        for (let i = 0; i < dataset.resources.length; i++) {
+            let resourceUrl = 'http://' + portalName
+                + '/api/3/action/resource_show?id=' + dataset.resources[i].id;
 
-        let resourceData = await fetchData(resourceUrl);
+            let resourceData = await fetchData(resourceUrl);
 
-        if (resourceData.error) {
-            datasetsStats.differentModifiedDates++;
-        } else {
-            let result = await analyseResource(resourceData.data.result);
+            if (resourceData.error) {
+                datasetsStats.differentModifiedDates++;
+            } else {
+                let result = await analyseResource(resourceData.data.result);
 
-            resourcesStats.numOfParams += result.numbers.numOfParams;
-            resourcesStats.numOfBadParams += result.numbers.numOfBadParams;
-            if (result.download) {
-                if (result.download.error) {
-                    resourcesStats.numOfErrors++;
-                } else {
-                    // fill dictionary of formats
-                    if (!resourcesStats.formats[result.download.format]) {
-                        resourcesStats.formats[result.download.format] = 1;
+                resourcesStats.numOfParams += result.numbers.numOfParams;
+                resourcesStats.numOfBadParams += result.numbers.numOfBadParams;
+                if (result.download) {
+                    if (result.download.error) {
+                        resourcesStats.numOfErrors++;
                     } else {
-                        resourcesStats.formats[result.download.format]++;
-                    }
-                    // if resource was modified after the metadata was already modified
-                    if (result.lastModified) {
-                        if (result.lastModified > actuallyLastModified) {
-                            actuallyLastModified = result.lastModified;
+                        // fill dictionary of formats
+                        if (!resourcesStats.formats[result.download.format]) {
+                            resourcesStats.formats[result.download.format] = 1;
+                        } else {
+                            resourcesStats.formats[result.download.format]++;
+                        }
+                        // if resource was modified after the metadata was already modified
+                        if (result.dates.lastModified) {
+                            if (result.dates.lastModified > actuallyLastModified) {
+                                actuallyLastModified = result.dates.lastModified;
+                            }
                         }
                     }
                 }
             }
         }
     }
+    let actuallyLastModifiedMonths = analyseDate(actuallyLastModified);
 
     return {
         numbers: {
@@ -131,9 +134,12 @@ var analyseDataset = async (portalName, dataset) => {
         },
         missingParams: missingParams, // list of missing parameters in dataset metadata
         urlError: urlError, // if URL does not work report it
-        metadataLastModified: metadataLastModified, // when was metadata last modified
-        dateLastModified: dateLastModified.toLocaleString(), // actual date
-        actuallyLastModified: actuallyLastModified.toLocaleString(), // when was dataset actually last modified
+        dates: {
+            metadataLastModified: metadataLastModified, // when was metadata last modified
+            dateLastModified: dateLastModified ? dateLastModified.toLocaleString() : '', // actual date
+            actuallyLastModified: actuallyLastModified ? actuallyLastModified.toLocaleString() : '', // when was dataset actually last modified
+            actuallyLastModifiedMonths: actuallyLastModifiedMonths
+        },
         license: license, // if URL for license does not work report it
         resourcesStats: resourcesStats // stats about all dataset resources
     };

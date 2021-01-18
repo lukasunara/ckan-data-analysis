@@ -74,17 +74,16 @@
             <% } %>
             <p class="info-container">
                 By resource metadata last modified date was on 
-                <span class="redish-font italic-font"><%= results.lastModified.toLocaleString() %></span> 
-                (<span class="info-name"><%= results.lastModifiedMonths %></span> months ago).<br>
+                <span class="redish-font italic-font"><%= results.dates.lastModified.toLocaleString() %></span> 
+                (<span class="info-name"><%= results.dates.lastModifiedMonths %></span> months ago).<br>
                 <% if (!results.download.error) { %>
-                    After analysis we realized that the resource was actually last modified on 
-                    <span class="redish-font italic-font">
-                        <% if(results.lastModified > results.download.lastModified) { %>
-                            <%= results.lastModified.toLocaleString() %>
-                        <% } else { %>
+                    <% if(results.dates.lastModified < results.download.lastModified) { %>
+                        After analysis we realized that the resource was actually last modified on 
+                        <span class="redish-font italic-font">
                             <%= results.download.lastModified.toLocaleString() %>
-                        <% } %>
-                    </span>
+                        </span> 
+                        (<span class="info-name"><%= results.download.lastModifiedMonths %></span> months ago).
+                    <% } %>
                 <% } %>
             </p>
 

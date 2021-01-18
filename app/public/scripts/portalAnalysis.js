@@ -23,7 +23,7 @@ var analysePortal = async (portalName, datasets, organizations) => {
         if (dataset.error) {
             datasetsStats.differentModifiedDates++;
         } else {
-            var result = await analyseDataset(portalName, dataset.data.result);
+            var result = await analyseDataset(portalName, dataset.data.result, false);
 
             datasetsStats.numOfParams += result.numbers.numOfParams;
             datasetsStats.numOfBadParams += result.numbers.numOfBadParams;
@@ -41,7 +41,7 @@ var analysePortal = async (portalName, datasets, organizations) => {
             }
         }
     }
-    /*
+
     for (let i = 0; i < organizations.length; i++) {
         let organizationUrl = 'http://' + portalName
             + '/api/3/action/organization_show?id=' + organizations[i];
@@ -51,16 +51,16 @@ var analysePortal = async (portalName, datasets, organizations) => {
         if (organization.error) {
             organizationsStats.numOfErrors++;
         } else {
-            var result = await analyseOrganization(portalName, organization.data.result);
+            var result = await analyseOrganization(portalName, organization.data.result, false);
 
             organizationsStats.numOfParams += result.numbers.numOfParams;
             organizationsStats.numOfBadParams += result.numbers.numOfBadParams;
-            if (result.imageDisplayURL.error) {
+            if (result.imageDisplayURL && result.imageDisplayURL.error) {
                 organizationsStats.numOfErrors++;
             }
         }
     }
-    */
+
 
     return {
         datasetsStats

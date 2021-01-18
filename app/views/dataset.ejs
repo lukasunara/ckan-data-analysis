@@ -61,15 +61,17 @@
             </div>
             <div class="statistics-container">
                 <p class="last-modified-container">
-                    <% if (results.metadataLastModified >= 0) { %>
-                        Metadata for this datased was last modified 
-                        <span class="info-name"><%= results.metadataLastModified %></span> months ago.
+                    <% if (results.dates.metadataLastModified >= 0) { %>
+                        Metadata for this datased was last modified on 
+                        <span class="info-name italic-font"><%= results.dates.dateLastModified %></span>
+                        (<span class="info-name"><%= results.dates.metadataLastModified %></span> months ago).
                     <% } else { %>
                         Parameter <span class="info-name italic-font">metadata_last_modified </span>
                         is invalid (or completely missing)!
                     <% } %>
                     After analysing resources we see that the last date when this dataset was actually
-                    modified is <span class="info-name italic-font"><%= results.actuallyLastModified %></span>
+                    modified is <span class="info-name italic-font"><%= results.dates.actuallyLastModified %></span>
+                    (<span class="info-name"><%= results.dates.actuallyLastModifiedMonths %></span> months ago).
                 </p>
                 <% if(results.license) { %>
                     <% if(results.license.status.code >= 400) { %>
@@ -96,14 +98,18 @@
                 </p>
                 <div class="formats-list">
                     All resources come in these formats:
-                    <ul class="list-in-two-columns">
-                        <% for(let format in results.resourcesStats.formats) { %>
-                            <li class="equally-spaced-columns">
-                                <span class="redish-font"><%= format %></span>:
-                                <%= results.resourcesStats.formats[format] %>
-                            </li>
-                        <% } %>
-                    </ul>
+                    <% if (results.resourcesStats.formats.length > 0) { %>
+                        <ul class="list-in-two-columns">
+                            <% for(let format in results.resourcesStats.formats) { %>
+                                <li class="equally-spaced-columns">
+                                    <span class="redish-font"><%= format %></span>:
+                                    <%= results.resourcesStats.formats[format] %>
+                                </li>
+                            <% } %>
+                        </ul>
+                    <% } else { %>
+                        <span class="redish-font">not even a single resource can be used!</span>
+                    <% } %>
                 </div>
             </div>
         </div>

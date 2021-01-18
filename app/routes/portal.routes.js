@@ -57,7 +57,7 @@ router.get('/dataset/:datasetID', function (req, res) {
             if (dataset.error || dataset.data === undefined) {
                 redirectToWithError(res, req, '/portal/' + portalName);
             } else {
-                let results = await analyseDataset(portalName, dataset.data.result);
+                let results = await analyseDataset(portalName, dataset.data.result, true);
 
                 console.log(results);
 
@@ -89,7 +89,7 @@ router.get('/organization/:organizationID', function (req, res) {
             if (organization.error || organization.data === undefined) {
                 redirectToWithError(res, req, '/portal/' + portalName);
             } else {
-                let results = await analyseOrganization(portalName, organization.data.result);
+                let results = await analyseOrganization(portalName, organization.data.result, true);
 
                 res.render('organization', {
                     title: "Organization analysis results",
