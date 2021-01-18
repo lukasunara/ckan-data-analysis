@@ -16,11 +16,36 @@
             <h1 class="redish-font"><%= portalName %></h1>
         </div>
 
+        <div class="analysis-results basic-info vertical-flex container goldish-color-bg">
+            <h2 class="redish-font">Analysis results</h2>
+            <div class="datasets-organizations-statistics">
+                <div class="statistics-container">
+                    <h3 class="redish-font">Datasets Statistics</h3>
+                    <p class="info-container">
+                        Metadata of all datasets is missing 
+                        <span class="redish-font"><%= results.datasetsStats.numOfBadParams %> out of
+                        <%= results.datasetsStats.numOfParams %></span> useful parameters:
+                    </p>
+                    <p class="info-container">
+                        Metadata of all datasets contains 
+                        <span class="info-name"><%= results.datasetsStats.numOfErrors %></span> 
+                        URLs which cause some type of error.
+                    </p>
+                    <p class="info-container">
+                        Metadata of all datasets contains
+                        <span class="info-name"><%= results.datasetsStats.differentModifiedDates %></span> 
+                        wrong <span class="redish-font italic-font">last_modified</span> dates.
+                    </p>
+                </div>
+                
+            </div>
+        </div>
+
         <div class="list-container">
             <div class="datasets-list container goldish-color-bg">
                 <h2 class="redish-font">Datasets</h2>
                 <% if(datasets.length == 0) { %>
-                    <span>Portal hasn't got any datasets.</span>
+                    <span class="italic-font">Portal hasn't got any datasets.</span>
                 <% } else { %>
                     <span class="info-name">Number of datasets: </span><%= datasets.length %>
                     <ul>
@@ -39,7 +64,7 @@
             <div class="organizations-list container goldish-color-bg">
                 <h2 class="centered-text redish-font">Organizations</h2>
                 <% if(organizations.length == 0) { %>
-                    <span>Portal hasn't got any organizations.</span>
+                    <span class="italic-font">Portal hasn't got any organizations.</span>
                 <% } else { %>
                     <span class="info-name">Number of organizations: </span><%= organizations.length %>
                     <ul>

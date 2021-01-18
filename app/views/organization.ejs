@@ -45,7 +45,7 @@
         <div class="analysis-results basic-info vertical-flex container goldish-color-bg">
             <h2 class="redish-font">Analysis results</h2>
             <div class="missing-params">
-                <% if(results.missingParams.length> 0) { %>
+                <% if(results.missingParams.length > 0) { %>
                 Metadata is missing <span class="redish-font"><%= results.numbers.numOfBadParams %> out of
                 <%= results.numbers.numOfParams %></span> useful parameters:
                     <ul class="list-in-five-columns">
@@ -58,15 +58,36 @@
                 <% } else { %>
                     Metadata contains all useful parameters.
                 <% } %>
-
-                <% if(results.imageDisplayURL.error) { %>
+            </div>
+            <div class="statistics-datasets-container">
+                <div class="statistics-container">
+                    <% if(results.imageDisplayURL && results.imageDisplayURL.error) { %>
+                        <p class="info-container">
+                            Image display URL does not represent a legal URL format:
+                            <span class="redish-font italic-font">
+                                <%= results.imageDisplayURL.status + " " + results.imageDisplayURL.statusText %>
+                            </span>
+                        </p>
+                    <% } %>
+                </div>
+                <div class="statistics-container">
+                    <h3 class="redish-font">Datasets Statistics</h3>
                     <p class="info-container">
-                        Image display URL does not represent a legal URL format:
-                        <span class="redish-font italic-font">
-                            <%= results.download.message %>
-                        </span>
+                        Metadata of all datasets is missing
+                        <span class="redish-font"><%= results.datasetsStats.numOfBadParams %> out of
+                        <%= results.datasetsStats.numOfParams %></span> useful parameters:
                     </p>
-                <% } %>
+                    <p class="info-container">
+                        Metadata of all datasets contains
+                        <span class="info-name"><%= results.datasetsStats.numOfErrors %></span>
+                        URLs which cause some type of error.
+                    </p>
+                    <p class="info-container">
+                        Metadata of all datasets contains
+                        <span class="info-name"><%= results.datasetsStats.differentModifiedDates %></span>
+                        wrong <span class="redish-font italic-font">last_modified</span> dates.
+                    </p>
+                </div>
             </div>
         </div>
 

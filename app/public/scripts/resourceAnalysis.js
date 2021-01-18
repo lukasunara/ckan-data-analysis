@@ -42,11 +42,15 @@ var analyseResource = async (resource) => {
     sendParam(checkParam, 'format', resource.format);
     sendParam(checkParam, 'state', resource.state);
     sendParam(checkParam, 'description', resource.description);
+    sendParam(checkParam, 'last_modified', resource.last_modified);
 
     // get when was the metadata last modified
     let metadataLastModified = analyseDate(resource.last_modified);
     if (metadataLastModified < 0) {
+        var lastModified = new Date(resource.created);
         metadataLastModified = analyseDate(resource.created);
+    } else {
+        var lastModified = new Date(resource.last_modified);
     }
 
     // check the download url for this resource
@@ -86,7 +90,8 @@ var analyseResource = async (resource) => {
             numOfBadParams: numOfBadParams // number of missing or "empty" parameters
         },
         missingParams: missingParams, // list of all missing parameters
-        lastModified: metadataLastModified, // date when the metadata was last modified
+        lastModified: lastModified, // actual date
+        lastModifiedMonths: metadataLastModified, // date when the metadata was last modified
         download: download, // info about downloadd url response
         fileStats: fileStats // number of blank rows out of total number of rows
     }

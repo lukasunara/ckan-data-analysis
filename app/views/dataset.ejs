@@ -59,30 +59,58 @@
                     Metadata contains all useful parameters.
                 <% } %>
             </div>
-            <p class="last-modified-container">
-                <% if (results.lastModified >= 0) { %>
-                    Metadata for this datased was last modified 
-                    <span class="info-name"><%= results.lastModified %></span> months ago.
-                <% } else { %>
-                    Parameter <span class="info-name italic-font">metadata_last_modified </span>
-                    is invalid (or missing)!
+            <div class="statistics-container">
+                <p class="last-modified-container">
+                    <% if (results.metadataLastModified >= 0) { %>
+                        Metadata for this datased was last modified 
+                        <span class="info-name"><%= results.metadataLastModified %></span> months ago.
+                    <% } else { %>
+                        Parameter <span class="info-name italic-font">metadata_last_modified </span>
+                        is invalid (or completely missing)!
+                    <% } %>
+                    After analysing resources we see that the last date when this dataset was actually
+                    modified is <span class="info-name italic-font"><%= results.actuallyLastModified %></span>
+                </p>
+                <% if(results.license) { %>
+                    <% if(results.license.status.code >= 400) { %>
+                        <p class="info-container">
+                            License URL responds with error:
+                            <span class="redish-font italic-font">
+                                <%= results.license.status.code + " " + results.license.status.text %>
+                            </span>
+                        </p>
+                    <% } %>
                 <% } %>
-            </p>
-            <% if(results.license) { %>
-                <% if(results.license.status.code >= 400) { %>
-                    <p class="info-container">
-                        License URL responds with error:
-                        <span class="redish-font italic-font">
-                            <%= results.license.status.code + " " + results.license.status.text %>
-                        </span>
-                    </p>
-                <% } %>
-            <% } %>
+            </div>
+            <div class="statistics-container missing-params">
+                <h3 class="redish-font">Resources Statistics</h3>
+                <p class="info-container">
+                    Metadata of all resources is missing
+                    <span class="redish-font"><%= results.resourcesStats.numOfBadParams %> out of
+                    <%= results.resourcesStats.numOfParams %></span> useful parameters:
+                </p>
+                <p class="info-container">
+                    Metadata of all resources contains
+                    <span class="info-name"><%= results.resourcesStats.numOfErrors %></span>
+                    URLs which cause some type of error.
+                </p>
+                <div class="formats-list">
+                    All resources come in these formats:
+                    <ul class="list-in-two-columns">
+                        <% for(let format in results.resourcesStats.formats) { %>
+                            <li class="equally-spaced-columns">
+                                <span class="redish-font"><%= format %></span>:
+                                <%= results.resourcesStats.formats[format] %>
+                            </li>
+                        <% } %>
+                    </ul>
+                </div>
+            </div>
         </div>
 
         <div class="resources-list centered-flex vertical-flex container goldish-color-bg">
             <h2 class="redish-font">Resources</h2>
-            <% if(dataset.resources.length==0) { %>
+            <% if(dataset.resources.length == 0) { %>
                 <span>Dataset does not contain any resources.</span>
             <% } else { %>
                 <span>

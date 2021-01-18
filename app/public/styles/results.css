@@ -64,6 +64,8 @@ p.notes-container {
         0 6px 20px 0 rgba(14, 14, 14, 0.342);
 }
 
+.statistics-datasets-container,
+.datasets-organizations-statistics,
 .list-container {
     width: 100%;
     display: flex;
@@ -109,6 +111,14 @@ ul.list-in-two-columns {
     margin: 0 30%;
 }
 
+.statistics-container {
+    flex-grow: 1;
+}
+
 .missing-params {
     width: 100%;
+}
+
+.formats-list {
+    margin-top: 1em;
 }

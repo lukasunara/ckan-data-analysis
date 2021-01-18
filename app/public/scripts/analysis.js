@@ -37,7 +37,7 @@ var checkParam = (param) => {
 
 // if null, undefined or empty array return false
 var checkArray = (array) => {
-    return !array || array.length > 0;
+    return array && array.length > 0;
 }
 
 // count month difference between current and given date

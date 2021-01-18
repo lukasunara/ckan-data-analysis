@@ -38,6 +38,10 @@
 
         <div class="analysis-results basic-info vertical-flex container goldish-color-bg">
             <h2 class="redish-font">Analysis results</h2>
+            <p class="info-container">
+                Download URL returns <span class="info-name"><%= results.download.format %></span> format
+                and the expected format from metadata was <span class="info-name"><%= resource.format %></span>.
+            </p>
             <div class="missing-params">
                 <% if(results.missingParams.length > 0) { %>
                 Metadata is missing <span class="redish-font"><%= results.numbers.numOfBadParams %> out of
@@ -69,9 +73,29 @@
                 </p>
             <% } %>
             <p class="info-container">
-                Download URL returns <span class="info-name"><%= results.download.format %></span> format
-                and the expected format from metadata was <span class="info-name"><%= resource.format %></span>.
+                By resource metadata last modified date was on 
+                <span class="redish-font italic-font"><%= results.lastModified.toLocaleString() %></span> 
+                (<span class="info-name"><%= results.lastModifiedMonths %></span> months ago).<br>
+                <% if (!results.download.error) { %>
+                    After analysis we realized that the resource was actually last modified on 
+                    <span class="redish-font italic-font">
+                        <% if(results.lastModified > results.download.lastModified) { %>
+                            <%= results.lastModified.toLocaleString() %>
+                        <% } else { %>
+                            <%= results.download.lastModified.toLocaleString() %>
+                        <% } %>
+                    </span>
+                <% } %>
             </p>
+
+            <% if (results.fileStats) { %>
+                <p class="info-container">
+                    This resource file contains
+                    <span class="redish-font">
+                        <%= results.fileStats.blankRows %> out of <%= results.fileStats.numOfRows %>
+                    </span> blank rows.
+                </p>
+            <% } %>
         </div>
     </main>
 

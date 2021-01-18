@@ -11,13 +11,6 @@ const {
 var numOfParams, numOfBadParams;
 var index;
 var missingParams = [];
-var resourcesStats = {
-    numOfParams,
-    numOfBadParams,
-    formats,
-    numOfErrors
-};
-
 
 // sends param to a check function 
 var sendParam = (checkFunction, key, param1, param2) => {
@@ -39,14 +32,17 @@ var sendParam = (checkFunction, key, param1, param2) => {
 }
 
 // analyse one dataset
-var analyseDataset = async (dataset) => {
+var analyseDataset = async (portalName, dataset) => {
     numOfParams = 0;
     numOfBadParams = 0;
     index = 0;
     missingParams = [];
-    resourcesStats.numOfParams = 0;
-    resourcesStats.numOfBadParams = 0;
-    resourcesStats.numOfErrors = 0;
+    var resourcesStats = {
+        numOfParams: 0,
+        numOfBadParams: 0,
+        formats: {},
+        numOfErrors: 0
+    };
 
     sendParam(checkParam, 'title', dataset.title);
     sendParam(checkParam, 'name', dataset.name);
@@ -55,6 +51,8 @@ var analyseDataset = async (dataset) => {
     sendParam(checkParam, 'maintainer', dataset.maintainer);
     sendParam(checkParam, 'license_title', dataset.license_title);
     sendParam(checkParam, 'state', dataset.state);
+    sendParam(checkParam, 'metadata_created', dataset.metadata_created);
+    sendParam(checkParam, 'metadata_modified', dataset.metadata_modified);
     sendParam(checkParam, 'notes', dataset.notes, dataset.description);
     sendParam(checkParam, 'owmner_org', dataset.owmner_org, dataset.organization);
 
@@ -66,7 +64,10 @@ var analyseDataset = async (dataset) => {
     // get when was the metadata last modified
     let metadataLastModified = analyseDate(dataset.metadata_modified);
     if (metadataLastModified < 0) {
+        var dateLastModified = new Date(dataset.metadata_created);
         metadataLastModified = analyseDate(dataset.metadata_created);
+    } else {
+        var dateLastModified = new Date(dataset.metadata_modified);
     }
 
     let licenseUrlExists = sendParam(checkParam, 'license_url', dataset.license_url);
@@ -87,22 +88,37 @@ var analyseDataset = async (dataset) => {
         }
     }
 
-    let actuallyLastModified = metadataLastModified;
+    let actuallyLastModified = dateLastModified;
     // analyse all dataset resources
-    for (let resource in dataset.resources) {
-        let result = await analyseResource(resource);
+    for (let i = 0; i < dataset.resources.length; i++) {
+        let resourceUrl = 'http://' + portalName
+            + '/api/3/action/resource_show?id=' + dataset.resources[i].id;
 
-        resourcesStats.numOfParams += result.numbers.numOfParams;
-        resourcesStats.numOfBadParams += result.numbers.numOfBadParams;
-        if (result.download.error) {
-            resourcesStats.numOfErrors++;
+        let resourceData = await fetchData(resourceUrl);
+
+        if (resourceData.error) {
+            datasetsStats.differentModifiedDates++;
         } else {
-            // fill dictionary of formats
-            resourcesStats.formats[result.download.format] += 1;
-            // if resource was modified after the metadata was already modified
-            if (result.lastModified) {
-                if (result.lastModified > actuallyLastModified) {
-                    actuallyLastModified = result.lastModified;
+            let result = await analyseResource(resourceData.data.result);
+
+            resourcesStats.numOfParams += result.numbers.numOfParams;
+            resourcesStats.numOfBadParams += result.numbers.numOfBadParams;
+            if (result.download) {
+                if (result.download.error) {
+                    resourcesStats.numOfErrors++;
+                } else {
+                    // fill dictionary of formats
+                    if (!resourcesStats.formats[result.download.format]) {
+                        resourcesStats.formats[result.download.format] = 1;
+                    } else {
+                        resourcesStats.formats[result.download.format]++;
+                    }
+                    // if resource was modified after the metadata was already modified
+                    if (result.lastModified) {
+                        if (result.lastModified > actuallyLastModified) {
+                            actuallyLastModified = result.lastModified;
+                        }
+                    }
                 }
             }
         }
@@ -116,7 +132,8 @@ var analyseDataset = async (dataset) => {
         missingParams: missingParams, // list of missing parameters in dataset metadata
         urlError: urlError, // if URL does not work report it
         metadataLastModified: metadataLastModified, // when was metadata last modified
-        actuallyLastModified: actuallyLastModified, // when was dataset actually last modified
+        dateLastModified: dateLastModified.toLocaleString(), // actual date
+        actuallyLastModified: actuallyLastModified.toLocaleString(), // when was dataset actually last modified
         license: license, // if URL for license does not work report it
         resourcesStats: resourcesStats // stats about all dataset resources
     };

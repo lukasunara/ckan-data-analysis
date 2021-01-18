@@ -10,12 +10,6 @@ const {
 var numOfParams, numOfBadParams;
 var index;
 var missingParams = [];
-var datasetsStats = {
-    numOfParams,
-    numOfBadParams,
-    numOfErrors,
-    differentModifiedDates
-};
 
 // sends param to a check function 
 var sendParam = (checkFunction, key, param1, param2) => {
@@ -36,15 +30,17 @@ var sendParam = (checkFunction, key, param1, param2) => {
     return exists;
 }
 
-var analyseOrganization = async (organization) => {
+var analyseOrganization = async (portalName, organization) => {
     numOfParams = 0;
     numOfBadParams = 0;
     index = 0;
     missingParams = [];
-    datasetsStats.numOfParams = 0;
-    datasetsStats.numOfBadParams = 0;
-    datasetsStats.numOfErrors = 0;
-    datasetsStats.differentModifiedDates = 0;
+    var datasetsStats = {
+        numOfParams: 0,
+        numOfBadParams: 0,
+        numOfErrors: 0,
+        differentModifiedDates: 0
+    };
 
     sendParam(checkParam, 'name', organization.name);
     sendParam(checkParam, 'id', organization.id);
@@ -81,19 +77,28 @@ var analyseOrganization = async (organization) => {
     }
     // analyse all datasets
     if (packagesExist) {
-        for (let dataset in organization.packages) {
-            let result = await analyseDataset(dataset);
+        for (let i = 0; i < organization.packages.length; i++) {
+            let datasetUrl = 'http://' + portalName
+                + '/api/3/action/package_show?id=' + organization.packages[i].id;
 
-            datasetsStats.numOfParams += result.numbers.numOfParams;
-            datasetsStats.numOfBadParams += result.numbers.numOfBadParams;
-            if (result.urlError) {
-                datasetsStats.numOfErrors++;
-            }
-            if (result.license.error) {
-                datasetsStats.numOfErrors++;
-            }
-            if (result.metadataLastModified !== result.actuallyLastModified) {
+            let datasetData = await fetchData(datasetUrl);
+
+            if (datasetData.error) {
                 datasetsStats.differentModifiedDates++;
+            } else {
+                let result = await analyseDataset(portalName, datasetData.data.result);
+
+                datasetsStats.numOfParams += result.numbers.numOfParams;
+                datasetsStats.numOfBadParams += result.numbers.numOfBadParams;
+                if (result.urlError) {
+                    datasetsStats.numOfErrors++;
+                }
+                if (result.license.error) {
+                    datasetsStats.numOfErrors++;
+                }
+                if (result.metadataLastModified !== result.actuallyLastModified) {
+                    datasetsStats.differentModifiedDates++;
+                }
             }
         }
     }
