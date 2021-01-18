@@ -16,8 +16,9 @@ var parseExcelFile = (data, extension) => {
         var workbook = XLSX.read(data, { type: 'buffer', sheetStubs: true });
         // var workbook = XLSX.read('C:/Users/Ivan Sunara/FAKS/5. semestar/Projekt R/Istrazivanje/amk_2015-12-18.csv', { type: 'file', sheetStubs: true, sheetRows: 11 });
     }
-    var sheetNamesList = workbook.SheetNames;
+    var sheetNamesList = workbook.SheetNames; // list of sheet names
 
+    // iterate over all sheets and analyse them
     sheetNamesList.forEach(sheet => {
         let worksheetJSON = XLSX.utils.sheet_to_json(
             workbook.Sheets[sheet], { defval: null, blankrows: true }
@@ -33,6 +34,7 @@ var parseExcelFile = (data, extension) => {
     }
 }
 
+// parses through json file and analyzes it
 var parseJSONFile = (jsonData) => {
     numOfRows = 0;
     blankRows = 0;
@@ -45,7 +47,7 @@ var parseJSONFile = (jsonData) => {
     }
 }
 
-// analyses one worksheet
+// analyse one worksheet
 var analyseFile = (worksheetJSON) => {
     worksheetJSON.forEach(row => {
         numOfRows++;
@@ -57,6 +59,7 @@ var analyseFile = (worksheetJSON) => {
     // console.log(worksheetJSON);
 }
 
+// checks if a row is blank (contains no values)
 var checkJSONRow = (row) => {
     if (!row) {
         return false; // blank row
@@ -64,10 +67,10 @@ var checkJSONRow = (row) => {
     // if every parameter in row is not defined => row is empty
     for (let key in row) {
         if (row[key] !== null) {
-            if (row[key] instanceof String) {    // if row = ',' or '!' etc.
+            if (row[key] instanceof String) {
                 let str = row[key].trim();
                 if (str.length == 1 && !isAlphaNumeric(str.charCodeAt(0))) {
-                    continue;
+                    continue; // if row = ',' or '!' etc.
                 }
             }
             return true; // row not blank

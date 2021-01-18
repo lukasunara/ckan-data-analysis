@@ -49,25 +49,24 @@ var analyseResource = async (resource) => {
         metadataLastModified = analyseDate(resource.created);
     }
 
-    let urlExists = sendParam(checkParam, 'url', resource.url);
-    if (urlExists) {
+    // check the download url for this resource
+    let downloadUrlExists = sendParam(checkParam, 'url', resource.url);
+    if (downloadUrlExists) {
         var urlData = await fetchData(resource.url);
-        if (urlData.message) {
+
+        if (urlData.error) {  // error while fetching resource
             var download = {
-                error: true,
-                message: urlData.message
+                error: true, // it is an error
+                status: urlData.status, // error status code
+                statusText: urlData.statusText // error status text
             }
         } else {
-            // because .shp and .shx has the same content type
-            if (urlData.extension == 'shp' && resource.format.toLowerCase() == 'shx') {
-                urlData.extension = 'shx';
-            }
             var download = {
-                format: urlData.extension,
-                status: urlData.status,
-                lastModified: urlData.lastModified
+                format: urlData.extension, // actual format of fetched resource
+                status: urlData.status, // response status code
+                lastModified: urlData.lastModified // date when resource was actually last modified
             };
-
+            // count blank rows in resource data
             var fileStats;
             if (urlData.extension == 'xls' || urlData.extension == 'xlsx' ||
                 urlData.extension == 'csv' || urlData.extension == 'xml'
@@ -75,19 +74,21 @@ var analyseResource = async (resource) => {
                 fileStats = parseExcelFile(urlData.data, urlData.extension);
             } else if (urlData.extension == 'json') {
                 fileStats = parseJSONFile(urlData.data, urlData.extension);
+            } else if (urlData.extension == 'shp' && resource.format.toLowerCase() == 'shx') {
+                urlData.extension = 'shx'; // because .shp and .shx has the same content type
             }
         }
     }
 
     return {
         numbers: {
-            numOfParams: numOfParams,
-            numOfBadParams: numOfBadParams
+            numOfParams: numOfParams, // total number of parameters
+            numOfBadParams: numOfBadParams // number of missing or "empty" parameters
         },
-        missingParams: missingParams,
-        lastModified: metadataLastModified,
-        download: download,
-        fileStats: fileStats
+        missingParams: missingParams, // list of all missing parameters
+        lastModified: metadataLastModified, // date when the metadata was last modified
+        download: download, // info about downloadd url response
+        fileStats: fileStats // number of blank rows out of total number of rows
     }
 }
 

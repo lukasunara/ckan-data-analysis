@@ -2,10 +2,10 @@ const fetch = require('node-fetch');
 const mime = require('mime-types');
 
 var fetchData = async (url) => {
-    let fetchedData;
-    let fetchedError;
+    var fetchedData;
+    var fetchedError;
 
-    console.log(url);
+    console.log('URL: ' + url);
 
     await fetch(url)
         .then(handleResponse)
@@ -13,22 +13,21 @@ var fetchData = async (url) => {
         .catch(error => fetchedError = error);
 
     if (fetchedError) {
-        // TODO: do something with fetched error
-        console.log(fetchedError.status + " " + fetchedError.statusText + "\n");
+        console.log('fetch-error: ' + fetchedError.status + " " + fetchedError.statusText + "\n");
         return fetchedError;
     } else {
-        // TODO: do something with fetched data
         // console.log(fetchedData.data + "\n");
         return fetchedData;
     }
 }
 
+// handle response of fetchData function
 var handleResponse = async (response) => {
     let contentType = response.headers.get('content-type');
     let lastModified = response.headers.get('last-modified');
     let extension = mime.extension(contentType);
 
-    console.log(contentType);
+    console.log('Content-Type: ' + contentType);
     console.log('Last-Modified: ' + lastModified);
 
     var data;
@@ -47,27 +46,27 @@ var handleResponse = async (response) => {
             extension = 'shp'; // or 'shx'
         }
         data = 'extension';
-        // throw new Error(`Sorry, content-type ${contentType} is not supported.`);
     }
 
-    console.log(extension);
+    console.log('Extension: ' + extension);
 
     return {
-        data: data,
+        data: data, // contains returned response data (undefined if error)
         status: {
-            code: response.status,
-            text: response.statusText
+            code: response.status, // status code of response
+            text: response.statusText // status text of response
         },
-        extension: extension,
-        lastModified: lastModified
+        extension: extension, // extension of response data
+        lastModified: lastModified // date when the response data was last modified
     }
 }
 
-// handles error response
+// handle error response
 var handleError = (response) => {
     return Promise.reject({
-        status: response.status,
-        statusText: response.statusText
+        error: true,
+        status: response.status,  // status code of response
+        statusText: response.statusText  // status text of response
     });
 }
 
@@ -79,12 +78,6 @@ var handleJSONResponse = (response) => {
                 return json;
             } else {
                 return handleError(response);
-                /*
-                return Promise.reject(Object.assign({}, json, {
-                    status: response.status,
-                    statusText: response.statusText
-                }));
-                */
             }
         });
 }
@@ -101,7 +94,7 @@ var handleTextResponse = (response) => {
         });
 }
 
-// handle response for content type json
+// handle response for content type image
 var handleImageResponse = (response) => {
     return response.blob()
         .then(blob => {
@@ -113,7 +106,7 @@ var handleImageResponse = (response) => {
         });
 }
 
-// handle response for content type json
+// handle response for content type xlsx/xls
 var handleExcelResponse = (response) => {
     return response.arrayBuffer()
         .then(array => {
@@ -125,6 +118,14 @@ var handleExcelResponse = (response) => {
         });
 }
 
+// method for redirection when error occures
+var redirectToWithError = (res, req, path) => {
+    req.session.error = 'Not found';
+    req.session.success = false;
+    res.redirect(path);
+}
+
 module.exports = {
-    fetchData
+    fetchData,
+    redirectToWithError
 }

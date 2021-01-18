@@ -1,4 +1,5 @@
 const { fetchData } = require('./fetching.js');
+const { analyseResource } = require('./resourceAnalysis.js');
 const {
     analyseParam,
     analyseParamWithOption,
@@ -10,6 +11,13 @@ const {
 var numOfParams, numOfBadParams;
 var index;
 var missingParams = [];
+var resourcesStats = {
+    numOfParams,
+    numOfBadParams,
+    formats,
+    numOfErrors
+};
+
 
 // sends param to a check function 
 var sendParam = (checkFunction, key, param1, param2) => {
@@ -30,11 +38,15 @@ var sendParam = (checkFunction, key, param1, param2) => {
     return exists;
 }
 
+// analyse one dataset
 var analyseDataset = async (dataset) => {
     numOfParams = 0;
     numOfBadParams = 0;
     index = 0;
     missingParams = [];
+    resourcesStats.numOfParams = 0;
+    resourcesStats.numOfBadParams = 0;
+    resourcesStats.numOfErrors = 0;
 
     sendParam(checkParam, 'title', dataset.title);
     sendParam(checkParam, 'name', dataset.name);
@@ -52,14 +64,14 @@ var analyseDataset = async (dataset) => {
     sendParam(checkArray, 'tags', dataset.tags, dataset.keywords);
 
     // get when was the metadata last modified
-    let metadataLastModified;
-    metadataLastModified = analyseDate(dataset.metadata_modified);
+    let metadataLastModified = analyseDate(dataset.metadata_modified);
     if (metadataLastModified < 0) {
         metadataLastModified = analyseDate(dataset.metadata_created);
     }
 
     let licenseUrlExists = sendParam(checkParam, 'license_url', dataset.license_url);
     if (licenseUrlExists) {
+        // if bad URL for license => license = { status, statusText }
         var license = await fetchData(dataset.license_url);
     }
 
@@ -67,28 +79,46 @@ var analyseDataset = async (dataset) => {
     if (urlExists) {
         var urlData = await fetchData(dataset.url);
         // if url does not work report it
-        if (urlData.message) {
+        if (urlData.error) {
             var urlError = {
-                status: urlData.status,
-                message: urlData.message
+                status: urlData.status, // status code of response
+                statusText: urlData.statusText // response status text
             }
         }
     }
 
-    /*
+    let actuallyLastModified = metadataLastModified;
+    // analyse all dataset resources
     for (let resource in dataset.resources) {
-        analyseResource(dataset.resource);
+        let result = await analyseResource(resource);
+
+        resourcesStats.numOfParams += result.numbers.numOfParams;
+        resourcesStats.numOfBadParams += result.numbers.numOfBadParams;
+        if (result.download.error) {
+            resourcesStats.numOfErrors++;
+        } else {
+            // fill dictionary of formats
+            resourcesStats.formats[result.download.format] += 1;
+            // if resource was modified after the metadata was already modified
+            if (result.lastModified) {
+                if (result.lastModified > actuallyLastModified) {
+                    actuallyLastModified = result.lastModified;
+                }
+            }
+        }
     }
-    */
 
     return {
         numbers: {
-            numOfParams: numOfParams,
-            numOfBadParams: numOfBadParams
+            numOfParams: numOfParams, // total number of parameters
+            numOfBadParams: numOfBadParams // number of missing or "empty" parameters
         },
-        missingParams: missingParams,
-        lastModified: metadataLastModified,
-        license: license
+        missingParams: missingParams, // list of missing parameters in dataset metadata
+        urlError: urlError, // if URL does not work report it
+        metadataLastModified: metadataLastModified, // when was metadata last modified
+        actuallyLastModified: actuallyLastModified, // when was dataset actually last modified
+        license: license, // if URL for license does not work report it
+        resourcesStats: resourcesStats // stats about all dataset resources
     };
 }
 

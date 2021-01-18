@@ -1,4 +1,5 @@
 const { fetchData } = require('./fetching.js');
+const { analyseDataset } = require('./datasetAnalysis.js');
 const {
     analyseParam,
     analyseParamWithOption,
@@ -9,6 +10,12 @@ const {
 var numOfParams, numOfBadParams;
 var index;
 var missingParams = [];
+var datasetsStats = {
+    numOfParams,
+    numOfBadParams,
+    numOfErrors,
+    differentModifiedDates
+};
 
 // sends param to a check function 
 var sendParam = (checkFunction, key, param1, param2) => {
@@ -34,6 +41,10 @@ var analyseOrganization = async (organization) => {
     numOfBadParams = 0;
     index = 0;
     missingParams = [];
+    datasetsStats.numOfParams = 0;
+    datasetsStats.numOfBadParams = 0;
+    datasetsStats.numOfErrors = 0;
+    datasetsStats.differentModifiedDates = 0;
 
     sendParam(checkParam, 'name', organization.name);
     sendParam(checkParam, 'id', organization.id);
@@ -54,36 +65,48 @@ var analyseOrganization = async (organization) => {
     let urlExists = sendParam(checkParam, 'image_display_url', organization.image_display_url);
     if (urlExists) {
         let blobImage = await fetchData(organization.image_display_url);
-        if (blobImage.message) {
+        if (blobImage.error) {
             var imageDisplayURL = {
-                error: true,
-                message: urlData.message
+                error: true, // there was an error
+                status: urlData.status, // status code of error
+                statusText: urlData.statusText // error status text
             }
         } else {
-            if (blobImage.data == 'extension' || blobImage.data.status) {
-                console.log(blobImage); // if error
+            if (blobImage.data == 'extension') { // if error
+                console.log('URL does not lead to a image: ' + blobImage);
             } else {
                 var imageDisplayURL = organization.image_display_url;
             }
         }
     }
-
-    /*
-    if(packagesExist) {
+    // analyse all datasets
+    if (packagesExist) {
         for (let dataset in organization.packages) {
-            analyseDataset(dataset);
+            let result = await analyseDataset(dataset);
+
+            datasetsStats.numOfParams += result.numbers.numOfParams;
+            datasetsStats.numOfBadParams += result.numbers.numOfBadParams;
+            if (result.urlError) {
+                datasetsStats.numOfErrors++;
+            }
+            if (result.license.error) {
+                datasetsStats.numOfErrors++;
+            }
+            if (result.metadataLastModified !== result.actuallyLastModified) {
+                datasetsStats.differentModifiedDates++;
+            }
         }
     }
-    */
 
     return {
         numbers: {
-            numOfParams: numOfParams,
-            numOfBadParams: numOfBadParams
+            numOfParams: numOfParams, // total number of parameters
+            numOfBadParams: numOfBadParams // number of missing or "empty" parameters
         },
-        missingParams: missingParams,
-        imageDisplayURL: imageDisplayURL,
-        createdDate: createdDate
+        missingParams: missingParams, // list of missing parameters in organization metadata
+        imageDisplayURL: imageDisplayURL, // image_display_url or undefined if error or missing
+        createdDate: createdDate, // organization created date
+        datasetsStats: datasetsStats // stats about datasets
     };
 }
 
