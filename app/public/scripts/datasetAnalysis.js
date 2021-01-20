@@ -98,7 +98,7 @@ var analyseDataset = async (portalName, dataset, checkResources) => {
             let resourceData = await fetchData(resourceUrl);
 
             if (resourceData.error) {
-                datasetsStats.differentModifiedDates++;
+                resourcesStats.numOfErrors++;
             } else {
                 let result = await analyseResource(resourceData.data.result);
 
@@ -135,7 +135,7 @@ var analyseDataset = async (portalName, dataset, checkResources) => {
         missingParams: missingParams, // list of missing parameters in dataset metadata
         urlError: urlError, // if URL does not work report it
         dates: {
-            metadataLastModified: metadataLastModified, // when was metadata last modified
+            metadataLastModifiedMonths: metadataLastModified, // when was metadata last modified
             dateLastModified: dateLastModified ? dateLastModified.toLocaleString() : '', // actual date
             actuallyLastModified: actuallyLastModified ? actuallyLastModified.toLocaleString() : '', // when was dataset actually last modified
             actuallyLastModifiedMonths: actuallyLastModifiedMonths

@@ -9,12 +9,8 @@ var parseExcelFile = (data, extension) => {
 
     if (extension == 'xlsx' || extension == 'xls') {
         var workbook = XLSX.read(data, { type: 'array', sheetStubs: true });
-        // var workbook = XLSX.read('C:/Users/Ivan Sunara/FAKS/5. semestar/Projekt R/Istrazivanje/amk_2015-12-18.xls', { type: 'file', sheetStubs: true, sheetRows: 10 });
-        // var workbook = XLSX.read('C:/Users/Ivan Sunara/FAKS/5. semestar/Projekt R/Istrazivanje/muzeji-ispravljeni.xlsx', { type: 'file', sheetStubs: true, sheetRows: 10 });
-        // var workbook = XLSX.read('C:/Users/Ivan Sunara/FAKS/5. semestar/Projekt R/Istrazivanje/COVID-19-geographic-disbtribution-worldwide.xlsx', { type: 'file', sheetStubs: true });
     } else if (extension == 'csv' || extension == 'xml') {
         var workbook = XLSX.read(data, { type: 'buffer', sheetStubs: true });
-        // var workbook = XLSX.read('C:/Users/Ivan Sunara/FAKS/5. semestar/Projekt R/Istrazivanje/amk_2015-12-18.csv', { type: 'file', sheetStubs: true, sheetRows: 11 });
     }
     var sheetNamesList = workbook.SheetNames; // list of sheet names
 
