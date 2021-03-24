@@ -85,7 +85,7 @@ var analyseOrganization = async (portalName, organization, checkDatasets) => {
                 let datasetData = await fetchData(datasetUrl);
 
                 if (datasetData.error) {
-                    datasetsStats.differentModifiedDates++;
+                    datasetsStats.numOfErrors++;
                 } else {
                     let result = await analyseDataset(portalName, datasetData.data.result, true);
 
@@ -97,7 +97,7 @@ var analyseOrganization = async (portalName, organization, checkDatasets) => {
                     if (result.license.error) {
                         datasetsStats.numOfErrors++;
                     }
-                    if (result.metadataLastModified !== result.actuallyLastModified) {
+                    if (result.dateLastModified !== result.actuallyLastModified) {
                         datasetsStats.differentModifiedDates++;
                     }
                 }

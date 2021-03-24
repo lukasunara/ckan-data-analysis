@@ -61,10 +61,10 @@
             </div>
             <div class="statistics-container">
                 <p class="last-modified-container">
-                    <% if (results.dates.metadataLastModified >= 0) { %>
+                    <% if (results.dates.metadataLastModifiedMonths >= 0) { %>
                         Metadata for this datased was last modified on 
                         <span class="info-name italic-font"><%= results.dates.dateLastModified %></span>
-                        (<span class="info-name"><%= results.dates.metadataLastModified %></span> months ago).
+                        (<span class="info-name"><%= results.dates.metadataLastModifiedMonths %></span> months ago).
                     <% } else { %>
                         Parameter <span class="info-name italic-font">metadata_last_modified </span>
                         is invalid (or completely missing)!
@@ -98,7 +98,7 @@
                 </p>
                 <div class="formats-list">
                     All resources come in these formats:
-                    <% if (results.resourcesStats.formats.length > 0) { %>
+                    <% if (Object.keys(results.resourcesStats.formats).length > 0) { %>
                         <ul class="list-in-two-columns">
                             <% for(let format in results.resourcesStats.formats) { %>
                                 <li class="equally-spaced-columns">
