@@ -1,17 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title><%= title %></title>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="/vendor/normalize.css">
+    <%- include('../partials/head'); %>
     <link rel="stylesheet" type="text/css" href="/styles/main.css">
     <link rel="stylesheet" type="text/css" href="/styles/home.css">
 </head>
 
 <body class="primary-color-bg">
-    
+    <%- include('../partials/header'); %>
+
     <main>
         <section class="tabs-with-circles">
             <div class="tab container goldish-color-bg">
@@ -39,9 +37,8 @@
                 </div>
                 <div class="tab-text">
                     <span class="bigger-font">
-                        <a class="tab-link redish-font" href="https://ckan.org/" 
-                            title="Go to CKAN website" target="_blank"
-                        >
+                        <a class="tab-link redish-font" href="https://ckan.org/" title="Go to CKAN website"
+                            target="_blank">
                             About CKAN
                         </a>
                     </span>
@@ -56,4 +53,7 @@
         </section>
     </main>
 
+    <%- include('../partials/footer'); %>
+
+    <%- include('../partials/external_scripts'); %>
 </body>

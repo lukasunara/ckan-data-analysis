@@ -7,15 +7,15 @@ body {
 }
 
 .primary-color-bg {
-    background-color: rgba(231, 231, 231, 0.89);
+    background-color: #e3f2fd;
 }
 
 .secondary-color-bg {
     background-color: white;
 }
 
-.goldish-color-bg {
-    background-color: rgba(226, 195, 117, 0.712);
+.blue-color-bg {
+    background-color: #094977;
 }
 
 .redish-font {

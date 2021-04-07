@@ -3,7 +3,8 @@ const router = express.Router();
 
 router.get('/', function (req, res) {
     res.render('home', {
-        title: 'Home'
+        title: 'Home',
+        linkActive: 'home'
     });
 });
 

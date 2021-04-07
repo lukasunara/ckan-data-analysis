@@ -9,13 +9,26 @@ const pool = new Pool({
     port: 5432,
 });
 
+const sql_drop_table_contextuality = `DROP TABLE IF EXISTS contextuality;`;
+const sql_drop_tables_reusability = `DROP TABLE IF EXISTS reusability;`;
+const sql_drop_tables_interoperability = `DROP TABLE IF EXISTS interoperability;`;
+const sql_drop_table_accessibility = `DROP TABLE IF EXISTS accessibility;`;
+const sql_drop_tables_findability = `DROP TABLE IF EXISTS findability;`;
+const sql_drop_tables_chart = `DROP TABLE IF EXISTS chart;`;
+const sql_drop_tables_resource = `DROP TABLE IF EXISTS resource;`;
+const sql_drop_tables_dataset = `DROP TABLE IF EXISTS dataset;`;
+const sql_drop_tables_organization = `DROP TABLE IF EXISTS organization;`;
+const sql_drop_tables_portal = `DROP TABLE IF EXISTS portal;`;
+const sql_drop_tables_rateableObject = `DROP TABLE IF EXISTS rateableObject;`;
+
 const sql_create_rateableObject = `CREATE TABLE rateableObject (
     object_id VARCHAR(36) PRIMARY KEY
 );`;
 const sql_create_rateableObject_id_index = `CREATE UNIQUE INDEX idx_rateableObjectId ON rateableObject(object_id);`;
 
 const sql_create_portal = `CREATE TABLE portal (
-    portalName VARCHAR(20) NOT NULL
+    portalName VARCHAR(20) NOT NULL,
+    CONSTRAINT pkPortal PRIMARY KEY (object_id)
 ) INHERITS (rateableObject);`;
 
 const sql_create_organization = `CREATE TABLE organization (
@@ -28,7 +41,8 @@ const sql_create_organization = `CREATE TABLE organization (
     organization_numOfExtras INTEGER,
     organization_numOfMembers INTEGER,
     organization_dateCreated TIMESTAMP,
-    organization_imageDisplayURL TEXT
+    organization_imageDisplayURL TEXT,
+    CONSTRAINT pkOrganization PRIMARY KEY (object_id)
 ) INHERITS (rateableObject);`;
 
 const sql_create_dataset = `CREATE TABLE dataset (
@@ -49,14 +63,15 @@ const sql_create_dataset = `CREATE TABLE dataset (
     dataset_licenseTitle VARCHAR(100),
     dataset_licenseURL TEXT,
     dataset_URL TEXT,
-    CONSTRAINT fkDatasetPortal FOREIGN KEY (object_id) REFERENCES portal (object_id)
+    CONSTRAINT pkDataset PRIMARY KEY (object_id),
+    CONSTRAINT fkDatasetPortal FOREIGN KEY (object_id) REFERENCES portal(object_id)
         ON DELETE SET NULL
         ON UPDATE CASCADE,
-    CONSTRAINT fkDatasetOrganization FOREIGN KEY (object_id) REFERENCES organization (object_id)
+    CONSTRAINT fkDatasetOrganization FOREIGN KEY (object_id) REFERENCES organization(object_id)
         ON DELETE SET NULL
         ON UPDATE CASCADE
 ) INHERITS (rateableObject);`;
-const sql_create_dataset_organization_index = `CREATE INDEX idx_datasetOrganization ON organization(organization_id);`;
+const sql_create_dataset_organization_index = `CREATE INDEX idx_datasetOrganization ON organization(object_id);`;
 
 const sql_create_resource = `CREATE TABLE resource (
     dataset_id VARCHAR(36),
@@ -70,11 +85,12 @@ const sql_create_resource = `CREATE TABLE resource (
     resource_created TIMESTAMP,
     resource_lastModified TIMESTAMP,
     resource_URL TEXT,
-    CONSTRAINT fkResourceDataset FOREIGN KEY (object_id) REFERENCES dataset (object_id)
+    CONSTRAINT pkResource PRIMARY KEY (object_id),
+    CONSTRAINT fkResourceDataset FOREIGN KEY (object_id) REFERENCES dataset(object_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 ) INHERITS (rateableObject);`;
-const sql_create_resource_dataset_index = `CREATE INDEX idx_resourceDataset ON dataset(dataset_id);`;
+const sql_create_resource_dataset_index = `CREATE INDEX idx_resourceDataset ON dataset(object_id);`;
 
 const sql_create_chart = `CREATE TABLE chart (
     chart_id SERIAL PRIMARY KEY,
@@ -151,6 +167,20 @@ let tables = [
     sql_create_contextuality
 ];
 
+let drop_tables = [
+    sql_drop_table_contextuality,
+    sql_drop_tables_reusability,
+    sql_drop_tables_interoperability,
+    sql_drop_table_accessibility,
+    sql_drop_tables_findability,
+    sql_drop_tables_chart,
+    sql_drop_tables_resource,
+    sql_drop_tables_dataset,
+    sql_drop_tables_organization,
+    sql_drop_tables_portal,
+    sql_drop_tables_rateableObject
+];
+
 let indexes = [
     sql_create_rateableObject_id_index,
     sql_create_dataset_organization_index,
@@ -159,13 +189,21 @@ let indexes = [
     sql_create_chart_rateableObject_index
 ];
 
-if ((tables.length != table_data.length) || (tables.length != table_names.length)) {
-    console.log('Warning: "tables" and "names" arrays length mismatch.');
-    return;
-}
-
 //create tables and populate with data (if provided) 
 (async () => {
+    if (tables.length != table_names.length || tables.length != drop_tables.length) {
+        console.log('Warning: "tables", "table_names" and "drop_tables" arrays length mismatch.');
+        return;
+    }
+    console.log('Dropping all existing tables...');
+    for (let i = 0; i < drop_tables.length; i++) {
+        try {
+            await pool.query(drop_tables[i], []);
+        } catch (err) {
+            console.log('Error while dropping table ' + table_names[i] + '.');
+            return console.log(err.message);
+        }
+    }
     console.log('Creating tables');
     for (let i = 0; i < tables.length; i++) {
         console.log('Creating table ' + table_names[i] + '.');
@@ -185,6 +223,7 @@ if ((tables.length != table_data.length) || (tables.length != table_names.length
             console.log('Index ' + i + ' created.');
         } catch (err) {
             console.log('Error creating index ' + i + '.');
+            return console.log(err.message);
         }
     }
 })();

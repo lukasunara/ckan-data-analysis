@@ -4,17 +4,10 @@ const { body, validationResult } = require('express-validator');
 const router = express.Router();
 
 router.get('/', function (req, res) {
-    // console.log(req.session.errors);
     res.render('menu', {
         title: 'Menu',
-        success: req.session.success,
-        errors: req.session.errors,
-        error: req.session.error
+        linkActive: 'menu'
     });
-    // delete req.session['errors'];
-    req.session.errors = null;
-    req.session.success = true;
-    // console.log(req.session.errors);
 });
 
 router.post('/portal', [
@@ -26,13 +19,8 @@ router.post('/portal', [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-        req.session.errors = errors.array();
-        req.session.success = false;
         res.redirect('/menu');
     } else {
-        req.session.success = true;
-        req.session.errors = null;
-
         let reqUrl = new URL(req.body.url);
         let portalName = reqUrl.host;
 
@@ -49,13 +37,8 @@ router.post('/dataset', [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-        req.session.errors = errors.array();
-        req.session.success = false;
         res.redirect('/menu');
     } else {
-        req.session.success = true;
-        req.session.errors = null;
-
         let reqUrl = new URL(req.body.url);
         let portalName = reqUrl.host;
         let pathName = reqUrl.pathname.split('/');
@@ -73,13 +56,8 @@ router.post('/organization', [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-        req.session.errors = errors.array();
-        req.session.success = false;
         res.redirect('/menu');
     } else {
-        req.session.success = true;
-        req.session.errors = null;
-
         let reqUrl = new URL(req.body.url);
         let portalName = reqUrl.host;
         let pathName = reqUrl.pathname.split('/');
