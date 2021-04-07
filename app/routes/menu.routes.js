@@ -3,11 +3,15 @@ const { URL } = require('url');
 const { body, validationResult } = require('express-validator');
 const router = express.Router();
 
+var errorURL = null;
+
 router.get('/', function (req, res) {
     res.render('menu', {
         title: 'Menu',
-        linkActive: 'menu'
+        linkActive: 'menu',
+        errorURL: errorURL
     });
+    errorURL = null;
 });
 
 router.post('/portal', [
@@ -19,6 +23,7 @@ router.post('/portal', [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
+        errorURL = true;
         res.redirect('/menu');
     } else {
         let reqUrl = new URL(req.body.url);
@@ -37,6 +42,7 @@ router.post('/dataset', [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
+        errorURL = true;
         res.redirect('/menu');
     } else {
         let reqUrl = new URL(req.body.url);
@@ -56,6 +62,7 @@ router.post('/organization', [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
+        errorURL = true;
         res.redirect('/menu');
     } else {
         let reqUrl = new URL(req.body.url);

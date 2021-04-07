@@ -120,8 +120,6 @@ var handleExcelResponse = (response) => {
 
 // method for redirection when error occures
 var redirectToWithError = (res, req, path) => {
-    req.session.error = 'Not found';
-    req.session.success = false;
     res.redirect(path);
 }
 

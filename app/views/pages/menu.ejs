@@ -4,46 +4,47 @@
 <head>
     <%- include('../partials/head'); %>
     <link rel="stylesheet" type="text/css" href="/styles/main.css">
-    <link rel="stylesheet" type="text/css" href="/styles/menu.css">
+    <!-- <link rel="stylesheet" type="text/css" href="/styles/menu.css"> -->
 </head>
 
-<body class="primary-color-bg">
+<body class="lightblue-bg">
     <%- include('../partials/header'); %>
     
-    <main class="centered-flex vertical-flex">
-        <% if(success === false) { %>
-        <section class="errors container secondary-color-bg error-font">
-            <span>
-                Error: <%= error ? error : errors[0].msg %> (please try again)
-            </span>
+    <main>
+        <section class="container justify-content-center align-items-center p-4 w-75">
+            <div class="bg-light light-border rounded-3 m-1 p-5">
+                <h4>Choose analysis option</h4>
+                <form class="row mt-5" action="/menu/portal" method="POST">
+                    <div class="mb-3">
+                        <label for="url" class="form-label">URL of a portal, dataset or organization</label>
+                        <input type="text" class="form-control <% if (errorURL) { %> is-invalid <% } %>" id="url"
+                            name="url" aria-describedby="validationURL" placeholder="Insert URL..." required
+                        >
+                        <div id="validationURL" class="invalid-feedback">
+                            Error loading URL. Please provide a valid URL.
+                        </div>
+                    </div>
+                    <label for="typeOfElement" class="form-label">Choose type of element (URL must correspond to the type):</label>
+                    <div class="mt-0 mb-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="typeOfElement" id="radioPortal" required>
+                            <label class="form-check-label" for="radioPortal">Portal</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="typeOfElement" id="radioDataset" required>
+                            <label class="form-check-label" for="radioDataset">Dataset</label> 
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="typeOfElement" id="radioOrganization" required>
+                            <label class="form-check-label" for="radioOrganization">Organization</label>
+                        </div>
+                    </div>
+                    <div class="mb-1 d-flex justify-content-center">
+                        <input class="btn btn-secondary w-25" type="submit">
+                    </div>
+                </form>
+            </div>
         </section>
-        <% } %>
-            <section class="forms container goldish-color-bg darkpurple-font">
-                <span class="form-title redish-font">Choose analysis option</span>
-                <div class="menu-form">
-                    <form action="/menu/portal" method="POST">
-                            <label for="url">URL of a CKAN portal</label>
-                            <input type="text" id="url" name="url" placeholder="Insert URL...">
-                            <input class="darkpurple-font" type="submit">
-                    </form>
-                </div>
-                <hr class="dotted" />
-                <div class="menu-form">
-                    <form action="/menu/dataset" method="POST">
-                            <label for="url">URL of a single dataset</label>
-                            <input type="text" id="url" name="url" placeholder="Insert URL...">
-                            <input class="darkpurple-font" type="submit">
-                    </form>
-                </div>
-                <hr class="dotted" />
-                <div class="menu-form">
-                    <form action="/menu/organization" method="POST">
-                            <label for="url">URL of a organization</label>
-                            <input type="text" id="url" name="url" placeholder="Insert URL...">
-                            <input class="darkpurple-font" type="submit"">
-                    </form>
-                </div>
-            </section>
     </main>
 
     <%- include('../partials/footer'); %>

@@ -6,28 +6,24 @@ body {
     min-height: 100%;
 }
 
-.primary-color-bg {
+.lightblue-bg {
     background-color: #e3f2fd;
 }
 
-.secondary-color-bg {
+.white-bg {
     background-color: white;
 }
 
-.blue-color-bg {
+.darkblue-bg {
     background-color: #094977;
 }
 
-.redish-font {
+.darkred-font {
     color: rgb(129, 2, 2);
 }
 
 .error-font {
     color: red;
-}
-
-.darkpurple-font {
-    color: rgb(43, 22, 63);
 }
 
 .italic-font {
@@ -42,24 +38,9 @@ span.bigger-font {
     font-size: 1.2em;
 }
 
-.container {
-    border-radius: 15px;
-    box-shadow: 0 4px 8px 0 rgba(14, 14, 14, 0.342), 0 6px 20px 0 rgba(14, 14, 14, 0.342);
-}
-
-.centered-flex {
-    display: flex;
-    align-items: center;
-    justify-items: center;
-}
-
 hr.dotted {
     border-top: 2px dotted rgba(110, 243, 243, 0.801);
     width: 100%;
-}
-
-.vertical-flex {
-    flex-direction: column;
 }
 
 .pre-not-styled {
@@ -80,4 +61,8 @@ ul.list-in-two-columns {
 
 ul.list-in-five-columns {
     column-count: 5;
+}
+
+.light-border {
+    border: 1px solid rgba(0, 0, 0, .125);
 }
