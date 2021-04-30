@@ -27,42 +27,42 @@ const sql_create_rateableObject = `CREATE TABLE rateableObject (
 const sql_create_rateableObject_id_index = `CREATE UNIQUE INDEX idx_rateableObjectId ON rateableObject(object_id);`;
 
 const sql_create_portal = `CREATE TABLE portal (
-    portalName VARCHAR(20) NOT NULL,
+    name VARCHAR(20) NOT NULL,
     CONSTRAINT pkPortal PRIMARY KEY (object_id)
 ) INHERITS (rateableObject);`;
 
 const sql_create_organization = `CREATE TABLE organization (
-    organization_name VARCHAR(200),
-    organization_title VARCHAR(200),
-    organization_description TEXT,
-    organization_state VARCHAR(10),
-    organization_approvalStatus VARCHAR(10),
-    organization_packages BOOLEAN,
-    organization_numOfExtras INTEGER,
-    organization_numOfMembers INTEGER,
-    organization_dateCreated TIMESTAMP,
-    organization_imageDisplayURL TEXT,
+    name VARCHAR(200),
+    title VARCHAR(200),
+    description TEXT,
+    state VARCHAR(10),
+    approvalStatus VARCHAR(10),
+    packages BOOLEAN,
+    numOfExtras INTEGER,
+    numOfMembers INTEGER,
+    dateCreated TIMESTAMP,
+    imageDisplayURL TEXT,
     CONSTRAINT pkOrganization PRIMARY KEY (object_id)
 ) INHERITS (rateableObject);`;
 
 const sql_create_dataset = `CREATE TABLE dataset (
     portal_id VARCHAR(36),
     organization_id VARCHAR(36),
-    dataset_name VARCHAR(200),
-    dataset_title VARCHAR(200),
-    dataset_ownerOrg VARCHAR(36),
-    dataset_author VARCHAR(36),
-    dataset_maintainer VARCHAR(36),
-    dataset_state VARCHAR(10),
-    dataset_description TEXT,
-    dataset_metadataCreated TIMESTAMP,
-    dataset_metadataModified TIMESTAMP,
-    dataset_numOfExtras INTEGER,
-    dataset_numOfGroups INTEGER,
-    dataset_numOfKeywords INTEGER,
-    dataset_licenseTitle VARCHAR(100),
-    dataset_licenseURL TEXT,
-    dataset_URL TEXT,
+    name VARCHAR(200),
+    title VARCHAR(200),
+    ownerOrg VARCHAR(36),
+    author VARCHAR(36),
+    maintainer VARCHAR(36),
+    state VARCHAR(10),
+    description TEXT,
+    metadataCreated TIMESTAMP,
+    metadataModified TIMESTAMP,
+    numOfExtras INTEGER,
+    numOfGroups INTEGER,
+    numOfKeywords INTEGER,
+    licenseTitle VARCHAR(100),
+    licenseURL TEXT,
+    url TEXT,
     CONSTRAINT pkDataset PRIMARY KEY (object_id),
     CONSTRAINT fkDatasetPortal FOREIGN KEY (object_id) REFERENCES portal(object_id)
         ON DELETE SET NULL
@@ -75,16 +75,16 @@ const sql_create_dataset_organization_index = `CREATE INDEX idx_datasetOrganizat
 
 const sql_create_resource = `CREATE TABLE resource (
     dataset_id VARCHAR(36),
-    resource_revisionId VARCHAR(36),
-    resource_name VARCHAR(200),
-    resource_size INTEGER,
-    resource_format VARCHAR(10),
-    resource_mediaType VARCHAR(100),
-    resource_state VARCHAR(10),
-    resource_description TEXT,
-    resource_created TIMESTAMP,
-    resource_lastModified TIMESTAMP,
-    resource_URL TEXT,
+    revisionId VARCHAR(36),
+    name VARCHAR(200),
+    size INTEGER,
+    format VARCHAR(10),
+    mediaType VARCHAR(100),
+    state VARCHAR(10),
+    description TEXT,
+    created TIMESTAMP,
+    lastModified TIMESTAMP,
+    url TEXT,
     CONSTRAINT pkResource PRIMARY KEY (object_id),
     CONSTRAINT fkResourceDataset FOREIGN KEY (object_id) REFERENCES dataset(object_id)
         ON DELETE CASCADE
