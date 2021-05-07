@@ -27,7 +27,6 @@ module.exports = class Dataset extends RateableObject {
         this.licenseTitle = licenseTitle;
         this.licenseURL = licenseURL;
         this.url = url;
-
     }
 
     // save dataset into database
@@ -49,9 +48,9 @@ module.exports = class Dataset extends RateableObject {
         numOfKeywords, licenseTitle, licenseURL, url
     ) {
         try {
-            let rowCount = await dbUpdateDataset(this.object_id,
-                metadataModified, numOfExtras, numOfGroups, numOfKeywords,
-                licenseTitle, licenseURL, url
+            let rowCount = await dbUpdateDataset(this.object_id, this.portal_id,
+                this.organization_id, metadataModified, numOfExtras, numOfGroups,
+                numOfKeywords, licenseTitle, licenseURL, url
             );
             if (rowCount == 0)
                 console.log('WARNING: Dataset has not been updated!');
@@ -95,8 +94,8 @@ dbNewDataset = async (dataset) => {
 };
 
 // updating dataset data in database
-dbUpdateDataset = async (dataset_id, metadataModified, numOfExtras,
-    numOfGroups, numOfKeywords, licenseTitle, licenseURL, url
+dbUpdateDataset = async (dataset_id, portal_id, organization_id, metadataModified,
+    numOfExtras, numOfGroups, numOfKeywords, licenseTitle, licenseURL, url
 ) => {
     const sql = `UPDATE dataset
                     SET metadataModified = '${metadataModified}',
@@ -106,7 +105,9 @@ dbUpdateDataset = async (dataset_id, metadataModified, numOfExtras,
                         licenseTitle = '${licenseTitle}',
                         licenseURL = '${licenseURL}',
                         url = '${url}'
-                    WHERE object_id = '${dataset_id}';`;
+                    WHERE object_id = '${dataset_id}'
+                        AND portal_id = '${portal_id}'
+                        AND organization_id = '${organization_id}';`;
     try {
         const result = await db.query(sql, []);
         return result.rowCount;

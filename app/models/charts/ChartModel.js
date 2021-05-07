@@ -1,16 +1,24 @@
 const db = require('../../db');
+const { analyseParam, analyseParamWithOption } = require('../../public/scripts/analysis.js');
 
 // class Chart encapsulates a chart
 module.exports = class Chart {
 
-    constructor(chart_id, object_id, maxPoints, earnedPoints) {
+    constructor() {
+        if (this.constructor === Chart) {
+            throw new TypeError('Abstract class "Chart" cannot be instantiated directly.');
+        }
+        this.missingParams = new Set();
+        this.persisted = false;
+    }
+
+    constructor(chart_id, object_id, missingParams) {
         if (this.constructor === Chart) {
             throw new TypeError('Abstract class "Chart" cannot be instantiated directly.');
         }
         this.chart_id = chart_id;
         this.object_id = object_id;
-        this.maxPoints = maxPoints;
-        this.earnedPoints = earnedPoints;
+        this.missingParams = missingParams;
         this.persisted = false;
     }
 
@@ -29,6 +37,19 @@ module.exports = class Chart {
             console.log('ERROR: deleting chart data: ' + JSON.stringify(this));
             throw err;
         }
+    }
+
+    sendParam(checkFunction, key, param1, param2) {
+        let param;
+        if (!param2) {
+            param = analyseParam(param1, checkFunction);
+        } else {
+            param = analyseParamWithOption(param1, param2, checkFunction);
+        }
+        if (!param) {
+            this.missingParams.add(key);
+        }
+        return param;
     }
 };
 

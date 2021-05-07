@@ -1,28 +1,20 @@
-// if checkParam returns false add key to the missingParams
+// if checkParam returns false, add key to the missingParams
 var analyseParam = (param, checkFunction) => {
-    let exists = true;
-
-    if (!checkFunction(param)) {
-        exists = false;
-    }
-    return exists;
+    return checkFunction(param);
 }
 
-// if checkParam returns false add key to the missingParams
+// if checkParam returns false for both options, add key to the missingParams
 var analyseParamWithOption = (param1, param2, checkFunction) => {
-    let exists = true;
-
-    if (!checkFunction(param1)) {
-        if (!checkFunction(param2)) {
-            exists = false;
-        }
+    let param = analyseParam(param1, checkFunction);
+    if (!param) {
+        param = analyseParam(param2, checkFunction);
     }
-    return exists;
+    return param;
 }
 
+// analises given date
 var analyseDate = (param) => {
     let exists = analyseParam(param, checkParam);
-
     if (exists) {
         let date = new Date(param);
         return monthDifference(date);
@@ -35,9 +27,9 @@ var checkParam = (param) => {
     return param;
 }
 
-// if null, undefined or empty array return false
+// returns size of array
 var checkArray = (array) => {
-    return array && array.length > 0;
+    return array ? array.length : array;
 }
 
 // count month difference between current and given date

@@ -30,6 +30,10 @@ var sendParam = (checkFunction, key, param1, param2) => {
 }
 
 var analyseResource = async (resource) => {
+    /*
+    1. provjeri parametre
+    2. spremi u bazu podataka info o organizaciji i svim chartovima
+    */
     numOfParams = 0;
     numOfBadParams = 0;
     index = 0;

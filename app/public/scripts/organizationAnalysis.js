@@ -31,6 +31,11 @@ var sendParam = (checkFunction, key, param1, param2) => {
 }
 
 var analyseOrganization = async (portalName, organization, checkDatasets) => {
+    /*
+    1. provjeri parametre
+    2. ocijeni sve datasetove
+    3. spremi u bazu podataka info o organizaciji i svim chartovima
+    */
     numOfParams = 0;
     numOfBadParams = 0;
     index = 0;

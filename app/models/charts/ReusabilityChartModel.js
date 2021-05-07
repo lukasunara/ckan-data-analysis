@@ -3,12 +3,25 @@ const Chart = require('./ChartModel');
 
 // class ReusabilityChart encapsulates an reusability chart
 module.exports = class ReusabilityChart extends Chart {
+    // max number of points for each category of evaluation
+    static maxLicense = 3;
+    static maxBasicInfo = 1;
+    static maxExtras = 3;
+    static maxExtrasOrganization = 4;
+    static maxPublisher = 4;
+
+    // empty constructor
+    constructor() {
+        super();
+        this.license = 0;
+        this.basicInfo = 0;
+        this.extras = 0;
+        this.publisher = 0;
+    }
 
     // constructor for ReusabilityChart
-    constructor(chart_id, object_id, maxPoints, earnedPoints,
-        license, basicInfo, extras, publisher
-    ) {
-        super(chart_id, object_id, maxPoints, earnedPoints);
+    constructor(chart_id, object_id, missingParams, license, basicInfo, extras, publisher) {
+        super(chart_id, object_id, missingParams);
         this.license = license;
         this.basicInfo = basicInfo;
         this.extras = extras;
@@ -30,14 +43,15 @@ module.exports = class ReusabilityChart extends Chart {
     }
 
     // update chart data
-    async updateChartData(earnedPoints, license, basicInfo, extras, publisher) {
+    async updateChartData(missingParams, license, basicInfo, extras, publisher) {
         try {
             let rowCount = await dbUpdateChart(this.chart_id,
-                earnedPoints, license, basicInfo, extras, publisher
+                missingParams, license, basicInfo, extras, publisher
             );
             if (rowCount == 0)
                 console.log('WARNING: reusability chart has not been updated!');
             else {
+                this.missingParams = missingParams;
                 this.license = license;
                 this.basicInfo = basicInfo;
                 this.extras = extras;
@@ -49,16 +63,53 @@ module.exports = class ReusabilityChart extends Chart {
         }
     }
 
+    checkLicense(checkFunction, key, param1, param2) {
+        let param = sendParam(checkFunction, key, param1, param2);
+        if (param) {
+            this.license++;
+            var urlData = await fetchData(param);
+            // if url does not work report it
+            if (urlData.error) {
+                /*var urlError = {
+                    status: urlData.status, // status code of response
+                    statusText: urlData.statusText // response status text
+                }*/
+            } else {
+                this.license++;
+            }
+        }
+    }
+
+    checkBasicInfo(checkFunction, key, param1, param2) {
+        let param = sendParam(checkFunction, key, param1, param2);
+        if (param) {
+            this.basicInfo++;
+        }
+    }
+
+    checkExtras(checkFunction, key, param1, param2) {
+        let param = sendParam(checkFunction, key, param1, param2);
+        if (param) {
+            let points = param >= 3 ? 3 : param;
+            this.extras += points;
+        }
+    }
+
+    checkPublisher(checkFunction, key, param1, param2) {
+        let param = sendParam(checkFunction, key, param1, param2);
+        if (param) {
+            this.publisher++;
+        }
+    }
 };
 
 // inserting a new accessibility chart into database
 dbNewChart = async (chart) => {
-    const sql = `INSERT INTO accessibility (object_id, maxPoints, earnedPoints,
-        license, basicInfo, extras, publisher) VALUES ('$1', '$2', '$3', '$4',
-        '$5', '$6', '$7');`;
+    const sql = `INSERT INTO accessibility (object_id, missingParams, license,
+        basicInfo, extras, publisher) VALUES ('$1', '$2', '$3', '$4', '$5', '$6');`;
     const values = [
-        chart.object_id, chart.maxPoints, chart.earnedPoints,
-        chart.license, chart.basicInfo, chart.extras, chart.publisher
+        chart.object_id, chart.missingParams, chart.license,
+        chart.basicInfo, chart.extras, chart.publisher
     ];
     try {
         const result = await db.query(sql, values);
@@ -70,9 +121,9 @@ dbNewChart = async (chart) => {
 };
 
 // updating chart data in database
-dbUpdateChart = async (chart_id, earnedPoints, license, basicInfo, extras, publisher) => {
+dbUpdateChart = async (chart_id, missingParams, license, basicInfo, extras, publisher) => {
     const sql = `UPDATE reusability
-                    SET earnedPoints = '${earnedPoints}',
+                    SET missingParams = '${missingParams}',
                         license = '${license}',
                         basicInfo = '${basicInfo}',
                         extras = '${extras}',

@@ -5,9 +5,12 @@ const RateableObject = require('./RateableObjectModel');
 module.exports = class Portal extends RateableObject {
 
     // constructor for Portal
-    constructor(object_id, name) {
+    constructor(object_id, name, title, description, url) {
         super(object_id);
         this.name = name;
+        this.title = title;
+        this.description = description;
+        this.url = url;
     }
 
     // save portal into database
@@ -25,9 +28,9 @@ module.exports = class Portal extends RateableObject {
     }
 
     // update portal name
-    async updatePortalName(name) {
+    async updatePortalName(name, title, description, url) {
         try {
-            let rowCount = await dbUpdatePortalName(this.object_id, name);
+            let rowCount = await dbUpdatePortalName(this.object_id, name, title, description, url);
             if (rowCount == 0)
                 console.log('WARNING: Portal has not been updated!');
             else
@@ -41,10 +44,13 @@ module.exports = class Portal extends RateableObject {
 
 // inserting a new portal into database
 dbNewPortal = async (portal) => {
-    const sql = `INSERT INTO portal (object_id, name) VALUES (
-        '${portal.object_id}', '${portal.name}');`;
+    const sql = `INSERT INTO portal (object_id, name, title, description, url)
+        VALUES ('$1', '$2', '$3', '$4', '$5');`;
+    const values = [
+        portal.object_id, portal.name, portal.title, portal.description, portal.url
+    ];
     try {
-        const result = await db.query(sql, []);
+        const result = await db.query(sql, values);
         return result.rowCount;
     } catch (err) {
         console.log(err);
@@ -53,9 +59,12 @@ dbNewPortal = async (portal) => {
 };
 
 // updating portalName of a portal
-dbUpdatePortalName = async (portal_id, portal_name) => {
+dbUpdatePortalName = async (portal_id, name, title, description, url) => {
     const sql = `UPDATE portal
-                    SET name = '${portal_name}'
+                    SET name = '${name}',
+                        title = '${title}',
+                        description = '${description}',
+                        url = '${url}'
                     WHERE object_id = '${portal_id}';`;
     try {
         const result = await db.query(sql, []);

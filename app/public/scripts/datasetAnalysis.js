@@ -33,6 +33,11 @@ var sendParam = (checkFunction, key, param1, param2) => {
 
 // analyse one dataset
 var analyseDataset = async (portalName, dataset, checkResources) => {
+    /*
+    1. provjeri parametre
+    2. ocijeni sve resurse
+    3. spremi u bazu podataka info o datasetu i svim chartovima
+    */
     numOfParams = 0;
     numOfBadParams = 0;
     index = 0;

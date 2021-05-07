@@ -1,8 +1,14 @@
-const { fetchData, redirectToWithError } = require('./fetching.js');
+const { fetchData } = require('./fetching.js');
 const { analyseDataset } = require('./datasetAnalysis.js');
 const { analyseOrganization } = require('./organizationAnalysis.js');
 
 var analysePortal = async (portalName, datasets, organizations) => {
+    /*
+    1. portal_id = name (tj. object_id = name)
+    2. provjeri title, description, url
+    3. ocijeni sve organizacije
+    4. spremi u bazu podataka info o portalu i svim chartovima
+    */
     var datasetsStats = {
         numOfParams: 0,
         numOfBadParams: 0,
