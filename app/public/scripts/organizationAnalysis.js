@@ -6,6 +6,7 @@ const {
     checkParam,
     checkArray
 } = require('./analysis.js');
+const Organization = require('../../models/data/OrganizationModel.js');
 
 var numOfParams, numOfBadParams;
 var index;
@@ -122,6 +123,34 @@ var analyseOrganization = async (portalName, organization, checkDatasets) => {
     };
 }
 
+var createOrganization = async (portalName, organization) => {
+    let newOrganization = Organization.fetchOrganizationById(organization.id, portalName);
+    if (!newOrganization) {
+        let title = dataset.title ? dataset.title : dataset.display_name;
+
+        newOrganization = new Organization(organization.id, portalName, organization.name,
+            title, organization.description, organization.state, organization.approval_status,
+            organization.extras.length, organization.users.length, organization.created,
+            organization.image_display_url
+        );
+    } else {
+        // update data about organization if needed
+    }
+    if (organization.packages) {
+        for (let i = 0; i < organization.packages.length; i++) {
+            let datasetUrl = 'http://' + portalName + '/api/3/action/package_show?id=' + organization.packages[i];
+            let dataset = await fetchData(datasetUrl);
+
+            if (dataset.error) {
+                continue;
+            } else {
+                await createDataset(portalName, dataset.data.result);
+            }
+        }
+    }
+    return newOrganization;
+};
+
 module.exports = {
-    analyseOrganization
+    analyseOrganization, createOrganization
 };

@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router({ mergeParams: true });
 const { fetchData, redirectToWithError } = require('../public/scripts/fetching.js');
-const { analyseDataset } = require('../public/scripts/datasetAnalysis.js');
-const { analyseOrganization } = require('../public/scripts/organizationAnalysis.js');
-const { analyseResource } = require('../public/scripts/resourceAnalysis.js');
-const { analysePortal } = require('../public/scripts/portalAnalysis.js');
+
+const { createDataset } = require('../public/scripts/datasetAnalysis.js');
+const { createOrganization } = require('../public/scripts/organizationAnalysis.js');
+const { createResource } = require('../public/scripts/resourceAnalysis.js');
+const { createPortal } = require('../public/scripts/portalAnalysis.js');
 
 // get '/portal/:portalName
 router.get('/', function (req, res) {
@@ -20,14 +21,23 @@ router.get('/', function (req, res) {
             let organizationsUrl = 'http://' + portalName + '/api/3/action/organization_list';
             let organizations = await fetchData(organizationsUrl);
 
+            let basicInfoUrl = 'http://' + portalName + '/api/3/action/status_show';
+            let basicInfo = await fetchData(basicInfoUrl);
+
+            let vocabulariesUrl = 'http://' + portalName + '/api/3/action/vocabulary_list';
+            let vocabularies = await fetchData(vocabulariesUrl);
+
             if (datasets.error || datasets.data === undefined ||
-                organizations.error || organizations.data === undefined
+                organizations.error || organizations.data === undefined ||
+                basicInfo.error || basicInfo.data === undefined ||
+                vocabularies.error || vocabularies.data === undefined
             ) {
                 redirectToWithError(res, req, '/menu');
             } else {
-                let results = await analysePortal(
-                    portalName, datasets.data.result, organizations.data.result
+                let portal = await createPortal(portalName, datasets.data.result,
+                    organizations.data.result, basicInfo.data.result, vocabularies.data.result
                 );
+                let results = await portal.analysePortal(true);
 
                 res.render('portal', {
                     title: "Portal analysis results",
@@ -51,15 +61,14 @@ router.get('/dataset/:datasetID', function (req, res) {
             redirectToWithError(res, req, '/portal/' + portalName);
         } else {
             let datasetUrl = 'http://' + portalName + '/api/3/action/package_show?id=' + datasetID;
+            let datasetData = await fetchData(datasetUrl);
 
-            let dataset = await fetchData(datasetUrl);
-
-            if (dataset.error || dataset.data === undefined) {
+            if (datasetData.error || datasetData.data === undefined) {
                 redirectToWithError(res, req, '/portal/' + portalName);
             } else {
-                let results = await analyseDataset(portalName, dataset.data.result, true);
+                let dataset = await createDataset(portalName, datasetData.data.result, true);
 
-                console.log(results);
+                let results = await dataset.analyseDataset(dataset.changed);
 
                 res.render('dataset', {
                     title: "Dataset analysis results",
@@ -83,13 +92,14 @@ router.get('/organization/:organizationID', function (req, res) {
         } else {
             let organizationUrl = 'http://' + portalName
                 + '/api/3/action/organization_show?id=' + organizationID;
+            let organizationData = await fetchData(organizationUrl);
 
-            let organization = await fetchData(organizationUrl);
-
-            if (organization.error || organization.data === undefined) {
+            if (organizationData.error || organizationData.data === undefined) {
                 redirectToWithError(res, req, '/portal/' + portalName);
             } else {
-                let results = await analyseOrganization(portalName, organization.data.result, true);
+                let organization = await createOrganization(portalName, organizationData.data.result);
+
+                let results = await organization.analyseOrganization();
 
                 res.render('organization', {
                     title: "Organization analysis results",
@@ -112,13 +122,14 @@ router.get('/resource/:resourceID', function (req, res) {
             redirectToWithError(res, req, '/portal/' + portalName);
         } else {
             let resourceUrl = 'http://' + portalName + '/api/3/action/resource_show?id=' + resourceID;
+            let resourceData = await fetchData(resourceUrl);
 
-            let resource = await fetchData(resourceUrl);
-
-            if (resource.error || resource.data === undefined) {
+            if (resourceData.error || resourceData.data === undefined) {
                 redirectToWithError(res, req, '/portal/' + portalName);
             } else {
-                let results = await analyseResource(resource.data.result);
+                let resource = await createResource(resourceData.data.result);
+
+                let results = resource.analyseResource(resource.changed);
 
                 res.render('resource', {
                     title: "Resource analysis results",

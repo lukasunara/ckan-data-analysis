@@ -1,6 +1,43 @@
 const { fetchData } = require('./fetching.js');
 const { analyseDataset } = require('./datasetAnalysis.js');
 const { analyseOrganization } = require('./organizationAnalysis.js');
+const Portal = require('../../models/data/PortalModel.js');
+
+var createPortal = async (portalName, datasets, organizations, basicInfo, vocabularies) => {
+    let portal = Portal.fetchPortalByName(portalName);
+    if (!portal) {
+        let dcatOrRdf = false;
+        let extensions = new Set(basicInfo.extensions);
+        if (extensions.has('dcat') || extensions.has('rdft')) {
+            dcatOrRdf = true;
+        }
+
+        portal = new Portal(portalName, portalName, basicInfo.site_title, basicInfo.site_description,
+            vocabularies.length, basicInfo.extensions.length, dcatOrRdf, basicInfo.url
+        );
+    }
+    for (let i = 0; i < datasets.length; i++) {
+        let datasetUrl = 'http://' + portalName + '/api/3/action/package_show?id=' + datasets[i];
+        let dataset = await fetchData(datasetUrl);
+
+        if (dataset.error) {
+            continue;
+        } else {
+            await createDataset(portalName, dataset.data.result);
+        }
+    }
+    for (let i = 0; i < organizations.length; i++) {
+        let organizationUrl = 'http://' + portalName + '/api/3/action/package_show?id=' + organizations[i];
+        let organization = await fetchData(organizationUrl);
+
+        if (organization.error) {
+            continue;
+        } else {
+            await createOrganization(portalName, organization.data.result);
+        }
+    }
+    return portal;
+};
 
 var analysePortal = async (portalName, datasets, organizations) => {
     /*
@@ -75,5 +112,6 @@ var analysePortal = async (portalName, datasets, organizations) => {
 }
 
 module.exports = {
-    analysePortal
+    analysePortal,
+    createPortal
 };

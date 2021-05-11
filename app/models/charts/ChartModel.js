@@ -4,14 +4,7 @@ const { analyseParam, analyseParamWithOption } = require('../../public/scripts/a
 // class Chart encapsulates a chart
 module.exports = class Chart {
 
-    constructor() {
-        if (this.constructor === Chart) {
-            throw new TypeError('Abstract class "Chart" cannot be instantiated directly.');
-        }
-        this.missingParams = new Set();
-        this.persisted = false;
-    }
-
+    // constructor for all Charts
     constructor(chart_id, object_id, missingParams) {
         if (this.constructor === Chart) {
             throw new TypeError('Abstract class "Chart" cannot be instantiated directly.');
@@ -27,6 +20,20 @@ module.exports = class Chart {
         return this.persisted;
     }
 
+    // save chart into database
+    async persist(dbNewFunction) {
+        try {
+            let rowCount = await dbNewFunction(this);
+            if (rowCount == 0)
+                console.log('WARNING: Chart has not been persisted!');
+            else
+                this.persisted = true;
+        } catch (err) {
+            console.log('ERROR: persisting chart data: ' + JSON.stringify(this));
+            throw err;
+        }
+    }
+
     // delete this chart from database
     async deleteChart() {
         try {
@@ -39,6 +46,19 @@ module.exports = class Chart {
         }
     }
 
+    // update chart data
+    async updateChartData(dbUpdateChartMethod) {
+        try {
+            let rowCount = await dbUpdateChartMethod(this);
+            if (rowCount == 0)
+                console.log('WARNING: chart has not been updated!');
+        } catch (err) {
+            console.log('ERROR: updating chart data: ' + JSON.stringify(this));
+            throw err;
+        }
+    }
+
+    // sends param to a check function and returns its' value
     sendParam(checkFunction, key, param1, param2) {
         let param;
         if (!param2) {
@@ -46,6 +66,7 @@ module.exports = class Chart {
         } else {
             param = analyseParamWithOption(param1, param2, checkFunction);
         }
+        // if param is null, undefined or empty => add to missingParams of this chart
         if (!param) {
             this.missingParams.add(key);
         }

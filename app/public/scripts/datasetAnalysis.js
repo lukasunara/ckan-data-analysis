@@ -7,6 +7,7 @@ const {
     checkParam,
     checkArray
 } = require('./analysis.js');
+const Dataset = require('../../models/data/DatasetModel.js');
 
 var numOfParams, numOfBadParams;
 var index;
@@ -150,6 +151,54 @@ var analyseDataset = async (portalName, dataset, checkResources) => {
     };
 }
 
+var createDataset = async (portalName, dataset) => {
+    let checkResources = false;
+
+    let newDataset = Dataset.fetchDatasetById(dataset.id, portalName);
+    if (!newDataset) {
+        let orgID = dataset.owner_org ? dataset.owmner_org : dataset.organization.id;
+        let description = dataset.notes ? dataset.notes : dataset.description;
+        let metadataCreated = new Date(dataset.metadata_created);
+        let metadataModified = new Date(dataset.metadata_modified);
+        let numOfKeywords = dataset.tags ? dataset.tags.length : (dataset.keywords ? dataset.keywords.length : 0);
+
+        newDataset = new Dataset(dataset.id, portalName, dataset.owner_org, orgID,
+            dataset.name, dataset.title, dataset.owner_org, dataset.author, dataset.maintainer,
+            dataset.private, dataset.state, description, metadataCreated, metadataModified,
+            dataset.extras.length, dataset.groups.length, numOfKeywords, dataset.license_title,
+            dataset.license_url, dataset.url
+        );
+        checkResources = true;
+    } else {
+        let lastModified = new Date(dataset.metadata_modified);
+        let savedLastModified = new Date(newDataset.metadataLastModified);
+        // if last modified timestamps are almost equal continue, else update
+        if (lastModified && (lastModified - savedLastModified >= 45)) {
+            let numOfKeywords = dataset.tags ? dataset.tags.length : (dataset.keywords ? dataset.keywords.length : 0);
+
+            await newDataset.updateDatasetData(lastModified, dataset.extras.length,
+                dataset.groups.length, numOfKeywords, dataset.license_title, dataset.license_url, dataset.url
+            );
+            checkResources = true;
+        }
+    }
+    if (checkResources) {
+        for (let i = 0; i < dataset.resources.length; i++) {
+            let resourceUrl = 'http://' + portalName
+                + '/api/3/action/resource_show?id=' + dataset.resources[i].id;
+            let resourceData = await fetchData(resourceUrl);
+
+            if (resourceData.error) {
+                resourcesStats.numOfErrors++;
+            } else {
+                await createResource(portalName, resourceData.data.result, dataset.id);
+            }
+        }
+    }
+    newDataset.changed = checkResources;
+    return newDataset;
+};
+
 module.exports = {
-    analyseDataset
+    analyseDataset, createDataset
 };

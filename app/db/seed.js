@@ -63,6 +63,7 @@ const sql_create_dataset = `CREATE TABLE dataset (
     ownerOrg VARCHAR(36),
     author VARCHAR(36),
     maintainer VARCHAR(36),
+    private BOOLEAN,
     state VARCHAR(10),
     description TEXT,
     metadataCreated TIMESTAMP,

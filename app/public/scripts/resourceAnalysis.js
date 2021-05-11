@@ -5,6 +5,7 @@ const {
     analyseDate,
     checkParam
 } = require('./analysis.js');
+const Resource = require('../../models/data/ResourceModel.js');
 
 var numOfParams, numOfBadParams;
 var index;
@@ -104,6 +105,85 @@ var analyseResource = async (resource) => {
     }
 }
 
+var createResource = async (resource, dataset_id) => {
+    let changed = false;
+
+    let newResource = Resource.fetchResourceById(resource.id);
+    if (!newResource) {
+        console.log('Should not be here! Ever!');
+        let result = await getUrlData(resource.url, resource.format);
+        let mediaType = result.mediaType;
+        let dateOfIssue = new Date(resource.created);
+        let lastModified = new Date(resource.last_modified);
+
+        newResource = new Resource(resource.id, dataset_id, resource.revision_id,
+            resource.name, resource.size, resource.format, mediaType, resource.state,
+            resource.description, dateOfIssue, lastModified, resource.url
+        );
+        changed = true;
+        newResource.actuallyLastModified = result.lastModified;
+        newResource.emptyRows = result.emptyRows;
+    } else {
+        let lastModified = new Date(resource.last_modified);
+        let savedLastModified = new Date(newDataset.lastModified);
+        // if last modified timestamps are almost equal continue, else update
+        if (lastModified && (lastModified - savedLastModified >= 45)) {
+            let result = getUrlData(resource.url, resource.format);
+            let mediaType = result.mediaType;
+
+            await newResource.updateResourceData(
+                lastModified, resource.size, resource.format, mediaType, resource.url
+            );
+            changed = true;
+            newResource.actuallyLastModified = result.lastModified;
+            newResource.emptyRows = result.emptyRows;
+        }
+    }
+    newResource.changed = changed;
+    return newResource;
+};
+
+// returns mediaType
+var getUrlData = async (url, format) => {
+    let mediaType = null;
+    let emptyRows = null;
+    if (url) {
+        var urlData = await fetchData(url);
+        if (urlData.error || urlData.status.code >= 400) {  // error while fetching resource
+            ;
+        } else {
+            if (urlData.extension.toLowerCase() == 'shp' && format.toLowerCase() == 'shx') {
+                urlData.extension = 'shx'; // because .shp and .shx has the same content type
+            }
+            mediaType = urlData.extension;
+            emptyRows = checkEmptyRows(urlData);
+        }
+    }
+    return {
+        mediaType: mediaType,
+        lastModified: urlData.lastModified,
+        emptyRows: emptyRows
+    };
+};
+
+// checks empty rows in a file (if the file can be read by xlsx extension)
+var checkEmptyRows = (urlData) => {
+    let percentage = null;
+    if (!urlData.error && urlData.data !== undefined) {
+        // count blank rows in resource data
+        let fileStats;
+        if (urlData.extension == 'xls' || urlData.extension == 'xlsx' ||
+            urlData.extension == 'csv' || urlData.extension == 'xml'
+        ) {
+            fileStats = parseExcelFile(urlData.data, urlData.extension);
+        } else if (urlData.extension == 'json') {
+            fileStats = parseJSONFile(urlData.data, urlData.extension);
+        }
+        percentage = fileStats.blankRows / fileStats.numOfRows * 100;
+    }
+    return percentage;
+}
+
 module.exports = {
-    analyseResource
+    analyseResource, createResource
 };
