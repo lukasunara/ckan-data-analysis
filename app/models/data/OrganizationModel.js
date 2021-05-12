@@ -1,4 +1,7 @@
 const db = require('../../db');
+const AccessibilityChart = require('../charts/AccessibilityChartModel');
+const FindabilityChart = require('../charts/FindabilityChartModel');
+const ReusabilityChart = require('../charts/ReusabilityChartModel');
 const RateableObject = require('./RateableObjectModel');
 
 // class Organization encapsulates a CKAN organization
@@ -76,23 +79,27 @@ module.exports = class Organization extends RateableObject {
 
     // analyse this organization
     async analyseOrganization(changedMetadata) {
-        let result = new AnalysisResult();
+        let result = new AnalysisResult(this.object_id);
         if (changedMetadata) {
+            result.reset();
             // 1. findability
             // 1.1. identification + from datasets
             result.findChart.checkIdentification(checkParam, 'id', this.object_id);
             result.findChart.checkIdentification(checkParam, 'name', this.name);
             result.findChart.checkIdentification(checkParam, 'title', this.title);
+            result.findChart.maxPointsID += FindabilityChart.maxIdentification;
             // 1.2. keywords (only from datasets)
             // 1.3. categories (only from datasets)
             // 1.4. state + from datasets
             result.findChart.checkState(checkParam, 'state', this.state);
             result.findChart.checkState(checkParam, 'approval_status', this.approvalStatus);
+            result.findChart.maxPointsState += FindabilityChart.maxStateOrganization;
 
             // 2. accessibility
             // 2.1. dataset accessibility (only from datasets)
             // 2.2. URL accessibility + from datasets
             result.accessChart.checkUrlAccess(checkParam, 'image_display_url', this.imageDisplayURL);
+            result.accessChart.maxPointsUrl += AccessibilityChart.maxUrlAccessibility;
             // 2.3. download URL (only from datasets)
 
             // 3. interoperability
@@ -106,18 +113,20 @@ module.exports = class Organization extends RateableObject {
             // 4.1. license (only from datasets)
             // 4.2. basic info + from datasets
             result.reuseChart.checkBasicInfo(checkParam, 'description', this.description);
+            result.reuseChart.maxPointsInfo += ReusabilityChart.maxBasicInfo
             // 4.3. extras + from datasets
-            result.reuseChart.checkExtras(checkArray, 'extras', this.numOfExtras);
-            result.reuseChart.checkExtras(checkArray, 'members', this.numOfMembers);
+            result.reuseChart.checkExtras(this.numOfExtras);
+            result.reuseChart.checkMembers(this.numOfMembers);
+            result.reuseChart.maxPointsExtras += ReusabilityChart.maxExtrasOrganization;
             // 4.4. publisher (only from datasets)
-        }
-        // 5. contextuality (only from dataasets)
 
-        for (let dataset of fetchDatasets()) {
-            // dataset.analyseDataset();
-        }
+            // 5. contextuality (only from dataasets)
 
-        // overall rating
+            for (let dataset of fetchDatasets()) {
+                dataset.analyseDataset(true);
+                result.add(dataset.result);
+            }
+        }
         this.result = result;
     }
 };

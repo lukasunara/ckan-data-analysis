@@ -41,6 +41,39 @@ module.exports = class AccessibilityChart extends Chart {
         super.persist(dbNewAccessibilityChart);
     }
 
+    // sets all points to zero
+    reset() {
+        this.datasetAccessibility = 0;
+        this.urlAccessibility = 0;
+        this.downloadURL = 0;
+
+        this.maxPointsDataset = 0;
+        this.maxPointsUrl = 0;
+        this.maxPointsDownload = 0;
+    }
+
+    // reduces points by other chart values
+    reduce(other) {
+        this.datasetAccessibility -= other.datasetAccessibility;
+        this.urlAccessibility -= other.urlAccessibility;
+        this.downloadURL -= other.downloadURL;
+
+        this.maxPointsDataset -= other.maxPointsDataset;
+        this.maxPointsUrl -= other.maxPointsUrl;
+        this.maxPointsDownload -= other.maxPointsDownload;
+    }
+
+    // adds points from other chart values
+    add(other) {
+        this.datasetAccessibility += other.datasetAccessibility;
+        this.urlAccessibility += other.urlAccessibility;
+        this.downloadURL += other.downloadURL;
+
+        this.maxPointsDataset += other.maxPointsDataset;
+        this.maxPointsUrl += other.maxPointsUrl;
+        this.maxPointsDownload += other.maxPointsDownload;
+    }
+
     // fetch chart from database for given object id
     static async fetchChartByID(object_id) {
         let result = await dbGetAccessibility(object_id);
@@ -83,10 +116,8 @@ module.exports = class AccessibilityChart extends Chart {
     checkDatasetAccess(checkFunction, key, param1, param2) {
         let param = sendParam(checkFunction, key, param1, param2);
         // if dataset is accessible, add 1 point
-        if (param) {
-            if (param == 'true') {
-                this.datasetAccessibility++;
-            }
+        if (!param) {
+            this.datasetAccessibility++;
         }
     }
 
@@ -115,10 +146,10 @@ module.exports = class AccessibilityChart extends Chart {
         // if URL exists, add 1 point
         if (param) {
             this.downloadURL++;
+            // don't need to check if URL works, because I know that it works if mediaType != null
             if (mediaType) {
                 this.downloadURL++; //if URL works, add 1 point
             }
-            // don't need to do this, because I know that it works if mediaType != null
             /*var urlData = await fetchData(param);
             if (urlData.error || urlData.status.code >= 400) {
                 urlData.error = true; //error while fetching resource

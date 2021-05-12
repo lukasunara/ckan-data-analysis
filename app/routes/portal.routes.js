@@ -37,7 +37,7 @@ router.get('/', function (req, res) {
                 let portal = await createPortal(portalName, datasets.data.result,
                     organizations.data.result, basicInfo.data.result, vocabularies.data.result
                 );
-                let results = await portal.analysePortal(true);
+                await portal.analysePortal(true);
 
                 res.render('portal', {
                     title: "Portal analysis results",
@@ -67,8 +67,7 @@ router.get('/dataset/:datasetID', function (req, res) {
                 redirectToWithError(res, req, '/portal/' + portalName);
             } else {
                 let dataset = await createDataset(portalName, datasetData.data.result, true);
-
-                let results = await dataset.analyseDataset(dataset.changed);
+                dataset.analyseDataset(dataset.changed);
 
                 res.render('dataset', {
                     title: "Dataset analysis results",
@@ -98,8 +97,7 @@ router.get('/organization/:organizationID', function (req, res) {
                 redirectToWithError(res, req, '/portal/' + portalName);
             } else {
                 let organization = await createOrganization(portalName, organizationData.data.result);
-
-                let results = await organization.analyseOrganization();
+                await organization.analyseOrganization();
 
                 res.render('organization', {
                     title: "Organization analysis results",
@@ -128,8 +126,7 @@ router.get('/resource/:resourceID', function (req, res) {
                 redirectToWithError(res, req, '/portal/' + portalName);
             } else {
                 let resource = await createResource(resourceData.data.result);
-
-                let results = resource.analyseResource(resource.changed);
+                resource.analyseResource(resource.changed);
 
                 res.render('resource', {
                     title: "Resource analysis results",

@@ -71,6 +71,7 @@ module.exports = class Resource extends RateableObject {
     async analyseResource(changedMetadata) {
         let result = new AnalysisResult(this.object_id);
         if (changedMetadata) {
+            result.reset();
             // 1. findability
             // 1.1. identification
             result.findChart.checkIdentification(checkParam, 'id', this.object_id);

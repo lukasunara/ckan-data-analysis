@@ -1,4 +1,7 @@
 const db = require('../../db');
+const FindabilityChart = require('../charts/FindabilityChartModel');
+const InteroperabilityChart = require('../charts/InteroperabilityChartModel');
+const ReusabilityChart = require('../charts/ReusabilityChartModel');
 const RateableObject = require('./RateableObjectModel');
 
 // class Portal encapsulates a CKAN portal
@@ -68,10 +71,24 @@ module.exports = class Portal extends RateableObject {
 
     // analyse this portal
     async analysePortal(changedMetadata) {
-        let result = new AnalysisResult();
-        // 1. findability (only from organizations)
-        // 2. accessibility (only from organizations)
+        let result = new AnalysisResult(this.object_id);
         if (changedMetadata) {
+            // 1. findability
+            // 1.1. identification + from organizations
+            result.findChart.checkIdentification(checkParam, 'name', this.name);
+            result.findChart.checkIdentification(checkParam, 'title', this.title);
+            result.findChart.maxPointsID += FindabilityChart.maxIdentificationPortal;
+            // 1.2. keywords (only from organizations)
+            // 1.3. categories (only from organizations)
+            // 1.4. state (only from organizations)
+
+            // 2. accessibility
+            // 2.1. dataset accessibility (only from organizations)
+            // 2.2. URL accessibility + from organizations
+            result.accessChart.checkUrlAccess(checkParam, 'url', this.url);
+            result.accessChart.maxPointsUrl += AccessibilityChart.maxUrlAccessibility;
+            // 2.3. download URL (only from organizations)
+
             // 3. interoperability
             // 3.1. format (only from organizations)
             // 3.2. format diversity (only from organizations)
@@ -80,21 +97,23 @@ module.exports = class Portal extends RateableObject {
             // 3.5. linked open data
             result.interChart.checkVocabularies(this.numOfVocabularies);
             result.interChart.checkExtensions(this.numOfExtensions, this.dcatOrRdf);
+            result.interChart.maxPointsLOD += InteroperabilityChart.maxLinkedOpenData;
 
             // 4. reusability
             // 4.1. license (only from organizations)
             // 4.2. basic info + from organizations
             result.reuseChart.checkBasicInfo(checkParam, 'description', this.description);
+            result.reuseChart.maxPointsInfo += ReusabilityChart.maxBasicInfo;
             // 4.3. extras (only from organizations)
             // 4.4. publisher (only from organizations)
-        }
-        // 5. contextuality (only from organizations)
 
-        for (let organization of fetchOrganizations()) {
-            // organization.analyseOrganization();
-        }
+            // 5. contextuality (only from organizations)
 
-        // overall rating
+            for (let organization of fetchOrganizations()) {
+                organization.analyseOrganization(true);
+                result.add(organization.result);
+            }
+        }
         this.result = result;
     }
 };

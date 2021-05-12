@@ -5,7 +5,7 @@ const Chart = require('./ChartModel');
 module.exports = class FindabilityChart extends Chart {
     // max number of points for each category of evaluation
     static maxIdentification = 3;
-    static maxIdentificationPortal = 1;
+    static maxIdentificationPortal = 2;
     static maxKeywords = 3;
     static maxCategories = 1;
     static maxState = 1;
@@ -43,6 +43,45 @@ module.exports = class FindabilityChart extends Chart {
     // save chart into database
     async persist() {
         super.persist(dbNewFindabilityChart);
+    }
+
+    // sets all points to zero
+    reset() {
+        this.identification = 0;
+        this.keywords = 0;
+        this.categories = 0;
+        this.state = 0;
+
+        this.maxPointsID = 0;
+        this.maxPointsKeywords = 0;
+        this.maxPointsCategories = 0;
+        this.maxPointsState = 0;
+    }
+
+    // reduces points by other chart values
+    reduce(other) {
+        this.identification -= other.identification;
+        this.keywords -= other.keywords;
+        this.categories -= other.categories;
+        this.state -= other.state;
+
+        this.maxPointsID -= other.maxPointsID;
+        this.maxPointsKeywords -= other.maxPointsKeywords;
+        this.maxPointsCategories -= other.maxPointsCategories;
+        this.maxPointsState -= other.maxPointsState;
+    }
+
+    // adds points from other chart values
+    add(other) {
+        this.identification += other.identification;
+        this.keywords += other.keywords;
+        this.categories += other.categories;
+        this.state += other.state;
+
+        this.maxPointsID += other.maxPointsID;
+        this.maxPointsKeywords += other.maxPointsKeywords;
+        this.maxPointsCategories += other.maxPointsCategories;
+        this.maxPointsState += other.maxPointsState;
     }
 
     // fetch chart from database for given object id
@@ -93,12 +132,12 @@ module.exports = class FindabilityChart extends Chart {
     }
 
     // checks number od keywords
-    checkKeywords(checkFunction, key, param1, param2) {
-        let param = sendParam(checkFunction, key, param1, param2);
+    checkKeywords(numOfKeywords) {
         // points in range [0, 3]
-        if (param) {
-            let points = param >= 3 ? 3 : param;
-            this.keywords += points;
+        if (numOfKeywords > 0) {
+            this.keywords += numOfKeywords >= 3 ? 3 : numOfKeywords;
+        } else {
+            this.missingParams.add('keywords');
         }
     }
 

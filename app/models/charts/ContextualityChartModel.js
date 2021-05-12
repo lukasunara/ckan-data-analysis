@@ -50,6 +50,51 @@ module.exports = class ContextualityChart extends Chart {
         super.persist(dbNewContextualityChart);
     }
 
+    // sets all points to zero
+    reset() {
+        this.numOfResources = 0;
+        this.fileSize = 0;
+        this.emptyData = 0;
+        this.dateOfIssue = 0;
+        this.modificationDate = 0;
+
+        this.maxPointsResources = 0;
+        this.maxPointsFSize = 0;
+        this.maxPointsEmpty = 0;
+        this.maxPointsIssue = 0;
+        this.maxPointsModified = 0;
+    }
+
+    // reduces points by other chart values
+    reduce(other) {
+        this.numOfResources -= other.numOfResources;
+        this.fileSize -= other.fileSize;
+        this.emptyData -= other.emptyData;
+        this.dateOfIssue -= other.dateOfIssue;
+        this.modificationDate -= other.modificationDate;
+
+        this.maxPointsResources -= other.maxPointsResources;
+        this.maxPointsFSize -= other.maxPointsFSize;
+        this.maxPointsEmpty -= other.maxPointsEmpty;
+        this.maxPointsIssue -= other.maxPointsIssue;
+        this.maxPointsModified -= other.maxPointsModified;
+    }
+
+    // adds points from other chart values
+    add(other) {
+        this.numOfResources += other.numOfResources;
+        this.fileSize += other.fileSize;
+        this.emptyData += other.emptyData;
+        this.dateOfIssue += other.dateOfIssue;
+        this.modificationDate += other.modificationDate;
+
+        this.maxPointsResources += other.maxPointsResources;
+        this.maxPointsFSize += other.maxPointsFSize;
+        this.maxPointsEmpty += other.maxPointsEmpty;
+        this.maxPointsIssue += other.maxPointsIssue;
+        this.maxPointsModified += other.maxPointsModified;
+    }
+
     // fetch chart from database for given object id
     static async fetchChartByID(object_id) {
         let result = await dbGetContextuality(object_id);

@@ -1,5 +1,5 @@
 const { fetchData } = require('./fetching.js');
-const { analyseDataset } = require('./datasetAnalysis.js');
+const { analyseDataset, createDataset } = require('./datasetAnalysis.js');
 const {
     analyseParam,
     analyseParamWithOption,
@@ -124,6 +124,8 @@ var analyseOrganization = async (portalName, organization, checkDatasets) => {
 }
 
 var createOrganization = async (portalName, organization) => {
+    let changed = false;
+    // fetch organization from database (if exists)
     let newOrganization = Organization.fetchOrganizationById(organization.id, portalName);
     if (!newOrganization) {
         let title = dataset.title ? dataset.title : dataset.display_name;
@@ -133,8 +135,9 @@ var createOrganization = async (portalName, organization) => {
             organization.extras.length, organization.users.length, organization.created,
             organization.image_display_url
         );
+        changed = true;
     } else {
-        // update data about organization if needed
+        // update data about organization (don't know when because there is not a last_modified flag)
     }
     if (organization.packages) {
         for (let i = 0; i < organization.packages.length; i++) {
@@ -148,7 +151,7 @@ var createOrganization = async (portalName, organization) => {
             }
         }
     }
-    return newOrganization;
+    return { newOrganization: newOrganization, changed: changed };
 };
 
 module.exports = {

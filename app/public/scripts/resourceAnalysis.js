@@ -139,8 +139,7 @@ var createResource = async (resource, dataset_id) => {
             newResource.emptyRows = result.emptyRows;
         }
     }
-    newResource.changed = changed;
-    return newResource;
+    return { newResource: newResource, changed: changed };
 };
 
 // returns mediaType

@@ -1,4 +1,8 @@
 const db = require('../../db');
+const AccessibilityChart = require('../charts/AccessibilityChartModel');
+const ContextualityChart = require('../charts/ContextualityChartModel');
+const FindabilityChart = require('../charts/FindabilityChartModel');
+const ReusabilityChart = require('../charts/ReusabilityChartModel');
 const RateableObject = require('./RateableObjectModel');
 const Resource = require('./ResourceModel');
 
@@ -94,63 +98,74 @@ module.exports = class Dataset extends RateableObject {
 
     // analyses this dataset
     async analyseDataset(changedMetadata) {
-        let result = new AnalysisResult();
+        let result = new AnalysisResult(this.object_id);
         if (changedMetadata) {
+            result.reset();
             // 1. findability
             // 1.1. identification + from resources
             result.findChart.checkIdentification(checkParam, 'id', this.object_id);
             result.findChart.checkIdentification(checkParam, 'name', this.name);
             result.findChart.checkIdentification(checkParam, 'title', this.title);
+            result.findChart.maxPointsID += FindabilityChart.maxIdentification;
             // 1.2. keywords
-            result.findChart.checkKeywords(checkArray, 'keywords', this.numOfKeywords);
+            result.findChart.checkKeywords(this.numOfKeywords);
+            result.findChart.maxPointsKeywords += FindabilityChart.maxKeywords;
             // 1.3. categories
             result.findChart.checkCategories(checkParam, 'categories', this.numOfGroups);
+            result.findChart.maxPointsCategories += FindabilityChart.maxCategories;
             // 1.4. state + from resources
             result.findChart.checkState(checkParam, 'state', this.state);
+            result.findChart.maxPointsState += FindabilityChart.maxState;
+
+            // 2. accessibility
+            // 2.1. dataset accessibility
+            result.accessChart.checkDatasetAccess(checkParam, 'private', this.private);
+            result.accessChart.maxPointsDataset += AccessibilityChart.maxDatasetAccessibility;
+            // 2.2. URL accessibility
+            result.accessChart.checkUrlAccess(checkParam, 'url', this.url);
+            result.accessChart.maxPointsUrl += AccessibilityChart.maxUrlAccessibility;
+            // 2.3. download URL (only from resources)
+
+            // 3. interoperability
+            // 3.1. format (only from resources)
+            // 3.2. format diversity (only from resources)
+            // 3.3. compatibility (only from resources)
+            // 3.4. machine readable (only from resources)
+            // 3.5. linked open data (not calculated)
+
+            // 4. reusability
+            // 4.1. license
+            result.reuseChart.checkLicenseTitle(checkParam, 'license_title', this.licenseTitle);
+            result.reuseChart.checkLicenseUrl(checkParam, 'license_url', this.licenseURL);
+            result.reuseChart.maxPointsLicense += ReusabilityChart.maxLicense;
+            // 4.2. basic info + from resources
+            result.reuseChart.checkBasicInfo(checkParam, 'notes', this.description);
+            result.reuseChart.maxPointsInfo += ReusabilityChart.maxBasicInfo;
+            // 4.3. extras
+            result.reuseChart.checkExtras(this.numOfExtras);
+            result.reuseChart.maxPointsExtras += ReusabilityChart.maxExtras;
+            // 4.4. publisher
+            result.reuseChart.checkPublisher(checkParam, 'author', this.author);
+            result.reuseChart.checkPublisher(checkParam, 'maintainer', this.maintainer);
+            result.reuseChart.checkPublisher(checkParam, 'owmner_org', this.owner_org);
+            result.reuseChart.maxPointsPublisher += ReusabilityChart.maxPublisher;
+
+            // 5. contextuality
+            // 5.1. number of resources (get from database)
+            // 5.2. file size (only from resources)
+            // 5.3. empty data (only from resources)
+            // 5.4. date of issue + from resources
+            result.contextChart.checkIssueDate(this.metadataCreated);
+            result.contextChart.maxPointsIssue += ContextualityChart.maxDateOfIssue;
+            // 5.5. modification date + from resources
+            result.contextChart.checkLastModified(this.metadataModified);
+            result.contextChart.maxPointsModified += ContextualityChart.maxModificationDate;
+
+            for (let resource of fetchResources()) {
+                resource.analyseResource(true);
+                result.add(resource.result);
+            }
         }
-        // 2. accessibility
-        // 2.1. dataset accessibility
-        result.accessChart.checkDatasetAccess(checkParam, 'private', this.private);
-        // 2.2. URL accessibility
-        result.accessChart.checkUrlAccess(checkParam, 'url', dataset.url);
-        // 2.3. download URL (only from resources)
-
-        // 3. interoperability
-        // 3.1. format (only from resources)
-        // 3.2. format diversity (only from resources)
-        // 3.3. compatibility (only from resources)
-        // 3.4. machine readable (only from resources)
-        // 3.5. linked open data (not calculated)
-
-        // 4. reusability
-        // 4.1. license
-        result.reuseChart.checkLicenseTitle(checkParam, 'license_title', this.licenseTitle);
-        result.reuseChart.checkLicenseUrl(checkParam, 'license_url', this.licenseURL);
-        // 4.2. basic info + from resources
-        result.reuseChart.checkBasicInfo(checkParam, 'notes', dataset.notes, dataset.description);
-        // 4.3. extras
-        result.reuseChart.checkExtras(checkArray, 'extras', dataset.extras);
-        // 4.4. publisher
-        result.reuseChart.checkPublisher(checkParam, 'author', dataset.author);
-        result.reuseChart.checkPublisher(checkParam, 'maintainer', dataset.maintainer);
-        result.reuseChart.checkPublisher(checkParam, 'owmner_org', dataset.owmner_org);
-        result.reuseChart.checkPublisher(checkParam, 'organization', dataset.organization);
-
-        // 5. contextuality
-        // 5.1. number of resources (get from database)
-        // 5.2. file size (only from resources)
-        // 5.3. empty data (only from resources)
-        // 5.4. date of issue + from resources
-        result.contextChart.checkIssueDate(this.metadataCreated);
-        // 5.5. modification date + from resources
-        result.contextChart.checkLastModified(this.last_modified);
-
-        for (let resource of fetchResources()) {
-            // resource.analyseResource();
-            // result.findChart.identification += resource.result.findChart.identification;
-        }
-
-        // overall rating
         this.result = result;
     }
 };

@@ -50,6 +50,51 @@ module.exports = class InteroperabilityChart extends Chart {
         super.persist(dbNewInteroperabilityChart);
     }
 
+    // sets all points to zero
+    reset() {
+        this.format = 0;
+        this.formatDiversity = 0;
+        this.compatibility = 0;
+        this.machineReadable = 0;
+        this.linkedOpenData = 0;
+
+        this.maxPointsFormat = 0;
+        this.maxPointsFormatDiv = 0;
+        this.maxPointsComp = 0;
+        this.maxPointsMachine = 0;
+        this.maxPointsLOD = 0;
+    }
+
+    // reduces points by other chart values
+    reduce(other) {
+        this.format -= other.format;
+        this.formatDiversity -= other.formatDiversity;
+        this.compatibility -= other.compatibility;
+        this.machineReadable -= other.machineReadable;
+        this.linkedOpenData -= other.linkedOpenData;
+
+        this.maxPointsFormat -= other.maxPointsFormat;
+        this.maxPointsFormatDiv -= other.maxPointsFormatDiv;
+        this.maxPointsComp -= other.maxPointsComp;
+        this.maxPointsMachine -= other.maxPointsMachine;
+        this.maxPointsLOD -= other.maxPointsLOD;
+    }
+
+    // adds points from other chart values
+    add(other) {
+        this.format += other.format;
+        this.formatDiversity += other.formatDiversity;
+        this.compatibility += other.compatibility;
+        this.machineReadable += other.machineReadable;
+        this.linkedOpenData += other.linkedOpenData;
+
+        this.maxPointsFormat += other.maxPointsFormat;
+        this.maxPointsFormatDiv += other.maxPointsFormatDiv;
+        this.maxPointsComp += other.maxPointsComp;
+        this.maxPointsMachine += other.maxPointsMachine;
+        this.maxPointsLOD += other.maxPointsLOD;
+    }
+
     // fetch chart from database for given object id
     static async fetchChartByID(object_id) {
         let result = await dbGetInteroperability(object_id);

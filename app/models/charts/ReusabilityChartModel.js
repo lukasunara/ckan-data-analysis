@@ -8,7 +8,7 @@ module.exports = class ReusabilityChart extends Chart {
     static maxBasicInfo = 1;
     static maxExtras = 3;
     static maxExtrasOrganization = 4;
-    static maxPublisher = 4;
+    static maxPublisher = 3;
 
     // constructor for ReusabilityChart
     constructor(chart_id, object_id, missingParams, license, basicInfo, extras, publisher) {
@@ -42,6 +42,45 @@ module.exports = class ReusabilityChart extends Chart {
     // save chart into database
     async persist() {
         super.persist(dbNewReusabilityChart);
+    }
+
+    // sets all points to zero
+    reset() {
+        this.license = 0;
+        this.basicInfo = 0;
+        this.extras = 0;
+        this.publisher = 0;
+
+        this.maxPointsLicense = 0;
+        this.maxPointsInfo = 0;
+        this.maxPointsExtras = 0;
+        this.maxPointsPublisher = 0;
+    }
+
+    // reduces points by other chart values
+    reduce(other) {
+        this.license -= other.license;
+        this.basicInfo -= other.basicInfo;
+        this.extras -= other.extras;
+        this.publisher -= other.publisher;
+
+        this.maxPointsLicense -= other.maxPointsLicense;
+        this.maxPointsInfo -= other.maxPointsInfo;
+        this.maxPointsExtras -= other.maxPointsExtras;
+        this.maxPointsPublisher -= other.maxPointsPublisher;
+    }
+
+    // adds points from other chart values
+    add(other) {
+        this.license += other.license;
+        this.basicInfo += other.basicInfo;
+        this.extras += other.extras;
+        this.publisher += other.publisher;
+
+        this.maxPointsLicense += other.maxPointsLicense;
+        this.maxPointsInfo += other.maxPointsInfo;
+        this.maxPointsExtras += other.maxPointsExtras;
+        this.maxPointsPublisher += other.maxPointsPublisher;
     }
 
     // fetch chart from database for given object id
@@ -118,12 +157,22 @@ module.exports = class ReusabilityChart extends Chart {
     }
 
     // checks how many extras there are
-    checkExtras(checkFunction, key, param1, param2) {
-        let param = sendParam(checkFunction, key, param1, param2);
+    checkExtras(numOfExtras) {
         // points are in range [0, 3]
-        if (param) {
-            let points = param >= 3 ? 3 : param;
-            this.extras += points;
+        if (numOfExtras > 0) {
+            this.extras += param >= 3 ? 3 : param;
+        } else {
+            this.missingParams.add('extras');
+        }
+    }
+
+    // checks how many members there are in an organization
+    checkMembers(numOfMembers) {
+        // if exists, add 1 point
+        if (numOfMembers > 0) {
+            this.extras++;
+        } else {
+            this.missingParams.add('members');
         }
     }
 

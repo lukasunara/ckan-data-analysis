@@ -70,4 +70,29 @@ module.exports = class AnalysisResult {
         }
         return { percentage: percentage, grade: grade }
     }
+
+    // sets all chart values to zero
+    reset() {
+        this.findChart.reset();
+        this.accessChart.reset();
+        this.interChart.reset();
+        this.reuseChart.reset();
+        this.contextChart.reset();
+    }
+
+    reduce(other) {
+        this.findChart.reduce(other.findChart);
+        this.accessChart.reduce(other.accessChart);
+        this.interChart.reduce(other.interChart);
+        this.reuseChart.reduce(other.reuseChart);
+        this.contextChart.reduce(other.contextChart);
+    }
+
+    add(other) {
+        this.findChart.add(other.findChart);
+        this.accessChart.add(other.accessChart);
+        this.interChart.add(other.interChart);
+        this.reuseChart.add(other.reuseChart);
+        this.contextChart.add(other.contextChart);
+    }
 };
