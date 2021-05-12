@@ -11,15 +11,13 @@ module.exports = class InteroperabilityChart extends Chart {
     static maxLinkedOpenData = 7;
 
     // constructor for InteroperabilityChart
-    constructor(chart_id, object_id, missingParams, format,
-        formatDiversity, compatibility, machineReadable, linkedOpenData
-    ) {
-        super(chart_id, object_id, missingParams);
-        this.format = format;
-        this.formatDiversity = formatDiversity;
-        this.compatibility = compatibility;
-        this.machineReadable = machineReadable;
-        this.linkedOpenData = linkedOpenData;
+    constructor(data) {
+        super(data.chart_id, data.object_id, data.missingParams);
+        this.format = data.format;
+        this.formatDiversity = data.formatDiversity;
+        this.compatibility = data.compatibility;
+        this.machineReadable = data.machineReadable;
+        this.linkedOpenData = data.linkedOpenData;
 
         this.maxPointsFormat = 0;
         this.maxPointsFormatDiv = 0;
@@ -30,7 +28,16 @@ module.exports = class InteroperabilityChart extends Chart {
 
     // creates a new empty InteroperabilityChart
     static createEmptyInteroperability(object_id) {
-        return new InteroperabilityChart(undefined, object_id, new Set(), 0, 0, 0, 0, 0);
+        return new InteroperabilityChart({
+            chart_id: undefined,
+            object_id: object_id,
+            missingParams: new Set(),
+            format: 0,
+            formatDiversity: 0,
+            compatibility: 0,
+            machineReadables: 0,
+            linkedOpenData: 0
+        });
     }
 
     // gets maximum of points an object could have received
@@ -43,11 +50,6 @@ module.exports = class InteroperabilityChart extends Chart {
     getEarnedPoints() {
         return this.format + this.formatDiversity + this.compatibility
             + this.machineReadable + this.machineReadable;
-    }
-
-    // save chart into database
-    async persist() {
-        super.persist(dbNewInteroperabilityChart);
     }
 
     // sets all points to zero
@@ -95,44 +97,25 @@ module.exports = class InteroperabilityChart extends Chart {
         this.maxPointsLOD += other.maxPointsLOD;
     }
 
+    // save chart into database
+    async persist() {
+        super.persist(dbNewInteroperabilityChart);
+    }
+
     // fetch chart from database for given object id
     static async fetchChartByID(object_id) {
         let result = await dbGetInteroperability(object_id);
+        result.missingParams = new Set(result.missingParams.split(' '));
 
         let interChart = null;
         if (result) {
-            interChart = new InteroperabilityChart(
-                result.chart_id, result.object_id, result.missingParams, result.format,
-                result.formatDiversity, result.compatibility, result.machineReadable, result.linkedOpenData
-            );
+            interChart = new InteroperabilityChart(result);
             interChart.persisted = true;
         }
         return interChart;
     }
 
-    /*// update chart data
-    async updateChartData(missingParams, format, formatDiversity,
-        compatibility, machineReadable, linkedOpenData
-    ) {
-        try {
-            let rowCount = await dbUpdateChart(this.chart_id, missingParams,
-                format, formatDiversity, compatibility, machineReadable, linkedOpenData
-            );
-            if (rowCount == 0)
-                console.log('WARNING: Interoperability chart has not been updated!');
-            else {
-                this.missingParams = missingParams;
-                this.format = format;
-                this.formatDiversity = formatDiversity;
-                this.compatibility = compatibility;
-                this.machineReadable = machineReadable;
-                this.linkedOpenData = linkedOpenData;
-            }
-        } catch (err) {
-            console.log('ERROR: updating interoperability chart data: ' + JSON.stringify(this));
-            throw err;
-        }
-    } */
+    // update chart data
     async updateChartData() {
         super.updateChartData(dbUpdateInteroperability);
     }
@@ -183,13 +166,13 @@ module.exports = class InteroperabilityChart extends Chart {
     }
 };
 
-// inserting a new interoperability chart into database
-dbNewInteroperabilityChart = async (chart) => {
+// inserts a new interoperability chart into database
+var dbNewInteroperabilityChart = async (chart, missingParams) => {
     const sql = `INSERT INTO interoperability (object_id, missingParams, format,
         formatDiversity, compatibility, machineReadable, linkedOpenData)
-        VALUES ('$1', '$2', '$3', '$4', '$5', '$6', '$7');`;
+        VALUES ('$1', '$2', $3, $4, $5, $6, $7);`;
     const values = [
-        chart.object_id, chart.missingParams, chart.format, chart.formatDiversity,
+        chart.object_id, missingParams, chart.format, chart.formatDiversity,
         chart.compatibility, chart.machineReadable, chart.linkedOpenData
     ];
     try {
@@ -201,15 +184,15 @@ dbNewInteroperabilityChart = async (chart) => {
     }
 };
 
-// updating interoperability chart data in database
-dbUpdateInteroperability = async (chart) => {
+// updates interoperability chart data in database
+var dbUpdateInteroperability = async (chart, missingParams) => {
     const sql = `UPDATE interoperability
-                    SET missingParams = '${chart.missingParams}',
-                        format = '${chart.format}',
-                        formatDiversity = '${chart.formatDiversity}',
-                        compatibility = '${chart.compatibility}',
-                        machineReadable = '${chart.machineReadable}',
-                        linkedOpenData = '${chart.linkedOpenData}'
+                    SET missingParams = '${missingParams}',
+                        format = ${chart.format},
+                        formatDiversity = ${chart.formatDiversity},
+                        compatibility = ${chart.compatibility},
+                        machineReadable = ${chart.machineReadable},
+                        linkedOpenData = ${chart.linkedOpenData}
                     WHERE chart_id = '${chart.chart_id}';`;
     try {
         const result = await db.query(sql, []);
@@ -220,7 +203,8 @@ dbUpdateInteroperability = async (chart) => {
     }
 };
 
-dbGetInteroperability = async (object_id) => {
+// gets interoperability chart from database
+var dbGetInteroperability = async (object_id) => {
     const sql = `SELECT * FROM interoperability WHERE object_id = '${object_id}';`;
     try {
         const result = await db.query(sql, []);

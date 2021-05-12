@@ -10,11 +10,11 @@ module.exports = class AccessibilityChart extends Chart {
     static maxDownloadURL = 2;
 
     // constructor for AccessibilityChart
-    constructor(chart_id, object_id, missingParams, datasetAccessibility, urlAccessibility, downloadURL) {
-        super(chart_id, object_id, missingParams);
-        this.datasetAccessibility = datasetAccessibility;
-        this.urlAccessibility = urlAccessibility;
-        this.downloadURL = downloadURL;
+    constructor(data) {
+        super(data.chart_id, data.object_id, data.missingParams);
+        this.datasetAccessibility = data.datasetAccessibility;
+        this.urlAccessibility = data.urlAccessibility;
+        this.downloadURL = data.downloadURL;
 
         this.maxPointsDataset = 0;
         this.maxPointsUrl = 0;
@@ -23,7 +23,14 @@ module.exports = class AccessibilityChart extends Chart {
 
     // creates a new empty AccessibilityChart
     static createEmptyAccessibility(object_id) {
-        return new AccessibilityChart(undefined, object_id, new Set(), 0, 0, 0);
+        return new AccessibilityChart({
+            chart_id: undefined,
+            object_id: object_id,
+            missingParams: new Set(),
+            datasetAccessibility: 0,
+            urlAccessibility: 0,
+            downloadURL: 0
+        });
     }
 
     // gets maximum of points an object could have received
@@ -34,11 +41,6 @@ module.exports = class AccessibilityChart extends Chart {
     // gets number of points an object has earned
     getEarnedPoints() {
         return this.datasetAccessibility + this.urlAccessibility + this.downloadURL;
-    }
-
-    // save chart into database
-    async persist() {
-        super.persist(dbNewAccessibilityChart);
     }
 
     // sets all points to zero
@@ -77,37 +79,22 @@ module.exports = class AccessibilityChart extends Chart {
     // fetch chart from database for given object id
     static async fetchChartByID(object_id) {
         let result = await dbGetAccessibility(object_id);
+        result.missingParams = new Set(result.missingParams.split(' '));
 
         let accessChart = null;
         if (result) {
-            accessChart = new AccessibilityChart(
-                result.chart_id, result.object_id, result.missingParams,
-                result.datasetAccessibility, result.urlAccessibility, result.downloadURL
-            );
+            accessChart = new AccessibilityChart(result);
             accessChart.persisted = true;
         }
         return accessChart;
     }
 
-    /*// update chart data
-    async updateChartData(missingParams, datasetAccessibility, urlAccessibility, downloadURL) {
-        try {
-            let rowCount = await dbUpdateChart(this.chart_id,
-                missingParams, datasetAccessibility, urlAccessibility, downloadURL
-            );
-            if (rowCount == 0)
-                console.log('WARNING: Accessibility chart has not been updated!');
-            else {
-                this.missingParams = missingParams;
-                this.datasetAccessibility = datasetAccessibility;
-                this.urlAccessibility = urlAccessibility;
-                this.downloadURL = downloadURL;
-            }
-        } catch (err) {
-            console.log('ERROR: updating accessibility chart data: ' + JSON.stringify(this));
-            throw err;
-        }
-    }*/
+    // save chart into database
+    async persist() {
+        super.persist(dbNewAccessibilityChart);
+    }
+
+    // update chart data
     async updateChartData() {
         super.updateChartData(dbUpdateAccessibility);
     }
@@ -160,12 +147,12 @@ module.exports = class AccessibilityChart extends Chart {
     }
 };
 
-// inserting a new accessibility chart into database
-dbNewAccessibilityChart = async (chart) => {
+// inserts a new accessibility chart into database
+var dbNewAccessibilityChart = async (chart, missingParams) => {
     const sql = `INSERT INTO accessibility (object_id, missingParams, datasetAccessibility,
-        urlAccessibility, downloadURL) VALUES ('$1', '$2', '$3', '$4', '$5');`;
+        urlAccessibility, downloadURL) VALUES ('$1', '$2', $3, $4, $5);`;
     const values = [
-        chart.object_id, chart.missingParams, chart.datasetAccessibility,
+        chart.object_id, missingParams, chart.datasetAccessibility,
         chart.urlAccessibility, chart.downloadURL
     ];
     try {
@@ -177,13 +164,13 @@ dbNewAccessibilityChart = async (chart) => {
     }
 };
 
-// updating chart data in database
-dbUpdateAccessibility = async (chart) => {
+// updates accessibility chart data in database
+var dbUpdateAccessibility = async (chart, missingParams) => {
     const sql = `UPDATE accessibility
-                    SET missingParams = '${chart.missingParams}',
-                        datasetAccessibility = '${chart.datasetAccessibility}',
-                        urlAccessibility = '${chart.urlAccessibility}',
-                        downloadURL = '${chart.downloadURL}'
+                    SET missingParams = '${missingParams}',
+                        datasetAccessibility = ${chart.datasetAccessibility},
+                        urlAccessibility = ${chart.urlAccessibility},
+                        downloadURL = ${chart.downloadURL}
                     WHERE chart_id = '${chart.chart_id}';`;
     try {
         const result = await db.query(sql, []);
@@ -194,7 +181,8 @@ dbUpdateAccessibility = async (chart) => {
     }
 };
 
-dbGetAccessibility = async (object_id) => {
+// gets accessibility chart from database
+var dbGetAccessibility = async (object_id) => {
     const sql = `SELECT * FROM accessibility WHERE object_id = '${object_id}';`;
     try {
         const result = await db.query(sql, []);

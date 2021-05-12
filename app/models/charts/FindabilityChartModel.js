@@ -12,12 +12,12 @@ module.exports = class FindabilityChart extends Chart {
     static maxStateOrganization = 2;
 
     // constructor for FindabilityChart
-    constructor(chart_id, object_id, missingParams, identification, keywords, categories, state) {
-        super(chart_id, object_id, missingParams);
-        this.identification = identification;
-        this.keywords = keywords;
-        this.categories = categories;
-        this.state = state;
+    constructor(data) {
+        super(data.chart_id, data.object_id, data.missingParams);
+        this.identification = data.identification;
+        this.keywords = data.keywords;
+        this.categories = data.categories;
+        this.state = data.state;
 
         this.maxPointsID = 0;
         this.maxPointsKeywords = 0;
@@ -27,7 +27,15 @@ module.exports = class FindabilityChart extends Chart {
 
     // creates a new empty FindabilityChart
     static createEmptyFindability(object_id) {
-        return new FindabilityChart(undefined, object_id, new Set(), 0, 0, 0, 0);
+        return new FindabilityChart({
+            chart_id: undefined,
+            object_id: object_id,
+            missingParams: new Set(),
+            identification: 0,
+            keywords: 0,
+            categories: 0,
+            state: 0
+        });
     }
 
     // gets maximum of points an object could have received
@@ -38,11 +46,6 @@ module.exports = class FindabilityChart extends Chart {
     // gets number of points an object has earned
     getEarnedPoints() {
         return this.identification + this.keywords + this.categories + this.state;
-    }
-
-    // save chart into database
-    async persist() {
-        super.persist(dbNewFindabilityChart);
     }
 
     // sets all points to zero
@@ -87,38 +90,22 @@ module.exports = class FindabilityChart extends Chart {
     // fetch chart from database for given object id
     static async fetchChartByID(object_id) {
         let result = await dbGetFindability(object_id);
+        result.missingParams = new Set(result.missingParams.split(' '));
 
         let findChart = null;
         if (result) {
-            findChart = new FindabilityChart(
-                result.chart_id, result.object_id, result.missingParams,
-                result.identification, result.keywords, result.categories, result.state
-            );
+            findChart = new FindabilityChart(result);
             findChart.persisted = true;
         }
         return findChart;
     }
 
-    /*// update chart data
-    async updateChartData(missingParams, identification, keywords, categories, state) {
-        try {
-            let rowCount = await dbUpdateChart(this.chart_id,
-                missingParams, identification, keywords, categories, state
-            );
-            if (rowCount == 0)
-                console.log('WARNING: Findability chart has not been updated!');
-            else {
-                this.missingParams = missingParams;
-                this.identification = identification;
-                this.keywords = keywords;
-                this.categories = categories;
-                this.state = state;
-            }
-        } catch (err) {
-            console.log('ERROR: updating findability chart data: ' + JSON.stringify(this));
-            throw err;
-        }
-    } */
+    // save chart into database
+    async persist() {
+        super.persist(dbNewFindabilityChart);
+    }
+
+    // update chart data
     async updateChartData() {
         super.updateChartData(dbUpdateFindability);
     }
@@ -158,12 +145,12 @@ module.exports = class FindabilityChart extends Chart {
     }
 };
 
-// inserting a new findability chart into database
-dbNewFindabilityChart = async (chart) => {
+// inserts a new findability chart into database
+var dbNewFindabilityChart = async (chart, missingParams) => {
     const sql = `INSERT INTO findability (object_id, missingParams, identification,
-        keywords, categories, state) VALUES ('$1', '$2', '$3', '$4', '$5', '$6');`;
+                                keywords, categories, state) VALUES ('$1', '$2', $3, $4, $5, $6);`;
     const values = [
-        chart.object_id, chart.missingParams, chart.identification,
+        chart.object_id, missingParams, chart.identification,
         chart.keywords, chart.categories, chart.state,
     ];
     try {
@@ -175,14 +162,14 @@ dbNewFindabilityChart = async (chart) => {
     }
 };
 
-// updating findability chart data in database
-dbUpdateFindability = async (chart) => {
+// updates findability chart data in database
+var dbUpdateFindability = async (chart, missingParams) => {
     const sql = `UPDATE findability
-                    SET missingParams = '${chart.missingParams}',
-                        identification = '${chart.identification}',
-                        keywords = '${chart.keywords}',
-                        categories = '${chart.categories}',
-                        state = '${chart.state}'
+                    SET missingParams = '${missingParams}',
+                        identification = ${chart.identification},
+                        keywords = ${chart.keywords},
+                        categories = ${chart.categories},
+                        state = ${chart.state}
                     WHERE chart_id = '${chart.chart_id}';`;
     try {
         const result = await db.query(sql, []);
@@ -193,7 +180,8 @@ dbUpdateFindability = async (chart) => {
     }
 };
 
-dbGetFindability = async (object_id) => {
+// gets findability chart from database
+var dbGetFindability = async (object_id) => {
     const sql = `SELECT * FROM findability WHERE object_id = '${object_id}';`;
     try {
         const result = await db.query(sql, []);

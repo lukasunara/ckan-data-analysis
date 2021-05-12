@@ -10,29 +10,26 @@ const Resource = require('./ResourceModel');
 module.exports = class Dataset extends RateableObject {
 
     // constructor for Dataset
-    constructor(object_id, portal_id, organization_id, name, title, owner_org,
-        author, maintainer, private, state, description, metadataCreated, metadataModified,
-        numOfExtras, numOfGroups, numOfKeywords, licenseTitle, licenseURL, url
-    ) {
-        super(object_id);
-        this.portal_id = portal_id;
-        this.organization_id = organization_id;
-        this.name = name;
-        this.title = title;
-        this.owner_org = owner_org;
-        this.author = author;
-        this.maintainer = maintainer;
-        this.private = private;
-        this.state = state;
-        this.description = description;
-        this.metadataCreated = metadataCreated;
-        this.metadataModified = metadataModified;
-        this.numOfExtras = numOfExtras;
-        this.numOfGroups = numOfGroups;
-        this.numOfKeywords = numOfKeywords;
-        this.licenseTitle = licenseTitle;
-        this.licenseURL = licenseURL;
-        this.url = url;
+    constructor(data) {
+        super(data.object_id, data.changed);
+        this.portal_id = data.portal_id;
+        this.organization_id = data.organization_id;
+        this.name = data.name;
+        this.title = data.title;
+        this.ownerOrg = data.ownerOrg;
+        this.author = data.author;
+        this.maintainer = data.maintainer;
+        this.private = data.private;
+        this.state = data.state;
+        this.description = data.description;
+        this.metadataCreated = data.metadataCreated;
+        this.metadataModified = data.metadataModified;
+        this.numOfExtras = data.numOfExtras;
+        this.numOfGroups = data.numOfGroups;
+        this.numOfKeywords = data.numOfKeywords;
+        this.licenseTitle = data.licenseTitle;
+        this.licenseURL = data.licenseURL;
+        this.url = data.url;
     }
 
     // save dataset into database
@@ -40,43 +37,16 @@ module.exports = class Dataset extends RateableObject {
         super.persist(dbNewDataset);
     }
 
-    // update dataset data
-    async updateDatasetData(metadataModified, numOfExtras, numOfGroups,
-        numOfKeywords, licenseTitle, licenseURL, url
-    ) {
-        try {
-            let rowCount = await dbUpdateDataset(this.object_id, this.portal_id,
-                this.organization_id, metadataModified, numOfExtras, numOfGroups,
-                numOfKeywords, licenseTitle, licenseURL, url
-            );
-            if (rowCount == 0)
-                console.log('WARNING: Dataset has not been updated!');
-            else {
-                this.metadataModified = metadataModified;
-                this.numOfExtras = numOfExtras;
-                this.numOfGroups = numOfGroups;
-                this.numOfKeywords = numOfKeywords;
-                this.licenseTitle = licenseTitle;
-                this.licenseURL = licenseURL;
-                this.url = url;
-            }
-        } catch (err) {
-            console.log('ERROR: updating dataset data: ' + JSON.stringify(this));
-            throw err;
-        }
+    // update dataset data in database
+    async update() {
+        super.update(dbUpdateDataset);
     }
 
     // fetch dataset by id
     static async fetchDatasetById(dataset_id, portal_id) {
         let result = await dbGetDataset(dataset_id, portal_id);
-
         if (result) {
-            return new Dataset(result.object_id, result.portal_id, result.organization_id,
-                result.name, result.title, result.owner_org, result.author, result.maintainer,
-                result.private, result.state, result.description, result.metadataCreated,
-                result.metadataModified, result.numOfExtras, result.numOfGroups,
-                result.numOfKeywords, result.licenseTitle, result.licenseURL, result.url
-            );
+            return new Dataset(result);
         }
         return null;
     }
@@ -86,20 +56,17 @@ module.exports = class Dataset extends RateableObject {
         let results = await dbGetResources(this.object_id);
         let resources = [];
 
-        for (let result of results) {
-            let newResource = new Resource(result.object_id, this.object_id,
-                result.revisionId, result.name, result.size, result.format, result.mediaType,
-                result.state, result.description, result.created, result.lastModified, result.url
-            );
+        for (let resource of results) {
+            let newResource = new Resource(resource);
             resources.push(newResource);
         }
         return resources;
     }
 
     // analyses this dataset
-    async analyseDataset(changedMetadata) {
+    async analyseDataset() {
         let result = new AnalysisResult(this.object_id);
-        if (changedMetadata) {
+        if (this.changed) {
             result.reset();
             // 1. findability
             // 1.1. identification + from resources
@@ -147,7 +114,7 @@ module.exports = class Dataset extends RateableObject {
             // 4.4. publisher
             result.reuseChart.checkPublisher(checkParam, 'author', this.author);
             result.reuseChart.checkPublisher(checkParam, 'maintainer', this.maintainer);
-            result.reuseChart.checkPublisher(checkParam, 'owmner_org', this.owner_org);
+            result.reuseChart.checkPublisher(checkParam, 'owmner_org', this.ownerOrg);
             result.reuseChart.maxPointsPublisher += ReusabilityChart.maxPublisher;
 
             // 5. contextuality
@@ -160,26 +127,26 @@ module.exports = class Dataset extends RateableObject {
             // 5.5. modification date + from resources
             result.contextChart.checkLastModified(this.metadataModified);
             result.contextChart.maxPointsModified += ContextualityChart.maxModificationDate;
-
-            for (let resource of fetchResources()) {
-                resource.analyseResource(true);
-                result.add(resource.result);
-            }
         }
+        for (let resource of fetchResources()) {
+            resource.analyseResource();
+            result.add(resource.result);
+        }
+        await result.updateDataInDB();
         this.result = result;
     }
 };
 
-// inserting a new dataset into database
-dbNewDataset = async (dataset) => {
-    const sql = `INSERT INTO dataset (object_id, portal_id, organization_id,
-        name, title, owner_org, author, maintainer, private, state, description, metadataCreated,
+// inserts a new dataset into database
+var dbNewDataset = async (dataset) => {
+    const sql = `INSERT INTO dataset (object_id, changed, portal_id, organization_id,
+        name, title, ownerOrg, author, maintainer, private, state, description, metadataCreated,
         metadataModified, numOfExtras, numOfGroups, numOfKeywords, licenseTitle,
-        licenseURL, url) VALUES ('$1', '$2', '$3', '$4', '$5', '$6', '$7', '$8', '$9',
-        '$10', '$11', '$12', '$13', '$14', '$15', '$16', '$17', '$18', '$19');`;
+        licenseURL, url) VALUES ('$1', $2, '$3', '$4', '$5', '$6', '$7', '$8', '$9',
+        $10, '$11', '$12', $13, $14, $15, $16, $17, '$18', '$19', '$20');`;
     const values = [
-        dataset.object_id, dataset.portal_id, dataset.organization_id,
-        dataset.name, dataset.title, dataset.owner_org, dataset.author, dataset.maintainer,
+        dataset.object_id, dataset.changed, dataset.portal_id, dataset.organization_id,
+        dataset.name, dataset.title, dataset.ownerOrg, dataset.author, dataset.maintainer,
         dataset.private, dataset.state, dataset.description, dataset.metadataCreated,
         dataset.metadataModified, dataset.numOfExtras, dataset.numOfGroups,
         dataset.numOfKeywords, dataset.licenseTitle, dataset.licenseURL, dataset.url
@@ -193,23 +160,26 @@ dbNewDataset = async (dataset) => {
     }
 };
 
-// updating dataset data in database
-dbUpdateDataset = async (dataset_id, portal_id, organization_id, metadataModified,
-    numOfExtras, numOfGroups, numOfKeywords, licenseTitle, licenseURL, url
-) => {
+// updates dataset data in database
+var dbUpdateDataset = async (dataset) => {
     const sql = `UPDATE dataset
-                    SET metadataModified = '${metadataModified}',
-                        numOfExtras = '${numOfExtras}',
-                        numOfGroups = '${numOfGroups}',
-                        numOfKeywords = '${numOfKeywords}',
-                        licenseTitle = '${licenseTitle}',
-                        licenseURL = '${licenseURL}',
-                        url = '${url}'
-                    WHERE object_id = '${dataset_id}'
-                        AND portal_id = '${portal_id}'
-                        AND organization_id = '${organization_id}';`;
+                    SET changed = $2, name = '$5', title = '$6', ownerOrg = '$7', author = '$8',
+                        maintainer = '$9', private = $10, state = '$11', description = '$12',
+                        metadataCreated = $13, metadataModified = $14, numOfExtras = $15,
+                        numOfGroups = $16, numOfKeywords = $17, licenseTitle = '$18',
+                        licenseURL = '$19', url = '$20'
+                    WHERE object_id = '$1'
+                        AND portal_id = '$3'
+                        AND organization_id = '$4';`;
+    const values = [
+        dataset.object_id, dataset.changed, dataset.portal_id, dataset.organization_id,
+        dataset.name, dataset.title, dataset.ownerOrg, dataset.author, dataset.maintainer,
+        dataset.private, dataset.state, dataset.description, dataset.metadataCreated,
+        dataset.metadataModified, dataset.numOfExtras, dataset.numOfGroups,
+        dataset.numOfKeywords, dataset.licenseTitle, dataset.licenseURL, dataset.url
+    ];
     try {
-        const result = await db.query(sql, []);
+        const result = await db.query(sql, values);
         return result.rowCount;
     } catch (err) {
         console.log(err);
@@ -217,9 +187,10 @@ dbUpdateDataset = async (dataset_id, portal_id, organization_id, metadataModifie
     }
 };
 
-// gets dataset from database by its' id
-dbGetDataset = async (dataset_id, portal_id) => {
-    const sql = `SELECT * FROM dataset WHERE object_id = '${dataset_id}' AND portal_id = '${portal_id}';`;
+// gets dataset from database (by its' id)
+var dbGetDataset = async (dataset_id, portal_id) => {
+    const sql = `SELECT * FROM dataset
+                    WHERE object_id = '${dataset_id}' AND portal_id = '${portal_id}';`;
     try {
         const result = await db.query(sql, []);
         return result.rows[0];
@@ -230,7 +201,7 @@ dbGetDataset = async (dataset_id, portal_id) => {
 }
 
 // gets all resources for this dataset
-dbGetResources = async (dataset_id) => {
+var dbGetResources = async (dataset_id) => {
     const sql = `SELECT * FROM resources WHERE dataset_id = ${dataset_id};`;
     try {
         const result = await db.query(sql, []);

@@ -8,20 +8,18 @@ const RateableObject = require('./RateableObjectModel');
 module.exports = class Organization extends RateableObject {
 
     // constructor for Organization
-    constructor(object_id, portal_id, name, title, description, state,
-        approvalStatus, numOfExtras, numOfMembers, dateCreated, imageDisplayURL
-    ) {
-        super(object_id);
-        this.portal_id = portal_id;
-        this.name = name;
-        this.title = title;
-        this.description = description;
-        this.state = state;
-        this.approvalStatus = approvalStatus;
-        this.numOfExtras = numOfExtras;
-        this.numOfMembers = numOfMembers;
-        this.dateCreated = dateCreated;
-        this.imageDisplayURL = imageDisplayURL;
+    constructor(data) {
+        super(data.object_id, data.changed);
+        this.portal_id = data.portal_id;
+        this.name = data.name;
+        this.title = data.title;
+        this.description = data.description;
+        this.state = data.state;
+        this.approvalStatus = data.approvalStatus;
+        this.numOfExtras = data.numOfExtras;
+        this.numOfMembers = data.numOfMembers;
+        this.dateCreated = data.dateCreated;
+        this.imageDisplayURL = data.imageDisplayURL;
     }
 
     // save organization into database
@@ -29,33 +27,16 @@ module.exports = class Organization extends RateableObject {
         super.persist(dbNewOrganization);
     }
 
-    // update numOfExtras
-    async updateNumOfExtras(numOfExtras, imageDisplayURL) {
-        try {
-            let rowCount = await dbUpdateOrganization(this.object_id,
-                this.portal_id, numOfExtras, imageDisplayURL
-            );
-            if (rowCount == 0)
-                console.log('WARNING: Organization has not been updated!');
-            else {
-                this.numOfExtras = numOfExtras;
-                this.imageDisplayURL = imageDisplayURL;
-            }
-        } catch (err) {
-            console.log('ERROR: updating organization data: ' + JSON.stringify(this));
-            throw err;
-        }
+    // update organization data in database
+    async update() {
+        super.update(dbUpdateOrganization);
     }
 
     // fetch organization by id
     static async fetchOrganizationById(organization_id, portal_id) {
         let result = await dbGetOrganization(organization_id, portal_id);
-
         if (result) {
-            return new Organization(result.object_id, result.portal_id, result.name, result.title,
-                result.description, result.state, result.approvalStatus, result.numOfExtras,
-                result.numOfMembers, result.dateCreated, result.imageDisplayURL
-            );
+            return new Organization(result);
         }
         return null;
     }
@@ -66,21 +47,16 @@ module.exports = class Organization extends RateableObject {
         let datasets = [];
 
         for (let dataset of results) {
-            let newDataset = new Dataset(dataset.object_id, dataset.portal_id, this.object_id,
-                dataset.name, dataset.title, dataset.owner_org, dataset.author, dataset.maintainer,
-                dataset.private, dataset.state, dataset.description, dataset.metadataCreated,
-                dataset.metadataModified, dataset.numOfExtras, dataset.numOfGroups, dataset.numOfKeywords,
-                dataset.licenseTitle, dataset.licenseURL, dataset.url
-            );
+            let newDataset = new Dataset(dataset);
             datasets.push(newDataset);
         }
         return datasets;
     }
 
     // analyse this organization
-    async analyseOrganization(changedMetadata) {
+    async analyseOrganization() {
         let result = new AnalysisResult(this.object_id);
-        if (changedMetadata) {
+        if (this.changed) {
             result.reset();
             // 1. findability
             // 1.1. identification + from datasets
@@ -121,24 +97,24 @@ module.exports = class Organization extends RateableObject {
             // 4.4. publisher (only from datasets)
 
             // 5. contextuality (only from dataasets)
-
-            for (let dataset of fetchDatasets()) {
-                dataset.analyseDataset(true);
-                result.add(dataset.result);
-            }
         }
+        for (let dataset of fetchDatasets()) {
+            dataset.analyseDataset();
+            result.add(dataset.result);
+        }
+        await result.updateDataInDB();
         this.result = result;
     }
 };
 
-// inserting a new organization into database
-dbNewOrganization = async (org) => {
-    const sql = `INSERT INTO organization (object_id, portal_id, name, title,
-                description, state, approvalStatus, numOfExtras, numOfMembers,
-                dateCreated, imageDisplayURL) VALUES ('$1', '$2', '$3', '$4',
-                '$5', '$6', '$7', '$8', '$9', '$10', '$11');`;
+// inserts a new organization into database
+var dbNewOrganization = async (org) => {
+    const sql = `INSERT INTO organization (object_id, changed, portal_id, name,
+                title, description, state, approvalStatus, numOfExtras, numOfMembers,
+                dateCreated, imageDisplayURL) VALUES ('$1', $2, '$3', '$4',
+                '$5', '$6', '$7', '$8', $9, $10, $11, '$12');`;
     const values = [
-        org.object_id, org.portal_id, org.name, org.title, org.description, org.state,
+        org.object_id, org.changed, org.portal_id, org.name, org.title, org.description, org.state,
         org.approvalStatus, org.numOfExtras, org.numOfMembers, org.dateCreated, org.imageDisplayURL
     ];
     try {
@@ -150,15 +126,20 @@ dbNewOrganization = async (org) => {
     }
 };
 
-// updating numOfExtras of organization
-dbUpdateOrganization = async (organization_id, portal_id, numOfExtras, imageDisplayURL) => {
+// updates organization data in database
+var dbUpdateOrganization = async (org) => {
     const sql = `UPDATE organization
-                    SET numOfExtras = '${numOfExtras}',
-                        imageDisplayURL = '${imageDisplayURL}'
-                    WHERE object_id = '${organization_id}'
-                        AND portal_id = '${portal_id}';`;
+                    SET changed = $2, name = '$4', title = '$5', description = '$6',
+                        state = '$7', approvalStatus = '$8', numOfExtras = $9,
+                        numOfMembers = $10, dateCreated = $11, imageDisplayURL = '$12'
+                    WHERE object_id = '$1'
+                        AND portal_id = '$3';`;
+    const values = [
+        org.object_id, org.changed, org.portal_id, org.name, org.title, org.description, org.state,
+        org.approvalStatus, org.numOfExtras, org.numOfMembers, org.dateCreated, org.imageDisplayURL
+    ];
     try {
-        const result = await db.query(sql, []);
+        const result = await db.query(sql, values);
         return result.rowCount;
     } catch (err) {
         console.log(err);
@@ -166,9 +147,10 @@ dbUpdateOrganization = async (organization_id, portal_id, numOfExtras, imageDisp
     }
 };
 
-// gets organization from database by its' id
-dbGetOrganization = async (organization_id, portal_id) => {
-    const sql = `SELECT * FROM organization WHERE object_id = '${organization_id}' AND portal_id = '${portal_id}';`;
+// gets organization from database (by its' id)
+var dbGetOrganization = async (organization_id, portal_id) => {
+    const sql = `SELECT * FROM organization
+                    WHERE object_id = '${organization_id}' AND portal_id = '${portal_id}';`;
     try {
         const result = await db.query(sql, []);
         return result.rows[0];
@@ -178,10 +160,10 @@ dbGetOrganization = async (organization_id, portal_id) => {
     }
 }
 
-// gets all datasets for this organization
-dbGetDatasets = async (organization_id, portal_id) => {
-    const sql = `SELECT * FROM datasets WHERE organization_id = '${organization_id}'
-                    AND portal_id = '${portal_id}';`;
+// gets all datasets from database for this organization
+var dbGetDatasets = async (organization_id, portal_id) => {
+    const sql = `SELECT * FROM datasets
+                    WHERE organization_id = '${organization_id}' AND portal_id = '${portal_id}';`;
     try {
         const result = await db.query(sql, []);
         return result.rows;

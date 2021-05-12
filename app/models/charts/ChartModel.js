@@ -22,8 +22,9 @@ module.exports = class Chart {
 
     // save chart into database
     async persist(dbNewFunction) {
+        let missing = this.missingParamsToString();
         try {
-            let rowCount = await dbNewFunction(this);
+            let rowCount = await dbNewFunction(this, missing);
             if (rowCount == 0)
                 console.log('WARNING: Chart has not been persisted!');
             else
@@ -48,8 +49,9 @@ module.exports = class Chart {
 
     // update chart data
     async updateChartData(dbUpdateChartMethod) {
+        let missing = this.missingParamsToString();
         try {
-            let rowCount = await dbUpdateChartMethod(this);
+            let rowCount = await dbUpdateChartMethod(this, missing);
             if (rowCount == 0)
                 console.log('WARNING: chart has not been updated!');
         } catch (err) {
@@ -72,10 +74,21 @@ module.exports = class Chart {
         }
         return param;
     }
+
+    // toString() method for missing parameters
+    missingParamsToString() {
+        let size = 0;
+        let string = '';
+        for (let param of this.missingParams) {
+            string += param;
+            if (++size !== this.missingParams.size) string += ' ';
+        }
+        return string;
+    }
 };
 
 // delete a chart from database
-dbDeleteChart = async (chart) => {
+var dbDeleteChart = async (chart) => {
     const sql = `DELETE FROM chart WHERE chart_id = '${chart.chart_id}';`;
     try {
         const result = await db.query(sql, []);

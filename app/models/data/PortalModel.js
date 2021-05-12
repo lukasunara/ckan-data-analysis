@@ -8,15 +8,15 @@ const RateableObject = require('./RateableObjectModel');
 module.exports = class Portal extends RateableObject {
 
     // constructor for Portal
-    constructor(object_id, name, title, description, numOfVocabularies, numOfExtensions, dcatOrRdf, url) {
-        super(object_id);
-        this.name = name;
-        this.title = title;
-        this.description = description;
-        this.numOfVocabularies = numOfVocabularies;
-        this.numOfExtensions = numOfExtensions;
-        this.dcatOrRdf = dcatOrRdf;
-        this.url = url;
+    constructor(data) {
+        super(data.object_id, data.changed);
+        this.name = data.name;
+        this.title = data.title;
+        this.description = data.description;
+        this.numOfVocabularies = data.numOfVocabularies;
+        this.numOfExtensions = data.numOfExtensions;
+        this.dcatOrRdf = data.dcatOrRdf;
+        this.url = data.url;
     }
 
     // save portal into database
@@ -24,31 +24,16 @@ module.exports = class Portal extends RateableObject {
         super.persist(dbNewPortal);
     }
 
-    // update portal name
-    async updatePortalName(name, title, description, numOfVocabularies, numOfExtensions, dcatOrRdf, url) {
-        try {
-            let rowCount = await dbUpdatePortalName(this.object_id, name, title, description,
-                numOfVocabularies, numOfExtensions, dcatOrRdf, url
-            );
-            if (rowCount == 0)
-                console.log('WARNING: Portal has not been updated!');
-            else
-                this.name = name;
-        } catch (err) {
-            console.log('ERROR: updating portal data: ' + JSON.stringify(this));
-            throw err;
-        }
+    // update portal data in database
+    async update() {
+        super.update(dbUpdatePortal);
     }
 
     // fetch portal by name
     static async fetchPortalByName(name) {
         let result = await dbGetPortal(name);
-
         if (result) {
-            return new Portal(result.object_id, result.name,
-                result.title, result.description, result.numOfVocabularies,
-                result.numOfExtensions, result.dcatOrRdf, result.url
-            );
+            return new Portal(result);
         }
         return null;
     }
@@ -59,20 +44,16 @@ module.exports = class Portal extends RateableObject {
         let organizations = [];
 
         for (let organization of results) {
-            let newOrganization = new Organization(organization.object_id,
-                organization.object_id, organization.name, organization.title, organization.state,
-                organization.approvalStatus, organization.packages, organization.numOfExtras,
-                organization.numOfMembers, organization.dataCreated, organization.imageDisplayURL
-            );
+            let newOrganization = new Organization(organization);
             organizations.push(newOrganization);
         }
         return organizations;
     }
 
     // analyse this portal
-    async analysePortal(changedMetadata) {
+    async analysePortal() {
         let result = new AnalysisResult(this.object_id);
-        if (changedMetadata) {
+        if (this.changed) {
             // 1. findability
             // 1.1. identification + from organizations
             result.findChart.checkIdentification(checkParam, 'name', this.name);
@@ -108,22 +89,24 @@ module.exports = class Portal extends RateableObject {
             // 4.4. publisher (only from organizations)
 
             // 5. contextuality (only from organizations)
-
-            for (let organization of fetchOrganizations()) {
-                organization.analyseOrganization(true);
-                result.add(organization.result);
-            }
         }
+        for (let organization of fetchOrganizations()) {
+            organization.analyseOrganization();
+            result.add(organization.result);
+        }
+        await result.updateDataInDB();
         this.result = result;
     }
 };
 
-// inserting a new portal into database
-dbNewPortal = async (portal) => {
-    const sql = `INSERT INTO portal (object_id, name, title, description, url)
-                    VALUES ('$1', '$2', '$3', '$4', '$5');`;
+// inserts a new portal into database
+var dbNewPortal = async (portal) => {
+    const sql = `INSERT INTO portal (object_id, changed, name, title, description,
+                        numOfVocabularies, numOfExtensions, dcatOrRdf, url)
+                    VALUES ('$1', $2, '$3', '$4', '$5', $6, $7, $8, '$9');`;
     const values = [
-        portal.object_id, portal.name, portal.title, portal.description, portal.url
+        portal.object_id, portal.changed, portal.name, portal.title, portal.description,
+        portal.numOfVocabularies, portal.numOfExtensions, portal.dcatOrRdf, portal.url
     ];
     try {
         const result = await db.query(sql, values);
@@ -134,16 +117,18 @@ dbNewPortal = async (portal) => {
     }
 };
 
-// updating portalName of a portal
-dbUpdatePortalName = async (portal_id, name, title, description, url) => {
+// updates portal data in database
+var dbUpdatePortal = async (portal) => {
     const sql = `UPDATE portal
-                    SET name = '${name}',
-                        title = '${title}',
-                        description = '${description}',
-                        url = '${url}'
-                    WHERE object_id = '${portal_id}';`;
+                    SET changed = $2, name = '$3', title = '$4', description = '$5',
+                        numOfVocabularies = $6, numOfExtensions = $7, dcatOrRdf = $8, url = '$9'
+                    WHERE object_id = '$1';`;
+    const values = [
+        portal.object_id, portal.changed, portal.name, portal.title, portal.description,
+        portal.numOfVocabularies, portal.numOfExtensions, portal.dcatOrRdf, portal.url
+    ];
     try {
-        const result = await db.query(sql, []);
+        const result = await db.query(sql, values);
         return result.rowCount;
     } catch (err) {
         console.log(err);
@@ -151,8 +136,8 @@ dbUpdatePortalName = async (portal_id, name, title, description, url) => {
     }
 };
 
-// gets portal from database by its' name
-dbGetPortal = async (name) => {
+// gets portal from database (by its' unique name)
+var dbGetPortal = async (name) => {
     const sql = `SELECT * FROM portal WHERE name = '${name}';`;
     try {
         const result = await db.query(sql, []);
@@ -163,8 +148,8 @@ dbGetPortal = async (name) => {
     }
 }
 
-// gets all organizations used on this portal
-dbGetOrganizations = async (portal_id) => {
+// gets all organizations which are contributing to this portal
+var dbGetOrganizations = async (portal_id) => {
     const sql = `SELECT * FROM organization WHERE portal_id = '${portal_id}';`;
     try {
         const result = await db.query(sql, []);

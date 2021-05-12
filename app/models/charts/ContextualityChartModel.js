@@ -1,6 +1,5 @@
 const db = require('../../db');
 const Chart = require('./ChartModel');
-const { parseExcelFile, parseJSONFile } = require('../../public/scripts/excelParsing.js');
 
 // class ContextualityChart encapsulates an contextuality chart
 module.exports = class ContextualityChart extends Chart {
@@ -12,15 +11,13 @@ module.exports = class ContextualityChart extends Chart {
     static maxModificationDate = 2;
 
     // constructor for ContextualityChart
-    constructor(chart_id, object_id, missingParams, numOfResources,
-        fileSize, emptyData, dateOfIssue, modificationDate
-    ) {
-        super(chart_id, object_id, missingParams);
-        this.numOfResources = numOfResources;
-        this.fileSize = fileSize;
-        this.emptyData = emptyData;
-        this.dateOfIssue = dateOfIssue;
-        this.modificationDate = modificationDate;
+    constructor(data) {
+        super(data.chart_id, data.object_id, data.missingParams);
+        this.numOfResources = data.numOfResources;
+        this.fileSize = data.fileSize;
+        this.emptyData = data.emptyData;
+        this.dateOfIssue = data.dateOfIssue;
+        this.modificationDate = data.modificationDate;
 
         this.maxPointsResources = 0;
         this.maxPointsFSize = 0;
@@ -31,7 +28,16 @@ module.exports = class ContextualityChart extends Chart {
 
     // creates a new empty ContextualityChart
     static createEmptyContextuality(object_id) {
-        return new ContextualityChart(undefined, object_id, new Set(), 0, 0, 0, 0, 0);
+        return new ContextualityChart({
+            chart_id: undefined,
+            object_id: object_id,
+            missingParams: new Set(),
+            numOfResources: 0,
+            fileSize: 0,
+            emptyData: 0,
+            dateOfIssue: 0,
+            modificationDate: 0
+        });
     }
 
     // gets maximum of points an object could have received
@@ -43,11 +49,6 @@ module.exports = class ContextualityChart extends Chart {
     // gets number of points an object has earned
     getEarnedPoints() {
         return this.numOfResources + this.fileSize + this.emptyData + this.dateOfIssue + this.modificationDate;
-    }
-
-    // save chart into database
-    async persist() {
-        super.persist(dbNewContextualityChart);
     }
 
     // sets all points to zero
@@ -95,42 +96,25 @@ module.exports = class ContextualityChart extends Chart {
         this.maxPointsModified += other.maxPointsModified;
     }
 
+    // save chart into database
+    async persist() {
+        super.persist(dbNewContextualityChart);
+    }
+
     // fetch chart from database for given object id
     static async fetchChartByID(object_id) {
         let result = await dbGetContextuality(object_id);
+        result.missingParams = new Set(result.missingParams.split(' '));
 
         let contextChart = null;
         if (result) {
-            contextChart = new ContextualityChart(
-                result.chart_id, result.object_id, result.missingParams, result.numOfResources,
-                result.fileSize, result.emptyData, result.dateOfIssue, result.modificationDate
-            );
+            contextChart = new ContextualityChart(result);
             contextChart.persisted = true;
         }
         return contextChart;
     }
 
-    /*// update chart data
-    async updateChartData(missingParams, numOfResources, fileSize, emptyData, dateOfIssue, modificationDate) {
-        try {
-            let rowCount = await dbUpdateChart(this.chart_id, missingParams,
-                numOfResources, fileSize, emptyData, dateOfIssue, modificationDate
-            );
-            if (rowCount == 0)
-                console.log('WARNING: contextuality chart has not been updated!');
-            else {
-                this.missingParams = missingParams;
-                this.numOfResources = numOfResources;
-                this.fileSize = fileSize;
-                this.emptyData = emptyData;
-                this.dateOfIssue = dateOfIssue;
-                this.modificationDate = modificationDate;
-            }
-        } catch (err) {
-            console.log('ERROR: updating contextuality chart data: ' + JSON.stringify(this));
-            throw err;
-        }
-    }*/
+    // update chart data  
     async updateChartData() {
         super.updateChartData(dbUpdateContextuality);
     }
@@ -201,14 +185,13 @@ module.exports = class ContextualityChart extends Chart {
     }
 };
 
-// inserting a new contextuality chart into database
-dbNewContextualityChart = async (chart) => {
+// inserts a new contextuality chart into database
+var dbNewContextualityChart = async (chart, missingParams) => {
     const sql = `INSERT INTO contextuality (object_id, missingParams, numOfResources,
-        fileSize, emptyData, dateOfIssue, modificationDate) VALUES ('$1', '$2', '$3',
-        '$4', '$5', '$6', '$7');`;
+        fileSize, emptyData, dateOfIssue, modificationDate) VALUES ('$1', '$2', $3, $4, $5, $6, $7);`;
     const values = [
-        chart.object_id, chart.missingParams, chart.numOfResources,
-        chart.fileSize, chart.emptyData, chart.dateOfIssue, chart.modificationDate
+        chart.object_id, missingParams, chart.numOfResources, chart.fileSize,
+        chart.emptyData, chart.dateOfIssue, chart.modificationDate
     ];
     try {
         const result = await db.query(sql, values);
@@ -219,15 +202,15 @@ dbNewContextualityChart = async (chart) => {
     }
 };
 
-// updating contextuality chart data in database
-dbUpdateContextuality = async (chart) => {
+// updates contextuality chart data in database
+var dbUpdateContextuality = async (chart, missingParams) => {
     const sql = `UPDATE contextuality
-                    SET missingParams = '${chart.missingParams}',
-                        numOfResources = '${chart.numOfResources}',
-                        fileSize = '${chart.fileSize}',
-                        emptyData = '${chart.emptyData}',
-                        dateOfIssue = '${chart.dateOfIssue}',
-                        modificationDate = '${chart.modificationDate}'
+                    SET missingParams = '${missingParams}',
+                        numOfResources = ${chart.numOfResources},
+                        fileSize = ${chart.fileSize},
+                        emptyData = ${chart.emptyData},
+                        dateOfIssue = ${chart.dateOfIssue},
+                        modificationDate = ${chart.modificationDate}
                     WHERE chart_id = '${chart.chart_id}';`;
     try {
         const result = await db.query(sql, []);
@@ -238,7 +221,8 @@ dbUpdateContextuality = async (chart) => {
     }
 };
 
-dbGetContextuality = async (object_id) => {
+// gets contextuality chart from database
+var dbGetContextuality = async (object_id) => {
     const sql = `SELECT * FROM contextuality WHERE object_id = '${object_id}';`;
     try {
         const result = await db.query(sql, []);

@@ -11,21 +11,19 @@ const ContextualityChart = require('../charts/ContextualityChartModel');
 module.exports = class Resource extends RateableObject {
 
     // constructor for Resource
-    constructor(object_id, dataset_id, revisionId, name, size, format, mediaType,
-        state, description, created, lastModified, url
-    ) {
-        super(object_id);
-        this.dataset_id = dataset_id;
-        this.revisionId = revisionId;
-        this.name = name;
-        this.size = size;
-        this.format = format;
-        this.mediaType = mediaType;
-        this.state = state;
-        this.description = description;
-        this.created = created;
-        this.lastModified = lastModified;
-        this.url = url;
+    constructor(data) {
+        super(data.object_id, data.changed);
+        this.dataset_id = data.dataset_id;
+        this.revisionId = data.revisionId;
+        this.name = data.name;
+        this.size = data.size;
+        this.format = data.format;
+        this.mediaType = data.mediaType;
+        this.state = data.state;
+        this.description = data.description;
+        this.created = data.created;
+        this.lastModified = data.lastModified;
+        this.url = data.url;
     }
 
     // save resource into database
@@ -33,44 +31,24 @@ module.exports = class Resource extends RateableObject {
         super.persist(dbNewResource);
     }
 
-    // update numOfExtras
-    async updateResourceData(lastModified, size, format, mediaType, url) {
-        try {
-            let rowCount = await dbUpdateResource(
-                this.object_id, lastModified, size, format, mediaType, url
-            );
-            if (rowCount == 0)
-                console.log('WARNING: Resource has not been updated!');
-            else {
-                this.lastModified = lastModified;
-                this.size = size;
-                this.format = format;
-                this.mediaType = mediaType;
-                this.url = url;
-            }
-        } catch (err) {
-            console.log('ERROR: updating resource data: ' + JSON.stringify(this));
-            throw err;
-        }
+    // update resource in database
+    async update() {
+        super.update(dbUpdateResource);
     }
 
     // fetch resource by id
     static async fetchResourceById(resource_id) {
         let result = await dbGetResource(resource_id);
-
         if (result) {
-            return new Resource(result.object_id, result.dataset_id, result.revisionId,
-                result.name, result.size, result.format, result.mediaType, result.state,
-                result.description, result.created, result.lastModified, result.url
-            );
+            return new Resource(result);
         }
         return null;
     }
 
     // analyses resource
-    async analyseResource(changedMetadata) {
+    async analyseResource() {
         let result = new AnalysisResult(this.object_id);
-        if (changedMetadata) {
+        if (this.changed) {
             result.reset();
             // 1. findability
             // 1.1. identification
@@ -134,14 +112,14 @@ module.exports = class Resource extends RateableObject {
     }
 };
 
-// inserting a new resource into database
-dbNewResource = async (resource) => {
-    const sql = `INSERT INTO resource (object_id, dataset_id, revisionId, name,
+// inserts a new resource into database
+var dbNewResource = async (resource) => {
+    const sql = `INSERT INTO resource (object_id, changed, dataset_id, revisionId, name,
         size, format, mediaType, state, description, created, lastModified, url)
-        VALUES ('$1', '$2', '$3', '$4', '$5', '$6', '$7', '$8', '$9', '$10', '$11', '$12');`;
+        VALUES ('$1', $2, '$3', '$4', '$5', $6, '$7', '$8', '$9', '$10', $11, $12, '$13');`;
     const values = [
-        resource.object_id, resource.dataset_id, resource.revisionId, resource.name,
-        resource.size, resource.format, resource.mediaType, resource.state,
+        resource.object_id, resource.changed, resource.dataset_id, resource.revisionId,
+        resource.name, resource.size, resource.format, resource.mediaType, resource.state,
         resource.description, resource.created, resource.lastModified, resource.url
     ];
     try {
@@ -153,15 +131,18 @@ dbNewResource = async (resource) => {
     }
 };
 
-// updating resource data in database
-dbUpdateResource = async (resource_id, lastModified, size, format, mediaType, url) => {
+// updates resource data in database
+var dbUpdateResource = async (resource) => {
     const sql = `UPDATE resource
-                    SET lastModified = '${lastModified}',
-                        size = '${size}',
-                        format = '${format}',
-                        mediaType = '${mediaType}',
-                        url = '${url}'
-                    WHERE object_id = '${resource_id}';`;
+                    SET changed = $2, revisionId = '$3', name = '$4', size = $5, format = '$6',
+                        mediaType = '$7', state = '$8', description = '$9', created = $10,
+                        lastModified = $11, url = '$12'
+                    WHERE object_id = '$1';`;
+    const values = [
+        resource.object_id, resource.changed, resource.revisionId, resource.name,
+        resource.size, resource.format, resource.mediaType, resource.state,
+        resource.description, resource.created, resource.lastModified, resource.url
+    ];
     try {
         const result = await db.query(sql, []);
         return result.rowCount;
@@ -171,9 +152,10 @@ dbUpdateResource = async (resource_id, lastModified, size, format, mediaType, ur
     }
 };
 
-// gets resource from database by its' id
-dbGetResource = async (resource_id) => {
-    const sql = `SELECT * FROM resource WHERE object_id = '${resource_id}';`;
+// gets resource from database (by its' id)
+var dbGetResource = async (resource_id) => {
+    const sql = `SELECT * FROM resource
+                    WHERE object_id = '${resource_id}';`;
     try {
         const result = await db.query(sql, []);
         return result.rows[0];
