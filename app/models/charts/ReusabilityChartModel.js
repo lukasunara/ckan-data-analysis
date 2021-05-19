@@ -1,5 +1,6 @@
 const db = require('../../db');
 const Chart = require('./ChartModel');
+const { fetchData } = require('../../public/scripts/fetching.js');
 
 // class ReusabilityChart encapsulates an reusability chart
 module.exports = class ReusabilityChart extends Chart {
@@ -12,9 +13,9 @@ module.exports = class ReusabilityChart extends Chart {
 
     // constructor for ReusabilityChart
     constructor(data) {
-        super(data.chart_id, data.object_id, data.missingParams);
+        super(data.chart_id, data.object_id, data.missing_params);
         this.license = data.license;
-        this.basicInfo = data.basicInfo;
+        this.basic_info = data.basic_info;
         this.extras = data.extras;
         this.publisher = data.publisher;
 
@@ -29,9 +30,9 @@ module.exports = class ReusabilityChart extends Chart {
         return new ReusabilityChart({
             chart_id: undefined,
             object_id: object_id,
-            missingParams: new Set(),
+            missing_params: new Set(),
             license: 0,
-            basicInfo: 0,
+            basic_info: 0,
             extras: 0,
             publisher: 0
         });
@@ -44,13 +45,13 @@ module.exports = class ReusabilityChart extends Chart {
 
     // gets number of points an object has earned
     getEarnedPoints() {
-        return this.license + this.basicInfo + this.extras + this.publisher;
+        return this.license + this.basic_info + this.extras + this.publisher;
     }
 
     // sets all points to zero
     reset() {
         this.license = 0;
-        this.basicInfo = 0;
+        this.basic_info = 0;
         this.extras = 0;
         this.publisher = 0;
 
@@ -63,7 +64,7 @@ module.exports = class ReusabilityChart extends Chart {
     // reduces points by other chart values
     reduce(other) {
         this.license -= other.license;
-        this.basicInfo -= other.basicInfo;
+        this.basic_info -= other.basic_info;
         this.extras -= other.extras;
         this.publisher -= other.publisher;
 
@@ -76,7 +77,7 @@ module.exports = class ReusabilityChart extends Chart {
     // adds points from other chart values
     add(other) {
         this.license += other.license;
-        this.basicInfo += other.basicInfo;
+        this.basic_info += other.basic_info;
         this.extras += other.extras;
         this.publisher += other.publisher;
 
@@ -86,18 +87,22 @@ module.exports = class ReusabilityChart extends Chart {
         this.maxPointsPublisher += other.maxPointsPublisher;
     }
 
+    isPersisted() {
+        return super.isPersisted();
+    }
+
     // save chart into database
     async persist() {
-        super.persist(dbNewReusabilityChart);
+        await super.persist(dbNewReusabilityChart);
     }
 
     // fetch chart from database for given object id
     static async fetchChartByID(object_id) {
         let result = await dbGetReusability(object_id);
-        result.missingParams = new Set(result.missingParams.split(' '));
 
         let reuseChart = null;
         if (result) {
+            result.missing_params = new Set(result.missing_params.split(' '));
             reuseChart = new ReusabilityChart(result);
             reuseChart.persisted = true;
         }
@@ -106,20 +111,20 @@ module.exports = class ReusabilityChart extends Chart {
 
     // update chart data
     async updateChartData() {
-        super.updateChartData(dbUpdateReusability);
+        await super.updateChartData(dbUpdateReusability);
     }
 
     // checks license title for dataset
     checkLicenseTitle(checkFunction, key, param1, param2) {
-        let param = sendParam(checkFunction, key, param1, param2);
+        let param = super.sendParam(checkFunction, key, param1, param2);
         if (param) {
             this.license++; //if title for license exists, add 1 point
         }
     }
 
     // checks license URL for dataset
-    checkLicenseUrl(checkFunction, key, param1, param2) {
-        let param = sendParam(checkFunction, key, param1, param2);
+    async checkLicenseUrl(checkFunction, key, param1, param2) {
+        let param = super.sendParam(checkFunction, key, param1, param2);
         if (param) {
             this.license++; //if URL for license exists, add 1 point
             var urlData = await fetchData(param);
@@ -137,9 +142,9 @@ module.exports = class ReusabilityChart extends Chart {
 
     // checks basic info fields
     checkBasicInfo(checkFunction, key, param1, param2) {
-        let param = sendParam(checkFunction, key, param1, param2);
+        let param = super.sendParam(checkFunction, key, param1, param2);
         if (param) {
-            this.basicInfo++; //if basic info field exists, add 1 point
+            this.basic_info++; //if basic info field exists, add 1 point
         }
     }
 
@@ -149,7 +154,7 @@ module.exports = class ReusabilityChart extends Chart {
         if (numOfExtras > 0) {
             this.extras += param >= 3 ? 3 : param;
         } else {
-            this.missingParams.add('extras');
+            this.missing_params.add('extras');
         }
     }
 
@@ -159,13 +164,13 @@ module.exports = class ReusabilityChart extends Chart {
         if (numOfMembers > 0) {
             this.extras++;
         } else {
-            this.missingParams.add('members');
+            this.missing_params.add('members');
         }
     }
 
     // checks if there is any information about publisher of data 
     checkPublisher(checkFunction, key, param1, param2) {
-        let param = sendParam(checkFunction, key, param1, param2);
+        let param = super.sendParam(checkFunction, key, param1, param2);
         if (param) {
             this.publisher++; //if exists, add 1 point
         }
@@ -174,11 +179,11 @@ module.exports = class ReusabilityChart extends Chart {
 
 // inserts a new reusability chart into database
 var dbNewReusabilityChart = async (chart, missingParams) => {
-    const sql = `INSERT INTO reusability (object_id, missingParams, license,
-        basicInfo, extras, publisher) VALUES ('$1', '$2', $3, $4, $5, $6);`;
+    const sql = `INSERT INTO reusability (object_id, missing_params, license,
+        basic_info, extras, publisher) VALUES ($1, $2, $3, $4, $5, $6);`;
     const values = [
         chart.object_id, missingParams, chart.license,
-        chart.basicInfo, chart.extras, chart.publisher
+        chart.basic_info, chart.extras, chart.publisher
     ];
     try {
         const result = await db.query(sql, values);
@@ -192,9 +197,9 @@ var dbNewReusabilityChart = async (chart, missingParams) => {
 // updates reusability chart data in database
 var dbUpdateReusability = async (chart, missingParams) => {
     const sql = `UPDATE reusability
-                    SET missingParams = '${missingParams}',
+                    SET missing_params = '${missingParams}',
                         license = ${chart.license},
-                        basicInfo = ${chart.basicInfo},
+                        basic_info = ${chart.basic_info},
                         extras = ${chart.extras},
                         publisher = ${chart.publisher}
                     WHERE chart_id = '${chart.chart_id}';`;

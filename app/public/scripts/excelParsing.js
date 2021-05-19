@@ -22,7 +22,7 @@ var parseExcelFile = (data, extension) => {
         analyseFile(worksheetJSON);
     });
 
-    console.log(blankRows + '/' + numOfRows + '\n');
+    // console.log(blankRows + '/' + numOfRows + '\n');
 
     return {
         numOfRows: numOfRows,

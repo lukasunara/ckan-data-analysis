@@ -30,13 +30,14 @@ const sql_create_rateableObject = `CREATE TABLE rateableObject (
 const sql_create_rateableObject_id_index = `CREATE UNIQUE INDEX idx_rateableObjectId ON rateableObject(object_id);`;
 
 const sql_create_portal = `CREATE TABLE portal (
-    name VARCHAR(20) NOT NULL UNIQUE,
-    title VARCHAR(20),
+    name VARCHAR(36) NOT NULL UNIQUE,
+    title VARCHAR(100),
     description TEXT,
-    numOfVocabularies INTEGER,
-    numOfExtensions INTEGER,
-    dcatOrRdf BOOLEAN,
+    num_of_vocabularies INTEGER,
+    num_of_extensions INTEGER,
+    dcat_or_rdf BOOLEAN,
     url TEXT,
+    date_of_storage TIMESTAMP,
     CONSTRAINT pkPortal PRIMARY KEY (object_id)
 ) INHERITS (rateableObject);`;
 const sql_create_portal_id_index = `CREATE UNIQUE INDEX idx_portalId ON portal(object_id);`;
@@ -48,11 +49,12 @@ const sql_create_organization = `CREATE TABLE organization (
     title VARCHAR(200),
     description TEXT,
     state VARCHAR(10),
-    approvalStatus VARCHAR(10),
-    numOfExtras INTEGER,
-    numOfMembers INTEGER,
-    dateCreated TIMESTAMP,
-    imageDisplayURL TEXT,
+    approval_status VARCHAR(10),
+    num_of_extras INTEGER,
+    num_of_members INTEGER,
+    date_created TIMESTAMP,
+    date_of_storage TIMESTAMP,
+    image_display_url TEXT,
     CONSTRAINT pkOrganization PRIMARY KEY (object_id),
     CONSTRAINT fkOrganizationPortal FOREIGN KEY (portal_id) REFERENCES portal(object_id)
         ON DELETE SET NULL
@@ -66,19 +68,19 @@ const sql_create_dataset = `CREATE TABLE dataset (
     organization_id VARCHAR(36),
     name VARCHAR(200),
     title VARCHAR(200),
-    ownerOrg VARCHAR(36),
+    owner_org VARCHAR(36),
     author VARCHAR(36),
     maintainer VARCHAR(36),
     private BOOLEAN,
     state VARCHAR(10),
     description TEXT,
-    metadataCreated TIMESTAMP,
-    metadataModified TIMESTAMP,
-    numOfExtras INTEGER,
-    numOfGroups INTEGER,
-    numOfKeywords INTEGER,
-    licenseTitle VARCHAR(100),
-    licenseURL TEXT,
+    metadata_created TIMESTAMP,
+    metadata_modified TIMESTAMP,
+    num_of_extras INTEGER,
+    num_of_groups INTEGER,
+    num_of_keywords INTEGER,
+    license_title VARCHAR(100),
+    license_url TEXT,
     url TEXT,
     CONSTRAINT pkDataset PRIMARY KEY (object_id),
     CONSTRAINT fkDatasetPortal FOREIGN KEY (portal_id) REFERENCES portal(object_id)
@@ -94,15 +96,17 @@ const sql_create_dataset_organization_index = `CREATE INDEX idx_datasetOrganizat
 
 const sql_create_resource = `CREATE TABLE resource (
     dataset_id VARCHAR(36),
-    revisionId VARCHAR(36),
+    revision_id VARCHAR(36),
     name VARCHAR(200),
     size INTEGER,
     format VARCHAR(10),
-    mediaType VARCHAR(100),
+    media_type VARCHAR(100),
     state VARCHAR(10),
     description TEXT,
     created TIMESTAMP,
-    lastModified TIMESTAMP,
+    last_modified TIMESTAMP,
+    actually_last_modified TIMESTAMP,
+    empty_rows NUMERIC(6, 4),
     url TEXT,
     CONSTRAINT pkResource PRIMARY KEY (object_id),
     CONSTRAINT fkResourceDataset FOREIGN KEY (dataset_id) REFERENCES dataset(object_id)
@@ -115,7 +119,7 @@ const sql_create_resource_dataset_index = `CREATE INDEX idx_resourceDataset ON r
 const sql_create_chart = `CREATE TABLE chart (
     chart_id SERIAL PRIMARY KEY,
     object_id VARCHAR(36),
-    missingParams TEXT NOT NULL,
+    missing_params TEXT,
     CONSTRAINT fkChartObject FOREIGN KEY (object_id) REFERENCES rateableObject(object_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
@@ -133,26 +137,26 @@ const sql_create_findability = `CREATE TABLE findability (
 const sql_create_findability_id_index = `CREATE UNIQUE INDEX idx_findabilityId ON findability(object_id);`;
 
 const sql_create_accessibility = `CREATE TABLE accessibility (
-    datasetAccessibility INTEGER CHECK (datasetAccessibility >= 0),
-    urlAccessibility INTEGER CHECK (urlAccessibility >= 0),
-    downloadURL INTEGER CHECK (downloadURL >= 0),
+    dataset_accessibility INTEGER CHECK (dataset_accessibility >= 0),
+    url_accessibility INTEGER CHECK (url_accessibility >= 0),
+    download_url INTEGER CHECK (download_url >= 0),
     CONSTRAINT pkAccessibility PRIMARY KEY (chart_id)
 ) INHERITS (chart);`;
 const sql_create_accessibility_id_index = `CREATE UNIQUE INDEX idx_accessibilityId ON accessibility(object_id);`;
 
 const sql_create_interoperability = `CREATE TABLE interoperability (
     format INTEGER CHECK (format >= 0),
-    formatDiversity INTEGER CHECK (formatDiversity >= 0),
+    format_diversity INTEGER CHECK (format_diversity >= 0),
     compatibility INTEGER CHECK (compatibility >= 0),
-    machineReadable INTEGER CHECK (machineReadable >= 0),
-    linkedOpenData INTEGER CHECK (linkedOpenData >= 0),
+    machine_readable INTEGER CHECK (machine_readable >= 0),
+    linked_open_data INTEGER CHECK (linked_open_data >= 0),
     CONSTRAINT pkInteroperability PRIMARY KEY (chart_id)
 ) INHERITS (chart);`;
 const sql_create_interoperability_id_index = `CREATE UNIQUE INDEX idx_interoperabilityId ON interoperability(object_id);`;
 
 const sql_create_reusability = `CREATE TABLE reusability (
     license INTEGER CHECK (license >= 0),
-    basicInfo INTEGER CHECK (basicInfo >= 0),
+    basic_info INTEGER CHECK (basic_info >= 0),
     extras INTEGER CHECK (extras >= 0),
     publisher INTEGER CHECK (publisher >= 0),
     CONSTRAINT pkReusability PRIMARY KEY (chart_id)
@@ -160,11 +164,11 @@ const sql_create_reusability = `CREATE TABLE reusability (
 const sql_create_reusability_id_index = `CREATE UNIQUE INDEX idx_reusabilityId ON reusability(object_id);`;
 
 const sql_create_contextuality = `CREATE TABLE contextuality (
-    numOfResources INTEGER CHECK (numOfResources >= 0),
-    fileSize INTEGER CHECK (fileSize >= 0),
-    emptyData INTEGER CHECK (emptyData >= 0),
-    dateOfIssue INTEGER CHECK (dateOfIssue >= 0),
-    modificationDate INTEGER CHECK (modificationDate >= 0),
+    num_of_resources INTEGER CHECK (num_of_resources >= 0),
+    file_size INTEGER CHECK (file_size >= 0),
+    empty_data INTEGER CHECK (empty_data >= 0),
+    date_of_issue INTEGER CHECK (date_of_issue >= 0),
+    modification_date INTEGER CHECK (modification_date >= 0),
     CONSTRAINT pkContextuality PRIMARY KEY (chart_id)
 ) INHERITS (chart);`;
 const sql_create_contextuality_id_index = `CREATE UNIQUE INDEX idx_contextualityId ON contextuality(object_id);`;

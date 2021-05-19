@@ -59,11 +59,38 @@ module.exports = class RateableObject {
             throw err;
         }
     }
+
+    // update "changed" flag in database
+    async setChanged(object_id, changed) {
+        try {
+            let rowCount = await dbSetChanged(object_id, changed);
+            if (!rowCount) {
+                console.log('WARNING: flag "changed" has not been updated!');
+            } else {
+                this.changed = changed;
+            }
+        } catch (err) {
+            console.log('ERROR: updating flag "changed": ' + JSON.stringify(this));
+            throw err;
+        }
+    }
 };
 
 // delete a rateable object from database
 var dbDeleteRateableObject = async (rateableObject) => {
     const sql = `DELETE FROM rateableObject WHERE object_id = '${rateableObject.object_id}';`;
+    try {
+        const result = await db.query(sql, []);
+        return result.rowCount;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    }
+};
+
+// set the "changed" flag in rateable object
+var dbSetChanged = async (object_id, changed) => {
+    const sql = `UPDATE rateableObject SET changed = '${changed}' WHERE object_id = '${object_id}';`;
     try {
         const result = await db.query(sql, []);
         return result.rowCount;

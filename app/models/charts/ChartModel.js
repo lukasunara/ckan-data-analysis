@@ -5,13 +5,13 @@ const { analyseParam, analyseParamWithOption } = require('../../public/scripts/a
 module.exports = class Chart {
 
     // constructor for all Charts
-    constructor(chart_id, object_id, missingParams) {
+    constructor(chart_id, object_id, missing_params) {
         if (this.constructor === Chart) {
             throw new TypeError('Abstract class "Chart" cannot be instantiated directly.');
         }
         this.chart_id = chart_id;
         this.object_id = object_id;
-        this.missingParams = missingParams;
+        this.missing_params = missing_params;
         this.persisted = false;
     }
 
@@ -70,7 +70,7 @@ module.exports = class Chart {
         }
         // if param is null, undefined or empty => add to missingParams of this chart
         if (!param) {
-            this.missingParams.add(key);
+            this.missing_params.add(key);
         }
         return param;
     }
@@ -79,9 +79,9 @@ module.exports = class Chart {
     missingParamsToString() {
         let size = 0;
         let string = '';
-        for (let param of this.missingParams) {
+        for (let param of this.missing_params) {
             string += param;
-            if (++size !== this.missingParams.size) string += ' ';
+            if (++size !== this.missing_params.size) string += ' ';
         }
         return string;
     }

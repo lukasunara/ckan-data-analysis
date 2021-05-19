@@ -11,10 +11,10 @@ module.exports = class AccessibilityChart extends Chart {
 
     // constructor for AccessibilityChart
     constructor(data) {
-        super(data.chart_id, data.object_id, data.missingParams);
-        this.datasetAccessibility = data.datasetAccessibility;
-        this.urlAccessibility = data.urlAccessibility;
-        this.downloadURL = data.downloadURL;
+        super(data.chart_id, data.object_id, data.missing_params);
+        this.dataset_accessibility = data.dataset_accessibility;
+        this.url_accessibility = data.url_accessibility;
+        this.download_url = data.download_url;
 
         this.maxPointsDataset = 0;
         this.maxPointsUrl = 0;
@@ -26,10 +26,10 @@ module.exports = class AccessibilityChart extends Chart {
         return new AccessibilityChart({
             chart_id: undefined,
             object_id: object_id,
-            missingParams: new Set(),
-            datasetAccessibility: 0,
-            urlAccessibility: 0,
-            downloadURL: 0
+            missing_params: new Set(),
+            dataset_accessibility: 0,
+            url_accessibility: 0,
+            download_url: 0
         });
     }
 
@@ -40,14 +40,14 @@ module.exports = class AccessibilityChart extends Chart {
 
     // gets number of points an object has earned
     getEarnedPoints() {
-        return this.datasetAccessibility + this.urlAccessibility + this.downloadURL;
+        return this.datasetAccessibility + this.url_accessibility + this.download_url;
     }
 
     // sets all points to zero
     reset() {
-        this.datasetAccessibility = 0;
-        this.urlAccessibility = 0;
-        this.downloadURL = 0;
+        this.dataset_accessibility = 0;
+        this.url_accessibility = 0;
+        this.download_url = 0;
 
         this.maxPointsDataset = 0;
         this.maxPointsUrl = 0;
@@ -56,9 +56,9 @@ module.exports = class AccessibilityChart extends Chart {
 
     // reduces points by other chart values
     reduce(other) {
-        this.datasetAccessibility -= other.datasetAccessibility;
-        this.urlAccessibility -= other.urlAccessibility;
-        this.downloadURL -= other.downloadURL;
+        this.dataset_accessibility -= other.dataset_accessibility;
+        this.url_accessibility -= other.url_accessibility;
+        this.download_url -= other.download_url;
 
         this.maxPointsDataset -= other.maxPointsDataset;
         this.maxPointsUrl -= other.maxPointsUrl;
@@ -67,9 +67,9 @@ module.exports = class AccessibilityChart extends Chart {
 
     // adds points from other chart values
     add(other) {
-        this.datasetAccessibility += other.datasetAccessibility;
-        this.urlAccessibility += other.urlAccessibility;
-        this.downloadURL += other.downloadURL;
+        this.dataset_accessibility += other.dataset_accessibility;
+        this.url_accessibility += other.url_accessibility;
+        this.download_url += other.download_url;
 
         this.maxPointsDataset += other.maxPointsDataset;
         this.maxPointsUrl += other.maxPointsUrl;
@@ -79,63 +79,67 @@ module.exports = class AccessibilityChart extends Chart {
     // fetch chart from database for given object id
     static async fetchChartByID(object_id) {
         let result = await dbGetAccessibility(object_id);
-        result.missingParams = new Set(result.missingParams.split(' '));
 
         let accessChart = null;
         if (result) {
+            result.missing_params = new Set(result.missing_params.split(' '));
             accessChart = new AccessibilityChart(result);
             accessChart.persisted = true;
         }
         return accessChart;
     }
 
+    isPersisted() {
+        return super.isPersisted();
+    }
+
     // save chart into database
     async persist() {
-        super.persist(dbNewAccessibilityChart);
+        await super.persist(dbNewAccessibilityChart);
     }
 
     // update chart data
     async updateChartData() {
-        super.updateChartData(dbUpdateAccessibility);
+        await super.updateChartData(dbUpdateAccessibility);
     }
 
     // checks if dataset is accessible or not
     checkDatasetAccess(checkFunction, key, param1, param2) {
-        let param = sendParam(checkFunction, key, param1, param2);
+        let param = super.sendParam(checkFunction, key, param1, param2);
         // if dataset is accessible, add 1 point
         if (!param) {
-            this.datasetAccessibility++;
+            this.dataset_accessibility++;
         }
     }
 
     // checks if URL is accessible or not
-    checkUrlAccess(checkFunction, key, param1, param2) {
-        let param = sendParam(checkFunction, key, param1, param2);
+    async checkUrlAccess(checkFunction, key, param1, param2) {
+        let param = super.sendParam(checkFunction, key, param1, param2);
         // if URL exists, add 1 point
         if (param) {
-            this.urlAccessibility++;
+            this.url_accessibility++;
             var urlData = await fetchData(param);
             // if url does not work, report it
-            if (urlData.error) {
+            if (!urlData || urlData.error) {
                 /*var urlError = {
                     status: urlData.status, //status code of response
                     statusText: urlData.statusText //response status text
                 }*/
             } else {
-                this.urlAccessibility++; //if URL works, add 1 point
+                this.url_accessibility++; //if URL works, add 1 point
             }
         }
     }
 
     // checks if downlaod URL for resources works or not
     checkDownloadUrl(checkFunction, key, url, mediaType) {
-        let param = sendParam(checkFunction, key, url);
+        let param = super.sendParam(checkFunction, key, url);
         // if URL exists, add 1 point
         if (param) {
-            this.downloadURL++;
+            this.download_url++;
             // don't need to check if URL works, because I know that it works if mediaType != null
             if (mediaType) {
-                this.downloadURL++; //if URL works, add 1 point
+                this.download_url++; //if URL works, add 1 point
             }
             /*var urlData = await fetchData(param);
             if (urlData.error || urlData.status.code >= 400) {
@@ -149,11 +153,11 @@ module.exports = class AccessibilityChart extends Chart {
 
 // inserts a new accessibility chart into database
 var dbNewAccessibilityChart = async (chart, missingParams) => {
-    const sql = `INSERT INTO accessibility (object_id, missingParams, datasetAccessibility,
-        urlAccessibility, downloadURL) VALUES ('$1', '$2', $3, $4, $5);`;
+    const sql = `INSERT INTO accessibility (object_id, missing_params, dataset_accessibility,
+        url_accessibility, download_url) VALUES ($1, $2, $3, $4, $5);`;
     const values = [
-        chart.object_id, missingParams, chart.datasetAccessibility,
-        chart.urlAccessibility, chart.downloadURL
+        chart.object_id, missingParams, chart.dataset_accessibility,
+        chart.url_accessibility, chart.download_url
     ];
     try {
         const result = await db.query(sql, values);
@@ -167,10 +171,10 @@ var dbNewAccessibilityChart = async (chart, missingParams) => {
 // updates accessibility chart data in database
 var dbUpdateAccessibility = async (chart, missingParams) => {
     const sql = `UPDATE accessibility
-                    SET missingParams = '${missingParams}',
-                        datasetAccessibility = ${chart.datasetAccessibility},
-                        urlAccessibility = ${chart.urlAccessibility},
-                        downloadURL = ${chart.downloadURL}
+                    SET missing_params = '${missingParams}',
+                        dataset_accessibility = ${chart.dataset_accessibility},
+                        url_accessibility = ${chart.url_accessibility},
+                        download_url = ${chart.download_url}
                     WHERE chart_id = '${chart.chart_id}';`;
     try {
         const result = await db.query(sql, []);

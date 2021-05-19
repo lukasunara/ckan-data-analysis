@@ -1,5 +1,6 @@
 const db = require('../../db');
 const Chart = require('./ChartModel');
+const { analyseDate } = require('../../public/scripts/analysis');
 
 // class ContextualityChart encapsulates an contextuality chart
 module.exports = class ContextualityChart extends Chart {
@@ -12,12 +13,12 @@ module.exports = class ContextualityChart extends Chart {
 
     // constructor for ContextualityChart
     constructor(data) {
-        super(data.chart_id, data.object_id, data.missingParams);
-        this.numOfResources = data.numOfResources;
-        this.fileSize = data.fileSize;
-        this.emptyData = data.emptyData;
-        this.dateOfIssue = data.dateOfIssue;
-        this.modificationDate = data.modificationDate;
+        super(data.chart_id, data.object_id, data.missing_params);
+        this.num_of_resources = data.num_of_resources;
+        this.file_size = data.file_size;
+        this.empty_data = data.empty_data;
+        this.date_of_issue = data.date_of_issue;
+        this.modification_date = data.modification_date;
 
         this.maxPointsResources = 0;
         this.maxPointsFSize = 0;
@@ -31,12 +32,12 @@ module.exports = class ContextualityChart extends Chart {
         return new ContextualityChart({
             chart_id: undefined,
             object_id: object_id,
-            missingParams: new Set(),
-            numOfResources: 0,
-            fileSize: 0,
-            emptyData: 0,
-            dateOfIssue: 0,
-            modificationDate: 0
+            missing_params: new Set(),
+            num_of_resources: 0,
+            file_size: 0,
+            empty_data: 0,
+            date_of_issue: 0,
+            modification_date: 0
         });
     }
 
@@ -48,16 +49,17 @@ module.exports = class ContextualityChart extends Chart {
 
     // gets number of points an object has earned
     getEarnedPoints() {
-        return this.numOfResources + this.fileSize + this.emptyData + this.dateOfIssue + this.modificationDate;
+        return this.num_of_resources + this.file_size + this.empty_data
+            + this.date_of_issue + this.modification_date;
     }
 
     // sets all points to zero
     reset() {
-        this.numOfResources = 0;
-        this.fileSize = 0;
-        this.emptyData = 0;
-        this.dateOfIssue = 0;
-        this.modificationDate = 0;
+        this.num_of_resources = 0;
+        this.file_size = 0;
+        this.empty_data = 0;
+        this.date_of_issue = 0;
+        this.modification_date = 0;
 
         this.maxPointsResources = 0;
         this.maxPointsFSize = 0;
@@ -68,11 +70,11 @@ module.exports = class ContextualityChart extends Chart {
 
     // reduces points by other chart values
     reduce(other) {
-        this.numOfResources -= other.numOfResources;
-        this.fileSize -= other.fileSize;
-        this.emptyData -= other.emptyData;
-        this.dateOfIssue -= other.dateOfIssue;
-        this.modificationDate -= other.modificationDate;
+        this.num_of_resources -= other.num_of_resources;
+        this.file_size -= other.file_size;
+        this.empty_data -= other.empty_data;
+        this.date_of_issue -= other.date_of_issue;
+        this.modification_date -= other.modification_date;
 
         this.maxPointsResources -= other.maxPointsResources;
         this.maxPointsFSize -= other.maxPointsFSize;
@@ -83,11 +85,11 @@ module.exports = class ContextualityChart extends Chart {
 
     // adds points from other chart values
     add(other) {
-        this.numOfResources += other.numOfResources;
-        this.fileSize += other.fileSize;
-        this.emptyData += other.emptyData;
-        this.dateOfIssue += other.dateOfIssue;
-        this.modificationDate += other.modificationDate;
+        this.num_of_resources += other.num_of_resources;
+        this.file_size += other.file_size;
+        this.empty_data += other.empty_data;
+        this.date_of_issue += other.date_of_issue;
+        this.modification_date += other.modification_date;
 
         this.maxPointsResources += other.maxPointsResources;
         this.maxPointsFSize += other.maxPointsFSize;
@@ -96,18 +98,22 @@ module.exports = class ContextualityChart extends Chart {
         this.maxPointsModified += other.maxPointsModified;
     }
 
+    isPersisted() {
+        return super.isPersisted();
+    }
+
     // save chart into database
     async persist() {
-        super.persist(dbNewContextualityChart);
+        await super.persist(dbNewContextualityChart);
     }
 
     // fetch chart from database for given object id
     static async fetchChartByID(object_id) {
         let result = await dbGetContextuality(object_id);
-        result.missingParams = new Set(result.missingParams.split(' '));
 
         let contextChart = null;
         if (result) {
+            result.missing_params = new Set(result.missing_params.split(' '));
             contextChart = new ContextualityChart(result);
             contextChart.persisted = true;
         }
@@ -116,25 +122,21 @@ module.exports = class ContextualityChart extends Chart {
 
     // update chart data  
     async updateChartData() {
-        super.updateChartData(dbUpdateContextuality);
+        await super.updateChartData(dbUpdateContextuality);
     }
 
     // checks if metadata about file size exists
     checkFileSize(checkFunction, key, param1, param2) {
-        let param = sendParam(checkFunction, key, param1, param2);
+        let param = super.sendParam(checkFunction, key, param1, param2);
         if (param) {
-            this.fileSize++; //if exists, add 1 point
+            this.file_size++; //if exists, add 1 point
         }
     }
 
     // checks number of resources for datasets
-    checkNumOfResources(checkFunction, key, param1, param2) {
-        let param = sendParam(checkFunction, key, param1, param2);
-        // if exists, points are in range [1, 5]
-        if (param) {
-            let points = param >= 5 ? 5 : param;
-            this.numOfResources += points;
-        }
+    checkNumOfResources(numOfResources) {
+        // points are in range [0, 5]
+        this.num_of_resources += numOfResources >= 5 ? 5 : numOfResources;
     }
 
     // checks date of issue
@@ -142,9 +144,9 @@ module.exports = class ContextualityChart extends Chart {
         let createdDate = analyseDate(created);
         // if date of issue exists and is not in the future, add 1 point
         if (createdDate < 0) {
-            this.missingParams.add('created');
+            this.missing_params.add('created');
         } else {
-            this.dateOfIssue++;
+            this.date_of_issue++;
         }
     }
 
@@ -153,15 +155,15 @@ module.exports = class ContextualityChart extends Chart {
         let metadataLastModified = analyseDate(last_modified);
         // if last modified date exists and is not in the future, add 1 point
         if (metadataLastModified < 0) {
-            this.missingParams.add('last_modified');
+            this.missing_params.add('last_modified');
         } else {
-            this.modificationDate++;
+            this.modification_date++;
             if (urlData_lastModified) {
                 let lastModified = new Date(last_modified);
                 let urlDataLastModified = new Date(urlData_lastModified);
                 // if last modified correct, add 1 point (45 second gap aloved)
                 if (lastModified - urlDataLastModified <= 45) {
-                    this.modificationDate++;
+                    this.modification_date++;
                 }
             }
         }
@@ -181,17 +183,17 @@ module.exports = class ContextualityChart extends Chart {
         } else {
             points = 0;
         }
-        this.emptyData += points;
+        this.empty_data += points;
     }
 };
 
 // inserts a new contextuality chart into database
 var dbNewContextualityChart = async (chart, missingParams) => {
-    const sql = `INSERT INTO contextuality (object_id, missingParams, numOfResources,
-        fileSize, emptyData, dateOfIssue, modificationDate) VALUES ('$1', '$2', $3, $4, $5, $6, $7);`;
+    const sql = `INSERT INTO contextuality (object_id, missing_params, num_of_resources,
+        file_size, empty_data, date_of_issue, modification_date) VALUES ($1, $2, $3, $4, $5, $6, $7);`;
     const values = [
-        chart.object_id, missingParams, chart.numOfResources, chart.fileSize,
-        chart.emptyData, chart.dateOfIssue, chart.modificationDate
+        chart.object_id, missingParams, chart.num_of_resources, chart.file_size,
+        chart.empty_data, chart.date_of_issue, chart.modification_date
     ];
     try {
         const result = await db.query(sql, values);
@@ -205,12 +207,12 @@ var dbNewContextualityChart = async (chart, missingParams) => {
 // updates contextuality chart data in database
 var dbUpdateContextuality = async (chart, missingParams) => {
     const sql = `UPDATE contextuality
-                    SET missingParams = '${missingParams}',
-                        numOfResources = ${chart.numOfResources},
-                        fileSize = ${chart.fileSize},
-                        emptyData = ${chart.emptyData},
-                        dateOfIssue = ${chart.dateOfIssue},
-                        modificationDate = ${chart.modificationDate}
+                    SET missing_params = '${missingParams}',
+                        num_of_resources = ${chart.num_of_resources},
+                        file_size = ${chart.file_size},
+                        empty_data = ${chart.empty_data},
+                        date_of_issue = ${chart.date_of_issue},
+                        modification_date = ${chart.modification_date}
                     WHERE chart_id = '${chart.chart_id}';`;
     try {
         const result = await db.query(sql, []);

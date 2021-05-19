@@ -5,7 +5,7 @@ var fetchData = async (url) => {
     var fetchedData;
     var fetchedError;
 
-    console.log('URL: ' + url);
+    // console.log('URL: ' + url);
 
     await fetch(url)
         .then(handleResponse)
@@ -13,7 +13,7 @@ var fetchData = async (url) => {
         .catch(error => fetchedError = error);
 
     if (fetchedError) {
-        console.log('fetch-error: ' + fetchedError.status + " " + fetchedError.statusText + "\n");
+        // console.log('fetch-error: ' + fetchedError.status + " " + fetchedError.statusText + "\n");
         return fetchedError;
     } else {
         // console.log(fetchedData.data + "\n");
@@ -27,8 +27,8 @@ var handleResponse = async (response) => {
     let lastModified = response.headers.get('last-modified');
     let extension = mime.extension(contentType);
 
-    console.log('Content-Type: ' + contentType);
-    console.log('Last-Modified: ' + lastModified);
+    // console.log('Content-Type: ' + contentType);
+    // console.log('Last-Modified: ' + lastModified);
 
     var data;
     if (contentType.includes('application/json')) {
@@ -48,7 +48,7 @@ var handleResponse = async (response) => {
         data = 'extension';
     }
 
-    console.log('Extension: ' + extension);
+    // console.log('Extension: ' + extension);
 
     return {
         data: data, // contains returned response data (undefined if error)

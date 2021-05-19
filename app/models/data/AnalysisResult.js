@@ -1,39 +1,46 @@
-const FindabilityChart = require('./FindabilityChartModel');
-const AccessibilityChart = require('./AccessibilityChartModel');
-const InteroperabilityChart = require('./InteroperabilityChartModel');
-const ReusabilityChart = require('./ReusabilityChartModel');
-const ContextualityChart = require('./ContextualityChartModel');
+const FindabilityChart = require('../charts/FindabilityChartModel');
+const AccessibilityChart = require('../charts/AccessibilityChartModel');
+const InteroperabilityChart = require('../charts/InteroperabilityChartModel');
+const ReusabilityChart = require('../charts/ReusabilityChartModel');
+const ContextualityChart = require('../charts/ContextualityChartModel');
 
 // class AnalysisResult represents results of an analysis
 module.exports = class AnalysisResult {
 
     // constructor for AnalysisResult
-    constructor(object_id) {
-        await this.fetchChartsFromDB(object_id);
+    constructor(object_id, charts) {
+        this.findChart = charts.findChart ? charts.findChart : FindabilityChart.createEmptyFindability(object_id);
+        this.accessChart = charts.accessChart ? charts.accessChart : AccessibilityChart.createEmptyAccessibility(object_id);
+        this.interChart = charts.interChart ? charts.interChart : InteroperabilityChart.createEmptyInteroperability(object_id);
+        this.reuseChart = charts.reuseChart ? charts.reuseChart : ReusabilityChart.createEmptyReusability(object_id);
+        this.contextChart = charts.contextChart ? charts.contextChart : ContextualityChart.createEmptyContextuality(object_id);
+    }
 
-        if (!this.findChart) this.findChart = FindabilityChart.createEmptyFindability(object_id);
-        if (!this.accessChart) this.accessChart = AccessibilityChart.createEmptyAccessibility(object_id);
-        if (!this.interChart) this.interChart = InteroperabilityChart.createEmptyInteroperability(object_id);
-        if (!this.reuseChart) this.reuseChart = ReusabilityChart.createEmptyReusability(object_id);
-        if (!this.contextChart) this.contextChart = ContextualityChart.createEmptyContextuality(object_id);
+    // creates a new AnalysisResult object
+    static async createAnalysisResult(object_id) {
+        let charts = await AnalysisResult.fetchChartsFromDB(object_id);
+
+        return new AnalysisResult(object_id, charts);
     }
 
     // fetches charts from database for given object
-    async fetchChartsFromDB(object_id) {
-        this.findChart = await FindabilityChart.fetchChartByObjectID(object_id);
-        this.accessChart = await AccessibilityChart.fetchChartByObjectID(object_id);
-        this.interChart = await InteroperabilityChart.fetchChartByObjectID(object_id);
-        this.reuseChart = await ReusabilityChart.fetchChartByObjectID(object_id);
-        this.contextChart = await ContextualityChart.fetchChartByObjectID(object_id);
+    static async fetchChartsFromDB(object_id) {
+        return {
+            findChart: await FindabilityChart.fetchChartByID(object_id),
+            accessChart: await AccessibilityChart.fetchChartByID(object_id),
+            interChart: await InteroperabilityChart.fetchChartByID(object_id),
+            reuseChart: await ReusabilityChart.fetchChartByID(object_id),
+            contextChart: await ContextualityChart.fetchChartByID(object_id)
+        }
     }
 
     // updates all chart data in database
-    async updateDataInDb() {
-        updateChart(this.findChart);
-        updateChart(this.accessChart);
-        updateChart(this.interChart);
-        updateChart(this.reuseChart);
-        updateChart(this.contextChart);
+    async updateDataInDB() {
+        await this.updateChart(this.findChart);
+        await this.updateChart(this.accessChart);
+        await this.updateChart(this.interChart);
+        await this.updateChart(this.reuseChart);
+        await this.updateChart(this.contextChart);
     }
 
     // updates/persists chart in database

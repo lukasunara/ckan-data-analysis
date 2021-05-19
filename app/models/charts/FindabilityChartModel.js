@@ -13,7 +13,7 @@ module.exports = class FindabilityChart extends Chart {
 
     // constructor for FindabilityChart
     constructor(data) {
-        super(data.chart_id, data.object_id, data.missingParams);
+        super(data.chart_id, data.object_id, data.missing_params);
         this.identification = data.identification;
         this.keywords = data.keywords;
         this.categories = data.categories;
@@ -30,7 +30,7 @@ module.exports = class FindabilityChart extends Chart {
         return new FindabilityChart({
             chart_id: undefined,
             object_id: object_id,
-            missingParams: new Set(),
+            missing_params: new Set(),
             identification: 0,
             keywords: 0,
             categories: 0,
@@ -90,29 +90,33 @@ module.exports = class FindabilityChart extends Chart {
     // fetch chart from database for given object id
     static async fetchChartByID(object_id) {
         let result = await dbGetFindability(object_id);
-        result.missingParams = new Set(result.missingParams.split(' '));
 
         let findChart = null;
         if (result) {
+            result.missing_params = new Set(result.missing_params.split(' '));
             findChart = new FindabilityChart(result);
             findChart.persisted = true;
         }
         return findChart;
     }
 
+    isPersisted() {
+        return super.isPersisted();
+    }
+
     // save chart into database
     async persist() {
-        super.persist(dbNewFindabilityChart);
+        await super.persist(dbNewFindabilityChart);
     }
 
     // update chart data
     async updateChartData() {
-        super.updateChartData(dbUpdateFindability);
+        await super.updateChartData(dbUpdateFindability);
     }
 
     // checks if identification exists
     checkIdentification(checkFunction, key, param1, param2) {
-        let param = sendParam(checkFunction, key, param1, param2);
+        let param = super.sendParam(checkFunction, key, param1, param2);
         if (param) {
             this.identification++; //if exists, add 1 point
         }
@@ -124,13 +128,13 @@ module.exports = class FindabilityChart extends Chart {
         if (numOfKeywords > 0) {
             this.keywords += numOfKeywords >= 3 ? 3 : numOfKeywords;
         } else {
-            this.missingParams.add('keywords');
+            this.missing_params.add('keywords');
         }
     }
 
     // checks if categories exist
     checkCategories(checkFunction, key, param1, param2) {
-        let param = sendParam(checkFunction, key, param1, param2);
+        let param = super.sendParam(checkFunction, key, param1, param2);
         if (param) {
             this.categories++; //if exists, add 1 point
         }
@@ -138,7 +142,7 @@ module.exports = class FindabilityChart extends Chart {
 
     // checks if state field exists
     checkState(checkFunction, key, param1, param2) {
-        let param = sendParam(checkFunction, key, param1, param2);
+        let param = super.sendParam(checkFunction, key, param1, param2);
         if (param) {
             this.state++; //if exists, add 1 point
         }
@@ -147,8 +151,8 @@ module.exports = class FindabilityChart extends Chart {
 
 // inserts a new findability chart into database
 var dbNewFindabilityChart = async (chart, missingParams) => {
-    const sql = `INSERT INTO findability (object_id, missingParams, identification,
-                                keywords, categories, state) VALUES ('$1', '$2', $3, $4, $5, $6);`;
+    const sql = `INSERT INTO findability (object_id, missing_params, identification,
+                                keywords, categories, state) VALUES ($1, $2, $3, $4, $5, $6);`;
     const values = [
         chart.object_id, missingParams, chart.identification,
         chart.keywords, chart.categories, chart.state,
@@ -165,7 +169,7 @@ var dbNewFindabilityChart = async (chart, missingParams) => {
 // updates findability chart data in database
 var dbUpdateFindability = async (chart, missingParams) => {
     const sql = `UPDATE findability
-                    SET missingParams = '${missingParams}',
+                    SET missing_params = '${missingParams}',
                         identification = ${chart.identification},
                         keywords = ${chart.keywords},
                         categories = ${chart.categories},
