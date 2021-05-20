@@ -1,20 +1,4 @@
-import { Utils } from "https://cdn.jsdelivr.net/npm/chart.js";
-
-// Append '4d' to the colors (alpha channel), except for the hovered index
-var handleHover = (evt, item, legend) => {
-    legend.chart.data.datasets[0].backgroundColor.forEach((color, index, colors) => {
-        colors[index] = index === item.index || color.length === 9 ? color : color + '4D';
-    });
-    legend.chart.update();
-};
-
-// Removes the alpha channel from background colors
-var handleLeave = (evt, item, legend) => {
-    legend.chart.data.datasets[0].backgroundColor.forEach((color, index, colors) => {
-        colors[index] = color.length === 9 ? color.slice(0, -2) : color;
-    });
-    legend.chart.update();
-};
+import { handleHover, handleLeave } from "./animations.js";
 
 // get everything needed for creation of ratings chart
 var getRatingsChar = (objectData) => {
@@ -23,14 +7,14 @@ var getRatingsChar = (objectData) => {
         datasets: [
             {
                 label: 'Number of points for each chart group',
-                data: [10, 15, 3, 34, 57
-                    // objectData.result.findChart.getEarnedPoints(),
-                    // objectData.result.accessChart.getEarnedPoints(),
-                    // objectData.result.interChart.getEarnedPoints(),
-                    // objectData.result.reuseChart.getEarnedPoints(),
-                    // objectData.result.contextChart.getEarnedPoints()
+                data: [
+                    objectData.result.findChart.earnedPoints,
+                    objectData.result.accessChart.earnedPoints,
+                    objectData.result.interChart.earnedPoints,
+                    objectData.result.reuseChart.earnedPoints,
+                    objectData.result.contextChart.earnedPoints
                 ],
-                backgroundColor: ["#2ecc71", "#e74c3c", "#95a5a6", "#9b59b6", "#f1c40f"]
+                backgroundColor: ["#2ecc71", "#e74c3c", "#3e6669", "#9b59b6", "#f1c40f"]
             }
         ]
     };
@@ -55,4 +39,7 @@ var getRatingsChar = (objectData) => {
     return config;
 };
 
-module.exports = { getRatingsChar };
+let objectData = JSON.parse(document.getElementById('objectData').dataset.test);
+
+let config = getRatingsChar(objectData);
+new Chart(document.getElementById('ratingsChart'), config);

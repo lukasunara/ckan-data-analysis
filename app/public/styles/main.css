@@ -8,7 +8,6 @@ body {
 
 .lightblue-bg {
     background-color: #e3f2fd;
-    /* background-color: #71c495 */
 }
 
 .white-bg {
@@ -66,4 +65,9 @@ ul.list-in-five-columns {
 
 .light-border {
     border: 1px solid rgba(0, 0, 0, .125);
+}
+
+canvas.smaller-chart {
+    height: 85%;
+    width: 85%;
 }

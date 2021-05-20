@@ -12,6 +12,9 @@ module.exports = class AccessibilityChart extends Chart {
     // constructor for AccessibilityChart
     constructor(data) {
         super(data.chart_id, data.object_id, data.missing_params);
+        this.darkColor = '#861a0e';
+        this.lightColor = '#d1594c';
+
         this.dataset_accessibility = data.dataset_accessibility;
         this.url_accessibility = data.url_accessibility;
         this.download_url = data.download_url;

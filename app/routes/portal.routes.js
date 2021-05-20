@@ -44,7 +44,8 @@ router.get('/', function (req, res) {
                     portalName: portalName,
                     datasets: datasets.data.result,
                     organizations: organizations.data.result,
-                    objectData: portal
+                    objectData: portal,
+                    overallResults: portal.result.getOverallRating()
                 });
             }
         }

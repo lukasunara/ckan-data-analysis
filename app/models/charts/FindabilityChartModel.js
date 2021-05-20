@@ -14,6 +14,9 @@ module.exports = class FindabilityChart extends Chart {
     // constructor for FindabilityChart
     constructor(data) {
         super(data.chart_id, data.object_id, data.missing_params);
+        this.darkColor = '#1b6b3d';
+        this.lightColor = '#71c495';
+
         this.identification = data.identification;
         this.keywords = data.keywords;
         this.categories = data.categories;

@@ -13,6 +13,9 @@ module.exports = class InteroperabilityChart extends Chart {
     // constructor for InteroperabilityChart
     constructor(data) {
         super(data.chart_id, data.object_id, data.missing_params);
+        this.darkColor = '#3e6669';
+        this.lightColor = '#a0c3c5';
+
         this.format = data.format;
         this.format_diversity = data.format_diversity;
         this.compatibility = data.compatibility;

@@ -54,13 +54,25 @@ module.exports = class AnalysisResult {
 
     // calculates overall rating
     getOverallRating() {
-        let maxPoints = this.findChart.getMaxPoints() + this.accessChart.getMaxPoints()
-            + this.interChart.getMaxPoints() + this.reuseChart.getMaxPoints()
-            + this.contextChart.getMaxPoints();
+        this.findChart.maxPoints = this.findChart.getMaxPoints();
+        this.accessChart.maxPoints = this.accessChart.getMaxPoints();
+        this.interChart.maxPoints = this.interChart.getMaxPoints();
+        this.reuseChart.maxPoints = this.reuseChart.getMaxPoints();
+        this.contextChart.maxPoints = this.contextChart.getMaxPoints();
 
-        let earnedPoints = this.findChart.getEarnedPoints() + this.accessChart.getEarnedPoints()
-            + this.interChart.getEarnedPoints() + this.reuseChart.getEarnedPoints()
-            + this.contextChart.getEarnedPoints();
+        let maxPoints = this.findChart.maxPoints + this.accessChart.maxPoints
+            + this.interChart.maxPoints + this.reuseChart.maxPoints
+            + this.contextChart.maxPoints;
+
+        this.findChart.earnedPoints = this.findChart.getEarnedPoints();
+        this.accessChart.earnedPoints = this.accessChart.getEarnedPoints();
+        this.interChart.earnedPoints = this.interChart.getEarnedPoints();
+        this.reuseChart.earnedPoints = this.reuseChart.getEarnedPoints();
+        this.contextChart.earnedPoints = this.contextChart.getEarnedPoints();
+
+        let earnedPoints = this.findChart.earnedPoints + this.accessChart.earnedPoints
+            + this.interChart.earnedPoints + this.reuseChart.earnedPoints
+            + this.contextChart.earnedPoints;
 
         let percentage = earnedPoints / maxPoints * 100;
         let grade = null;

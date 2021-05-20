@@ -14,6 +14,9 @@ module.exports = class ContextualityChart extends Chart {
     // constructor for ContextualityChart
     constructor(data) {
         super(data.chart_id, data.object_id, data.missing_params);
+        this.darkColor = '#eec10d';
+        this.lightColor = '#f1d872';
+
         this.num_of_resources = data.num_of_resources;
         this.file_size = data.file_size;
         this.empty_data = data.empty_data;

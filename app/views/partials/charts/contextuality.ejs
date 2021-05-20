@@ -1,0 +1,27 @@
+<div class="card align-items-center justify-content-center bg-light rounded-3 m-1 w-100">
+    <h2 class="class-title">Contextuality</h2>
+    <div class="card-body">
+        <p class="text-center">These indicators show the quality of data</p>
+        <div class="d-flex flex-row flex-wrap justify-content-center">
+            <div><canvas id="numOfResourcesChart" class="smaller-chart"></canvas></div>
+            <div><canvas id="fileSizeChart" class="smaller-chart"></canvas></div>
+            <div><canvas id="emptyDataChart" class="smaller-chart"></canvas></div>
+            <div><canvas id="dateOfIssueChart" class="smaller-chart"></canvas></div>
+            <div><canvas id="modificationDateChart" class="smaller-chart"></canvas></div>
+        </div>
+    </div>
+    <% if(objectData.result.findChart.missing_params.size> 0 && !objectData.result.findChart.missing_params.has('')) {
+        %>
+        <div>Missing parameters are:
+            <ul class="list-group list-group-flush list-group-horizontal">
+                <% objectData.result.findChart.missing_params.forEach(function(param) { %>
+                    <li class="list-group-item bg-light"><span class="fw-bold">
+                            <%= param %>
+                        </span></li>
+                    <% }) %>
+            </ul>
+        </div>
+        <% } %>
+</div>
+
+<script type="module" src="/scripts/charts/contextuality.js"></script>

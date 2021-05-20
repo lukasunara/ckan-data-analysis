@@ -14,6 +14,9 @@ module.exports = class ReusabilityChart extends Chart {
     // constructor for ReusabilityChart
     constructor(data) {
         super(data.chart_id, data.object_id, data.missing_params);
+        this.darkColor = '#7d4394';
+        this.lightColor = '#c683e0';
+
         this.license = data.license;
         this.basic_info = data.basic_info;
         this.extras = data.extras;
