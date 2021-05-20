@@ -75,7 +75,7 @@ module.exports = class AnalysisResult {
         } else {
             grade = 'VERY BAD';
         }
-        return { percentage: percentage, grade: grade }
+        return { percentage: percentage, grade: grade, max: maxPoints, earned: earnedPoints }
     }
 
     // sets all chart values to zero

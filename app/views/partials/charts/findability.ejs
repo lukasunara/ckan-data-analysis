@@ -1,0 +1,95 @@
+<div class="card align-items-center justify-content-center bg-light rounded-3 m-1">
+    <h2 class="class-title">Findability</h2>
+    <div class="card-body d-flex flex-row">
+        <div><canvas id="identificationChart"></canvas></div>
+        <div><canvas id="keywordsChart"></canvas></div>
+        <div><canvas id="categoriesChart"></canvas></div>
+        <div><canvas id="stateChart"></canvas></div>
+    </div>
+    <% if(objectData.result.findChart.missing_params.size > 0 && !objectData.result.findChart.missing_params.has('')) { %>
+    <div>Missing parameters are:
+        <ul class="list-group list-group-flush list-group-horizontal">
+            <% objectData.result.findChart.missing_params.forEach(function(param) { %>
+                <li class="list-group-item bg-light"><span class="fw-bold"><%= param %></span></li>
+            <% }) %>
+        </ul>
+    </div>
+    <% } %>
+</div>
+
+<!-- <script type="module">
+    import { getRatingsChart } from "../../public/scripts/charts/rating.js";
+    
+    // let objectData = '{{@objectData}}';
+    let config = getRatingsChart();
+
+    var myChart = new Chart(document.getElementById('ratingsChart'), config);
+</script> -->
+<script>
+    // Append '4d' to the colors (alpha channel), except for the hovered index
+    var handleHover = (evt, item, legend) => {
+        legend.chart.data.datasets[0].backgroundColor.forEach((color, index, colors) => {
+            colors[index] = index === item.index || color.length === 9 ? color : color + '4D';
+        });
+        legend.chart.update();
+    };
+
+    // Removes the alpha channel from background colors
+    var handleLeave = (evt, item, legend) => {
+        legend.chart.data.datasets[0].backgroundColor.forEach((color, index, colors) => {
+            colors[index] = color.length === 9 ? color.slice(0, -2) : color;
+        });
+        legend.chart.update();
+    };
+
+    // get everything needed for creation of ratings chart
+    var getDoughnutChar = (chartName, darkColor, lightColor) => {
+        const charData = {
+            labels: ['Earned points', 'Missing points'],
+            datasets: [
+                {
+                    label: chartName,
+                    data: [
+                        10, 15
+                    ],
+                    backgroundColor: [darkColor, lightColor]
+                }
+            ]
+        };
+        const config = {
+            type: 'doughnut',
+            data: charData,
+            options: {
+                animations: {
+                    radius: {
+                        duration: 400,
+                        easing: 'linear',
+                        loop: (context) => context.active
+                    }
+                },
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        onHover: handleHover,
+                        onLeave: handleLeave
+                    },
+                    title: {
+                        display: true,
+                        text: chartName
+                    }
+                }
+            },
+        };
+        return config;
+    };
+    let configID = getDoughnutChar('Identification', '#1b6b3d', '#71c495');
+    let configKey = getDoughnutChar('Keywords', '#1b6b3d', '#71c495');
+    let configCategories = getDoughnutChar('Categories', '#1b6b3d', '#71c495');
+    let configState = getDoughnutChar('State', '#1b6b3d', '#71c495');
+
+    var myChart = new Chart(document.getElementById('identificationChart'), configID);
+    var myChart = new Chart(document.getElementById('keywordsChart'), configKey);
+    var myChart = new Chart(document.getElementById('categoriesChart'), configCategories);
+    var myChart = new Chart(document.getElementById('stateChart'), configState);
+</script>

@@ -1,5 +1,5 @@
 const db = require('../../db');
-const { analyseParam, analyseParamWithOption } = require('../../public/scripts/analysis.js');
+const { analyseParam, analyseParamWithOption } = require('../../public/scripts/utils/analysis.js');
 
 // class Chart encapsulates a chart
 module.exports = class Chart {

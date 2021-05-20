@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router({ mergeParams: true });
-const { fetchData, redirectToWithError } = require('../public/scripts/fetching.js');
-
-const { createDataset } = require('../public/scripts/datasetCreation.js');
-const { createOrganization } = require('../public/scripts/organizationCreation.js');
-const { createResource } = require('../public/scripts/resourceCreation.js');
-const { createPortal } = require('../public/scripts/portalCreation.js');
+const { fetchData, redirectToWithError } = require('../public/scripts/utils/fetching.js');
+const { createDataset } = require('../public/scripts/create/datasetCreation.js');
+const { createOrganization } = require('../public/scripts/create/organizationCreation.js');
+const { createResource } = require('../public/scripts/create/resourceCreation.js');
+const { createPortal } = require('../public/scripts/create/portalCreation.js');
 
 // get '/portal/:portalName
 router.get('/', function (req, res) {
@@ -45,7 +44,7 @@ router.get('/', function (req, res) {
                     portalName: portalName,
                     datasets: datasets.data.result,
                     organizations: organizations.data.result,
-                    portal: portal
+                    objectData: portal
                 });
             }
         }
@@ -74,7 +73,7 @@ router.get('/dataset/:datasetID', function (req, res) {
                     linkActive: 'menu',
                     title: "Dataset analysis results",
                     portalName: portalName,
-                    dataset: dataset
+                    objectData: dataset
                 });
             }
         }
@@ -104,7 +103,7 @@ router.get('/organization/:organizationID', function (req, res) {
                     linkActive: 'menu',
                     title: "Organization analysis results",
                     portalName: portalName,
-                    organization: organization
+                    objectData: organization
                 });
             }
         }
@@ -132,7 +131,7 @@ router.get('/resource/:resourceID', function (req, res) {
                 res.render('resource', {
                     linkActive: 'menu',
                     title: "Resource analysis results",
-                    resource: resource
+                    objectData: resource
                 });
             }
         }

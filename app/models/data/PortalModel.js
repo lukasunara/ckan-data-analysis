@@ -1,5 +1,5 @@
 const db = require('../../db');
-const { checkParam } = require('../../public/scripts/analysis');
+const { checkParam } = require('../../public/scripts/utils/analysis');
 const AccessibilityChart = require('../charts/AccessibilityChartModel');
 const FindabilityChart = require('../charts/FindabilityChartModel');
 const InteroperabilityChart = require('../charts/InteroperabilityChartModel');
@@ -74,11 +74,11 @@ module.exports = class Portal extends RateableObject {
     async analysePortal() {
         let result = await AnalysisResult.createAnalysisResult(this.object_id);
         if (this.changed) {
+            result.reset();
             // 1. findability
             // 1.1. identification + from organizations
             result.findChart.checkIdentification(checkParam, 'name', this.name);
             result.findChart.checkIdentification(checkParam, 'title', this.title);
-            result.findChart.maxPointsID += FindabilityChart.maxIdentificationPortal;
             // 1.2. keywords (only from organizations)
             // 1.3. categories (only from organizations)
             // 1.4. state (only from organizations)
@@ -87,7 +87,6 @@ module.exports = class Portal extends RateableObject {
             // 2.1. dataset accessibility (only from organizations)
             // 2.2. URL accessibility + from organizations
             await result.accessChart.checkUrlAccess(checkParam, 'url', this.url);
-            result.accessChart.maxPointsUrl += AccessibilityChart.maxUrlAccessibility;
             // 2.3. download URL (only from organizations)
 
             // 3. interoperability
@@ -98,20 +97,23 @@ module.exports = class Portal extends RateableObject {
             // 3.5. linked open data
             result.interChart.checkVocabularies(this.num_of_vocabularies);
             result.interChart.checkExtensions(this.num_of_extensions, this.dcat_or_rdf);
-            result.interChart.maxPointsLOD += InteroperabilityChart.maxLinkedOpenData;
 
             // 4. reusability
             // 4.1. license (only from organizations)
             // 4.2. basic info + from organizations
             result.reuseChart.checkBasicInfo(checkParam, 'description', this.description);
-            result.reuseChart.maxPointsInfo += ReusabilityChart.maxBasicInfo;
             // 4.3. extras (only from organizations)
             // 4.4. publisher (only from organizations)
 
             // 5. contextuality (only from organizations)
         }
+        result.findChart.maxPointsID += FindabilityChart.maxIdentificationPortal;
+        result.accessChart.maxPointsUrl += AccessibilityChart.maxUrlAccessibility;
+        result.interChart.maxPointsLOD += InteroperabilityChart.maxLinkedOpenData;
+        result.reuseChart.maxPointsInfo += ReusabilityChart.maxBasicInfo;
+
         for (let organization of (await this.fetchOrganizations())) {
-            await organization.analyseOrganization();
+            await organization.analyseOrganization(result, !this.changed);
             result.add(organization.result);
         }
         await result.updateDataInDB();

@@ -1,0 +1,93 @@
+<div class="card align-items-center justify-content-center bg-light rounded-3 m-1">
+    <h2 class="class-title">Overall Rating</h2>
+    <div class="card-body d-flex flex-row">
+        <% var overall = objectData.result.getOverallRating(); %>
+        <div>
+            <h4 class="text-center"><%= overall.grade %></h4>
+            <ul class="list-group list-group-flush mt-3">
+                <li class="list-group-item bg-light">
+                Percentage: <span class="fw-bold"><%= overall.percentage.toFixed(2) %>%</span>    
+                </li>
+                <li class="list-group-item bg-light">
+                    MAX points: <span class="fw-bold"><%= overall.max %></span>
+                </li>
+                <li class="list-group-item bg-light">
+                    Earned points: <span class="fw-bold"><%= overall.earned %></span>
+                </li>
+            </ul>
+        </div>
+        <div>
+            <canvas id="ratingsChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- <script type="module">
+    import { getRatingsChart } from "../../public/scripts/charts/rating.js";
+    
+    // let objectData = '{{@objectData}}';
+    let config = getRatingsChart();
+
+    var myChart = new Chart(document.getElementById('ratingsChart'), config);
+</script> -->
+<script>
+    // Append '4d' to the colors (alpha channel), except for the hovered index
+    var handleHover = (evt, item, legend) => {
+        legend.chart.data.datasets[0].backgroundColor.forEach((color, index, colors) => {
+            colors[index] = index === item.index || color.length === 9 ? color : color + '4D';
+        });
+        legend.chart.update();
+    };
+
+    // Removes the alpha channel from background colors
+    var handleLeave = (evt, item, legend) => {
+        legend.chart.data.datasets[0].backgroundColor.forEach((color, index, colors) => {
+            colors[index] = color.length === 9 ? color.slice(0, -2) : color;
+        });
+        legend.chart.update();
+    };
+
+    // get everything needed for creation of ratings chart
+    var getRatingsChar = (objectData) => {
+        const charData = {
+            labels: ['Findability', 'Accessibility', 'Interoperability', 'Reusability', 'Contextuality'],
+            datasets: [
+                {
+                    label: 'Number of points for each chart group',
+                    data: [
+                        10, 15, 3, 34, 57
+                    ],
+                    backgroundColor: ["#2ecc71", "#e74c3c", "#95a5a6", "#9b59b6", "#f1c40f"]
+                }
+            ]
+        };
+        const config = {
+            type: 'pie',
+            data: charData,
+            options: {
+                animations: {
+                    radius: {
+                        duration: 400,
+                        easing: 'linear',
+                        loop: (context) => context.active
+                    }
+                },
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        onHover: handleHover,
+                        onLeave: handleLeave
+                    },
+                    title: {
+                        display: true,
+                        text: 'Distribution of points by analysis groups'
+                    }
+                }
+            },
+        };
+        return config;
+    };
+    let config = getRatingsChar();
+    var myChart = new Chart(document.getElementById('ratingsChart'), config);
+</script>

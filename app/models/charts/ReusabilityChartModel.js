@@ -1,6 +1,6 @@
 const db = require('../../db');
 const Chart = require('./ChartModel');
-const { fetchData } = require('../../public/scripts/fetching.js');
+const { fetchData } = require('../../public/scripts/utils/fetching.js');
 
 // class ReusabilityChart encapsulates an reusability chart
 module.exports = class ReusabilityChart extends Chart {

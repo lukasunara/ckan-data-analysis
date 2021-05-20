@@ -1,6 +1,6 @@
-const { fetchData } = require('./fetching.js');
-const { parseExcelFile, parseJSONFile } = require('./excelParsing.js');
-const Resource = require('../../models/data/ResourceModel.js');
+const { fetchData } = require('../utils/fetching.js');
+const { parseExcelFile, parseJSONFile } = require('../utils/excelParsing.js');
+const Resource = require('../../../models/data/ResourceModel.js');
 
 // creates new Resource object (or fetches existing one from database)
 var createResource = async (resource, dataset_id) => {

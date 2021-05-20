@@ -1,6 +1,6 @@
 const db = require('../../db');
 const Chart = require('./ChartModel');
-const { fetchData } = require('../../public/scripts/fetching.js');
+const { fetchData } = require('../../public/scripts/utils/fetching.js');
 
 // class AccessibilityChart encapsulates an accessibility chart
 module.exports = class AccessibilityChart extends Chart {
@@ -40,7 +40,7 @@ module.exports = class AccessibilityChart extends Chart {
 
     // gets number of points an object has earned
     getEarnedPoints() {
-        return this.datasetAccessibility + this.url_accessibility + this.download_url;
+        return this.dataset_accessibility + this.url_accessibility + this.download_url;
     }
 
     // sets all points to zero

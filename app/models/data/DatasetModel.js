@@ -1,5 +1,5 @@
 const db = require('../../db');
-const { checkParam } = require('../../public/scripts/analysis');
+const { checkParam } = require('../../public/scripts/utils/analysis');
 const AccessibilityChart = require('../charts/AccessibilityChartModel');
 const ContextualityChart = require('../charts/ContextualityChartModel');
 const FindabilityChart = require('../charts/FindabilityChartModel');
@@ -90,8 +90,12 @@ module.exports = class Dataset extends RateableObject {
     }
 
     // analyses this dataset
-    async analyseDataset() {
+    async analyseDataset(organizationResult, shouldReduce) {
         let result = await AnalysisResult.createAnalysisResult(this.object_id);
+        // if organization has been reseted => no need for reduce()
+        if (shouldReduce)
+            organizationResult.reduce(result);
+
         let resources = await this.fetchResources();
         if (this.changed) {
             result.reset();
@@ -100,24 +104,18 @@ module.exports = class Dataset extends RateableObject {
             result.findChart.checkIdentification(checkParam, 'id', this.object_id);
             result.findChart.checkIdentification(checkParam, 'name', this.name);
             result.findChart.checkIdentification(checkParam, 'title', this.title);
-            result.findChart.maxPointsID += FindabilityChart.maxIdentification;
             // 1.2. keywords
             result.findChart.checkKeywords(this.num_of_keywords);
-            result.findChart.maxPointsKeywords += FindabilityChart.maxKeywords;
             // 1.3. categories
             result.findChart.checkCategories(checkParam, 'categories', this.num_of_groups);
-            result.findChart.maxPointsCategories += FindabilityChart.maxCategories;
             // 1.4. state + from resources
             result.findChart.checkState(checkParam, 'state', this.state);
-            result.findChart.maxPointsState += FindabilityChart.maxState;
 
             // 2. accessibility
             // 2.1. dataset accessibility
             result.accessChart.checkDatasetAccess(checkParam, 'private', this.private);
-            result.accessChart.maxPointsDataset += AccessibilityChart.maxDatasetAccessibility;
             // 2.2. URL accessibility
             await result.accessChart.checkUrlAccess(checkParam, 'url', this.url);
-            result.accessChart.maxPointsUrl += AccessibilityChart.maxUrlAccessibility;
             // 2.3. download URL (only from resources)
 
             // 3. interoperability
@@ -131,42 +129,53 @@ module.exports = class Dataset extends RateableObject {
             // 4.1. license
             result.reuseChart.checkLicenseTitle(checkParam, 'license_title', this.license_title);
             await result.reuseChart.checkLicenseUrl(checkParam, 'license_url', this.license_url);
-            result.reuseChart.maxPointsLicense += ReusabilityChart.maxLicense;
             // 4.2. basic info + from resources
             result.reuseChart.checkBasicInfo(checkParam, 'notes', this.description);
-            result.reuseChart.maxPointsInfo += ReusabilityChart.maxBasicInfo;
             // 4.3. extras
             result.reuseChart.checkExtras(this.num_of_extras);
-            result.reuseChart.maxPointsExtras += ReusabilityChart.maxExtras;
             // 4.4. publisher
             result.reuseChart.checkPublisher(checkParam, 'author', this.author);
             result.reuseChart.checkPublisher(checkParam, 'maintainer', this.maintainer);
             result.reuseChart.checkPublisher(checkParam, 'owmner_org', this.owner_org);
-            result.reuseChart.maxPointsPublisher += ReusabilityChart.maxPublisher;
 
             // 5. contextuality
             // 5.1. number of resources (get from database)
             result.contextChart.checkNumOfResources(resources.length);
-            result.contextChart.maxPointsResources += ContextualityChart.maxNumOfResources;
             // 5.2. file size (only from resources)
             // 5.3. empty data (only from resources)
             // 5.4. date of issue + from resources
             result.contextChart.checkDateOfIssue(this.metadata_created);
-            result.contextChart.maxPointsIssue += ContextualityChart.maxDateOfIssue;
             // 5.5. modification date + from resources
             result.contextChart.checkLastModified(this.metadata_modified);
-            result.contextChart.maxPointsModified += ContextualityChart.maxModificationDate;
         }
+        result.findChart.maxPointsID += FindabilityChart.maxIdentification;
+        result.findChart.maxPointsKeywords += FindabilityChart.maxKeywords;
+        result.findChart.maxPointsCategories += FindabilityChart.maxCategories;
+        result.findChart.maxPointsState += FindabilityChart.maxState;
+        result.accessChart.maxPointsDataset += AccessibilityChart.maxDatasetAccessibility;
+        result.accessChart.maxPointsUrl += AccessibilityChart.maxUrlAccessibility;
+        result.reuseChart.maxPointsLicense += ReusabilityChart.maxLicense;
+        result.reuseChart.maxPointsInfo += ReusabilityChart.maxBasicInfo;
+        result.reuseChart.maxPointsExtras += ReusabilityChart.maxExtras;
+        result.reuseChart.maxPointsPublisher += ReusabilityChart.maxPublisher;
+        result.contextChart.maxPointsResources += ContextualityChart.maxNumOfResources;
+        result.contextChart.maxPointsIssue += ContextualityChart.maxDateOfIssue;
+        result.contextChart.maxPointsModified += ContextualityChart.maxModificationDate;
+
         let formats = new Set();
         for (let resource of resources) {
             if (resource.format && !formats.has(resource.format))
                 formats.add(resource.format);
 
-            await resource.analyseResource();
+            await resource.analyseResource(result, !this.changed);
             result.add(resource.result);
         }
         // 3.2. format diversity (get from resources in database)
+        organizationResult.interChart.format_diversity -= result.interChart.format_diversity;
+        result.interChart.format_diversity -= result.interChart.format_diversity;
         result.interChart.checkFormatDiversity(formats.size);
+        result.interChart.format_diversity += result.interChart.format_diversity;
+        organizationResult.interChart.format_diversity += result.interChart.format_diversity;
         result.interChart.maxPointsFormatDiv += InteroperabilityChart.maxFormatDiversity;
 
         await result.updateDataInDB();

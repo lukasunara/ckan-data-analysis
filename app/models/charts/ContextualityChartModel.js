@@ -1,6 +1,6 @@
 const db = require('../../db');
 const Chart = require('./ChartModel');
-const { analyseDate } = require('../../public/scripts/analysis');
+const { analyseDate } = require('../../public/scripts/utils/analysis');
 
 // class ContextualityChart encapsulates an contextuality chart
 module.exports = class ContextualityChart extends Chart {

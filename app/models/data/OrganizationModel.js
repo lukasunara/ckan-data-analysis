@@ -1,5 +1,5 @@
 const db = require('../../db');
-const { checkParam } = require('../../public/scripts/analysis');
+const { checkParam } = require('../../public/scripts/utils/analysis');
 const AccessibilityChart = require('../charts/AccessibilityChartModel');
 const FindabilityChart = require('../charts/FindabilityChartModel');
 const ReusabilityChart = require('../charts/ReusabilityChartModel');
@@ -75,8 +75,12 @@ module.exports = class Organization extends RateableObject {
     }
 
     // analyse this organization
-    async analyseOrganization() {
+    async analyseOrganization(portalResult, shouldReduce) {
         let result = await AnalysisResult.createAnalysisResult(this.object_id);
+        // if portal has been reseted => no need for reduce()
+        if (shouldReduce)
+            portalResult.reduce(result);
+
         if (this.changed) {
             result.reset();
             // 1. findability
@@ -84,19 +88,16 @@ module.exports = class Organization extends RateableObject {
             result.findChart.checkIdentification(checkParam, 'id', this.object_id);
             result.findChart.checkIdentification(checkParam, 'name', this.name);
             result.findChart.checkIdentification(checkParam, 'title', this.title);
-            result.findChart.maxPointsID += FindabilityChart.maxIdentification;
             // 1.2. keywords (only from datasets)
             // 1.3. categories (only from datasets)
             // 1.4. state + from datasets
             result.findChart.checkState(checkParam, 'state', this.state);
             result.findChart.checkState(checkParam, 'approval_status', this.approval_status);
-            result.findChart.maxPointsState += FindabilityChart.maxStateOrganization;
 
             // 2. accessibility
             // 2.1. dataset accessibility (only from datasets)
             // 2.2. URL accessibility + from datasets
             await result.accessChart.checkUrlAccess(checkParam, 'image_display_url', this.image_display_url);
-            result.accessChart.maxPointsUrl += AccessibilityChart.maxUrlAccessibility;
             // 2.3. download URL (only from datasets)
 
             // 3. interoperability
@@ -110,17 +111,21 @@ module.exports = class Organization extends RateableObject {
             // 4.1. license (only from datasets)
             // 4.2. basic info + from datasets
             result.reuseChart.checkBasicInfo(checkParam, 'description', this.description);
-            result.reuseChart.maxPointsInfo += ReusabilityChart.maxBasicInfo
             // 4.3. extras + from datasets
             result.reuseChart.checkExtras(this.num_of_extras);
             result.reuseChart.checkMembers(this.num_of_members);
-            result.reuseChart.maxPointsExtras += ReusabilityChart.maxExtrasOrganization;
             // 4.4. publisher (only from datasets)
 
             // 5. contextuality (only from dataasets)
         }
+        result.findChart.maxPointsID += FindabilityChart.maxIdentification;
+        result.findChart.maxPointsState += FindabilityChart.maxStateOrganization;
+        result.accessChart.maxPointsUrl += AccessibilityChart.maxUrlAccessibility;
+        result.reuseChart.maxPointsInfo += ReusabilityChart.maxBasicInfo
+        result.reuseChart.maxPointsExtras += ReusabilityChart.maxExtrasOrganization;
+
         for (let dataset of (await this.fetchDatasets())) {
-            await dataset.analyseDataset();
+            await dataset.analyseDataset(result, !this.changed);
             result.add(dataset.result);
         }
         await result.updateDataInDB();

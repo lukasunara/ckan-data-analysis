@@ -4,84 +4,24 @@
 <head>
     <%- include('../partials/head'); %>
     <link rel="stylesheet" type="text/css" href="/styles/main.css">
-    <link rel="stylesheet" type="text/css" href="/styles/results.css">
+    <!--<link rel="stylesheet" type="text/css" href="/styles/results.css">-->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<body class="primary-color-bg darkpurple-font">
+<body class="lightblue-bg">
     <%- include('../partials/header'); %>
     
-    <main class="centered-flex vertical-flex">
-        <div class="portal-title centered-flex vertical-flex container goldish-color-bg">
-            <h1 class="redish-font"><%= portalName %></h1>
-        </div>
-
-        <div class="analysis-results basic-info vertical-flex container goldish-color-bg">
-            <h2 class="redish-font">Analysis results</h2>
-            <div class="datasets-organizations-statistics">
-                <div class="statistics-container">
-                    <h3 class="redish-font">Datasets Statistics</h3>
-                    <p class="info-container">
-                        Metadata of all datasets is missing 
-                        <span class="redish-font"><%= results.datasetsStats.numOfBadParams %> out of
-                        <%= results.datasetsStats.numOfParams %></span> useful parameters:
-                    </p>
-                    <p class="info-container">
-                        Metadata of all datasets contains 
-                        <span class="info-name"><%= results.datasetsStats.numOfErrors %></span> 
-                        URLs which cause some type of error.
-                    </p>
-                    <p class="info-container">
-                        Metadata of all datasets contains
-                        <span class="info-name"><%= results.datasetsStats.differentModifiedDates %></span> 
-                        wrong <span class="redish-font italic-font">last_modified</span> dates.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <div class="list-container">
-            <div class="datasets-list container goldish-color-bg">
-                <h2 class="redish-font">Datasets</h2>
-                <% if(datasets.length == 0) { %>
-                    <span class="italic-font">Portal hasn't got any datasets.</span>
-                <% } else { %>
-                    <span class="info-name">Number of datasets: </span><%= datasets.length %>
-                    <ul>
-                        <% for(let dataset of datasets) { %>
-                            <li>
-                                <a class="darkpurple-font"
-                                   href="/portal/<%= portalName %>/dataset/<%= dataset %>"
-                                >
-                                    <%= dataset %>
-                                </a>
-                            </li>
-                        <% } %>
-                    </ul>
-                <% } %>
-            </div>
-            <div class="organizations-list container goldish-color-bg">
-                <h2 class="centered-text redish-font">Organizations</h2>
-                <% if(organizations.length == 0) { %>
-                    <span class="italic-font">Portal hasn't got any organizations.</span>
-                <% } else { %>
-                    <span class="info-name">Number of organizations: </span><%= organizations.length %>
-                    <ul>
-                        <% for(let organization of organizations) { %>
-                            <li>
-                                <a class="darkpurple-font"
-                                   href="/portal/<%= portalName %>/organization/<%= organization %>"
-                                >
-                                    <%= organization %>
-                                </a>
-                            </li>
-                        <% } %>
-                    </ul>
-                <% } %>
-            </div>
-        </div>
+    <main>
+        <div class="mt-3"><h1 class="text-center">
+            <%= objectData.title ? objectData.title : objectData.object_id %>
+        </h1></div>
+        <section class="container d-flex flex-column align-items-center justify-content-evenly p-4">
+            <%- include('../partials/charts/rating'); %>
+            <%- include('../partials/charts/findability'); %>
+        </section>
     </main>
-
+    
     <%- include('../partials/footer'); %>
 
-    <%- include('../partials/external_scripts'); %>
+    <%- include('../partials/external_scripts'); %>    
 </body>

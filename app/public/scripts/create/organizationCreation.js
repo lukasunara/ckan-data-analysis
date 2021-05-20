@@ -1,6 +1,6 @@
-const { fetchData } = require('./fetching.js');
+const { fetchData } = require('../utils/fetching.js');
 const { createDataset } = require('./datasetCreation.js');
-const Organization = require('../../models/data/OrganizationModel.js');
+const Organization = require('../../../models/data/OrganizationModel.js');
 
 // creates new Organization object (or fetches existing one from database)
 var createOrganization = async (portalName, organization) => {
