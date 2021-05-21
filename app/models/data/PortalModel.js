@@ -112,13 +112,16 @@ module.exports = class Portal extends RateableObject {
         result.interChart.maxPointsLOD += InteroperabilityChart.maxLinkedOpenData;
         result.reuseChart.maxPointsInfo += ReusabilityChart.maxBasicInfo;
 
-        for (let organization of (await this.fetchOrganizations())) {
+        let organizations = await this.fetchOrganizations();
+        for (let organization of organizations) {
             await organization.analyseOrganization(result, !this.changed);
             result.add(organization.result);
         }
         await result.updateDataInDB();
         await super.setChanged(this.object_id, false);
+
         this.result = result;
+        this.organizations = organizations;
     }
 };
 

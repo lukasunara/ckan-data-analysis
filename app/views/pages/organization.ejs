@@ -3,131 +3,25 @@
 
 <head>
     <%- include('../partials/head'); %>
-    <link rel="stylesheet" type="text/css" href="/styles/main.css">
-    <link rel="stylesheet" type="text/css" href="/styles/results.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<body class="primary-color-bg darkpurple-font">
+<body class="lightblue-bg">
     <%- include('../partials/header'); %>
     
-    <main class="centered-flex vertical-flex">
-        <div class="results-title centered-flex vertical-flex container goldish-color-bg">
-            <h1 class="centered-text redish-font"><%= organization.title ? organization.title : "Unknown" %></h1>
-            <% if(results.imageDisplayURL) { %>
-                <div class="image-organization-container">
-                    <img class="organization-image"
-                        src="<%= results.imageDisplayURL.error ? '#' : results.imageDisplayURL %>"
-                        alt="organization.jpg"
-                    />
-                </div>
-            <% } %>
-            <div class="basic-info slightly-bigger-text">
-                <span>
-                    <span class="info-name">Number of members: </span>
-                    <%= organization.users ? organization.users.length : "unknown" %>
-                </span>
-                <span>
-                    <span class="info-name">Created: </span>
-                    <%= results.createdDate ? results.createdDate : "unknown" %>
-                </span>
-                <span>
-                    <span class="info-name">Approved: </span>
-                    <%= organization.approved ? organization.approved : (organization.approval_status ? organization.approval_status : "unknown") %>
-                </span>
-            </div>
-            <p class="description-container">
-                <span class="description info-name slightly-bigger-text">Description: </span>
-                <%= organization.description ? organization.description : "Description is empty" %>
-            </p>
-        </div>
+    <%- include('../partials/spinner'); %>
+    <main id="main">
+        <div id="objectData" class="d-none" data-test="<%= JSON.stringify(objectData) %>"></div>
+        <div class="mt-3"><h1 class="text-center">
+                <%= objectData.title ? objectData.title : "Organization ID: " + objectData.object_id %>
+        </h1></div>
+        <%- include('../partials/charts/charts'); %>
 
-        <div class="analysis-results basic-info vertical-flex container goldish-color-bg">
-            <h2 class="redish-font">Analysis results</h2>
-            <div class="missing-params">
-                <% if(results.missingParams.length > 0) { %>
-                Metadata is missing <span class="redish-font"><%= results.numbers.numOfBadParams %> out of
-                <%= results.numbers.numOfParams %></span> useful parameters:
-                    <ul class="list-in-five-columns">
-                        <% for(let param of results.missingParams) { %>
-                            <li class="equally-spaced-columns italic-font">
-                                <%= param %>
-                            </li>
-                        <% } %>
-                    </ul>
-                <% } else { %>
-                    Metadata contains all useful parameters.
-                <% } %>
-            </div>
-            <div class="statistics-datasets-container">
-                <div class="statistics-container">
-                    <% if(results.imageDisplayURL && results.imageDisplayURL.error) { %>
-                        <p class="info-container">
-                            Image display URL does not represent a legal URL format:
-                            <span class="redish-font italic-font">
-                                <%= results.imageDisplayURL.status + " " + results.imageDisplayURL.statusText %>
-                            </span>
-                        </p>
-                    <% } %>
-                </div>
-                <div class="statistics-container">
-                    <h3 class="redish-font">Datasets Statistics</h3>
-                    <p class="info-container">
-                        Metadata of all datasets is missing
-                        <span class="redish-font"><%= results.datasetsStats.numOfBadParams %> out of
-                        <%= results.datasetsStats.numOfParams %></span> useful parameters:
-                    </p>
-                    <p class="info-container">
-                        Metadata of all datasets contains
-                        <span class="info-name"><%= results.datasetsStats.numOfErrors %></span>
-                        URLs which cause some type of error.
-                    </p>
-                    <p class="info-container">
-                        Metadata of all datasets contains
-                        <span class="info-name"><%= results.datasetsStats.differentModifiedDates %></span>
-                        wrong <span class="redish-font italic-font">last_modified</span> dates.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <div class="datasets-list datasets-list-org centered-flex vertical-flex container goldish-color-bg">
-            <h2 class="redish-font">Datasets</h2>
-            <% if(!organization.packages) { %>
-                <p class="description-container">
-                    Missing parameter <span class="info-name italic-font">packages</span>!<br><br>
-                    <% if(organization.package_count) { %>
-                        Instead there is parameter <span class="info-name italic-font">package_count</span>
-                        which shows that this organization authored
-                        <span class="info-name"><%= organization.package_count %></span> datasets.
-                    <% } else { %>
-                        Even the <span class="info-name italic-font">package_count</span> parameter is missing!
-                    <% } %>
-                </p>
-            <% } else { %>
-                <% if(organization.packages.length==0) { %>
-                    <span>Portal hasn't got any datasets.</span>
-                <% } else { %>
-                    <span>
-                        <span class="info-name">Number of datasets: </span>
-                        <%= organization.packages.length %>
-                    </span>
-                    <ul class="list-in-two-columns">
-                        <% for(let dataset of organization.packages) { %>
-                            <li class="equally-spaced-columns">
-                                <a class="darkpurple-font"
-                                href="/portal/<%= portalName %>/dataset/<%= dataset.id %>"
-                                >
-                                    <%= dataset.title ? dataset.title : (dataset.name ? dataset.name : dataset.id) %>
-                                </a>
-                            </li>
-                        <% } %>
-                    </ul>
-                <% } %>
-            <% } %>
-        </div>
+        <%- include('../partials/accordion_list', { list: objectData.datasets, typeOfObject: 'dataset' }); %>
     </main>
-
+    
     <%- include('../partials/footer'); %>
 
     <%- include('../partials/external_scripts'); %>
+    <script src='/scripts/loading.js'></script>
 </body>

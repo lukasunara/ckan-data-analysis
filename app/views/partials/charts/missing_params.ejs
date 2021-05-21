@@ -1,0 +1,15 @@
+<% if(chart.missing_params.size > 0 && !chart.missing_params.has('')) { %>
+    <div class="mb-2">
+        <button class="btn" type="button" data-bs-toggle="collapse" data-bs-target="#collapseList"
+            aria-expanded="false" aria-controls="collapseList" style="background-color: <%= chart.lightColor %>">
+            Press here to see missing metadata parameters
+        </button>
+        <div>
+            <ul id="collapseList" class="collapse list-group list-group-horizontal">
+                <% chart.missing_params.forEach(function(param) { %>
+                    <li class="list-group-item bg-light border-0"><span class="fw-bold"><%= param %></span></li>
+                <% }) %>
+            </ul>
+        </div>
+    </div>
+<% } %>

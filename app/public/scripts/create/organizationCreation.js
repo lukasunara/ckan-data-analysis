@@ -8,6 +8,8 @@ var createOrganization = async (portalName, organization) => {
     let newOrganization = await Organization.fetchOrganizationById(organization.id, portalName);
 
     let title = organization.title ? organization.title : organization.display_name;
+    let numOfExtras = organization.extras ? organization.extras.length : 0;
+    let numOfMembers = organization.users ? organization.users.length : 0;
     let currentDate = new Date();
 
     // if organization doesn't exists in database create a new one
@@ -15,8 +17,8 @@ var createOrganization = async (portalName, organization) => {
         let data = {
             object_id: organization.id, changed: true, portal_id: portalName, name: organization.name,
             title: title, description: organization.description, state: organization.state,
-            approval_status: organization.approval_status, num_of_extras: organization.extras.length,
-            num_of_members: organization.users.length, date_created: organization.created,
+            approval_status: organization.approval_status, num_of_extras: numOfExtras,
+            num_of_members: numOfMembers, date_created: organization.created,
             image_display_url: organization.image_display_url, date_of_storage: currentDate
         }
         newOrganization = new Organization(data);
@@ -29,7 +31,7 @@ var createOrganization = async (portalName, organization) => {
             let dataForUpdate = {
                 name: organization.name, title: title, description: organization.description,
                 state: organization.state, approval_status: organization.approval_status,
-                num_of_extras: organization.extras.length, num_of_members: organization.users.length,
+                num_of_extras: numOfExtras, num_of_members: numOfMembers,
                 date_created: organization.created, image_display_url: organization.image_display_url,
                 date_of_storage: currentDate
             }

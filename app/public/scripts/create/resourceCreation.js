@@ -26,7 +26,7 @@ var createResource = async (resource, dataset_id) => {
         await newResource.persist();
     } else {
         // if exists in database => check if same lastModified timestamp
-        let savedLastModified = new Date(newDataset.last_modified);
+        let savedLastModified = new Date(newResource.last_modified);
         // if last modified timestamps are almost equal continue, else update
         if (lastModified && (lastModified - savedLastModified >= 45)) {
             result = getUrlData(resource.url, resource.format);
@@ -56,7 +56,7 @@ var getUrlData = async (url, format) => {
             if (urlData.error || !urlData.status || urlData.status.code >= 400) {
                 ;
             } else {
-                if (urlData.extension.toLowerCase() == 'shp' && format.toLowerCase() == 'shx') {
+                if (urlData.extension == 'shp' && format.toLowerCase() == 'shx') {
                     urlData.extension = 'shx'; // because .shp and .shx has the same content type
                 }
                 mediaType = urlData.extension;

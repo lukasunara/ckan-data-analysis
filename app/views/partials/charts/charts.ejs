@@ -1,6 +1,8 @@
-<%- include('./rating'); %>
-<%- include('./findability'); %>
-<%- include('./accessibility'); %>
-<%- include('./interoperability'); %>
-<%- include('./reusability'); %>
-<%- include('./contextuality'); %>
+<section class="container d-flex flex-column align-items-center justify-content-evenly p-2">
+    <%- include('./rating'); %>
+    <%- include('./findability', { chart: objectData.result.findChart }); %>
+    <%- include('./accessibility', { chart: objectData.result.accessChart }); %>
+    <%- include('./interoperability', { chart: objectData.result.interChart }); %>
+    <%- include('./reusability', { chart: objectData.result.reuseChart }); %>
+    <%- include('./contextuality', { chart: objectData.result.contextChart }); %>
+</section>

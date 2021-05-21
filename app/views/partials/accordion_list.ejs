@@ -1,0 +1,31 @@
+<section class="container bg-light my-4 rounded-3 w-100 border p-2">
+    <div class="accordion accordion-flush bg-light">
+        <div class="accordion-item bg-light" id="listHeading">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#listPanel" aria-expanded="false" aria-controls="listPanel"
+                >
+                    Here you can choose which <%= typeOfObject %> you want to analyse
+                </button>
+            </h2>
+            <div id="listPanel" class="accordion-collapse collapse" aria-labelledby="listHeading">
+                <div class="accordion-body overflow-auto accordion-list-div bg-light">
+                    <% if (list.length > 0) { %>
+                    <ul class="list-group list-group-flush bg-light">
+                        <% for (let element of list) { %>
+                        <li class="list-group-item bg-light">
+                            <%= element.title ? element.title : element.name ? element.name : "Unknown " + typeOfObject %>:
+                            <a class="link-primary" href="/portal/<%= portalName %>/<%= typeOfObject %>/<%= element.object_id %>">
+                                <%= element.object_id %>
+                            </a>
+                        </li>
+                        <% } %>
+                    </ul>
+                    <% } else { %>
+                        <p>There are no resources for this dataset</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -3,101 +3,23 @@
 
 <head>
     <%- include('../partials/head'); %>
-    <link rel="stylesheet" type="text/css" href="/styles/main.css">
-    <link rel="stylesheet" type="text/css" href="/styles/results.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<body class="primary-color-bg darkpurple-font">
+<body class="lightblue-bg">
     <%- include('../partials/header'); %>
-    
-    <main class="centered-flex vertical-flex">
-        <div class="results-title centered-flex vertical-flex container goldish-color-bg">
-            <h1 class="centered-text redish-font"><%= resource.name ? resource.name : resource.id %></h1>
-            <div class="basic-info slightly-bigger-text">
-                <span>
-                    <span class="info-name">Format: </span>
-                    <%= resource.format ? resource.format : "Unknown" %>
-                </span>
-                <span>
-                    <span class="info-name">State: </span>
-                    <%= resource.state ? resource.state : "unknown" %>
-                </span>
-                <span>
-                    <span class="info-name">Download resource</span>
-                    <a class="url-link darkpurple-font" title="Download resource (if download URL exists)"
-                        href="<%= resource.url ? resource.url : '#' %>" target="_blank"
-                    >here</a>
-                </span>
-            </div>
-            <p class="description-container">
-                <span class="description info-name slightly-bigger-text">Description: </span>
-                <%= resource.description ? resource.description : "Description is empty" %>
-            </p>
-        </div>
 
-        <div class="analysis-results basic-info vertical-flex container goldish-color-bg">
-            <h2 class="redish-font">Analysis results</h2>
-            <p class="info-container">
-                Download URL returns <span class="info-name"><%= results.download.format %></span> format
-                and the expected format from metadata was <span class="info-name"><%= resource.format %></span>.
-            </p>
-            <div class="missing-params">
-                <% if(results.missingParams.length > 0) { %>
-                Metadata is missing <span class="redish-font"><%= results.numbers.numOfBadParams %> out of
-                <%= results.numbers.numOfParams %></span> useful parameters:
-                    <ul class="list-in-five-columns">
-                        <% for(let param of results.missingParams) { %>
-                            <li class="equally-spaced-columns italic-font">
-                                <%= param %>
-                            </li>
-                        <% } %>
-                    </ul>
-                <% } else { %>
-                    Metadata contains all useful parameters.
-                <% } %>
-            </div>
-            <% if(results.download.error) { %>
-                <p class="info-container">
-                    Download URL does not represent a legal URL format: 
-                    <span class="redish-font italic-font">
-                        <%= results.download.message %>
-                    </span>
-                </p>
-            <% } else if(results.download.status.code >= 400) { %>
-                <p class="info-container">
-                    Download URL responds with error: 
-                    <span class="redish-font italic-font">
-                        <%= results.download.status.code + " " + results.download.status.text %>
-                    </span>
-                </p>
-            <% } %>
-            <p class="info-container">
-                By resource metadata last modified date was on 
-                <span class="redish-font italic-font"><%= results.dates.lastModified.toLocaleString() %></span> 
-                (<span class="info-name"><%= results.dates.lastModifiedMonths %></span> months ago).<br>
-                <% if (!results.download.error) { %>
-                    <% if(results.dates.lastModified < results.download.lastModified) { %>
-                        After analysis we realized that the resource was actually last modified on 
-                        <span class="redish-font italic-font">
-                            <%= results.download.lastModified.toLocaleString() %>
-                        </span> 
-                        (<span class="info-name"><%= results.download.lastModifiedMonths %></span> months ago).
-                    <% } %>
-                <% } %>
-            </p>
-
-            <% if (results.fileStats) { %>
-                <p class="info-container">
-                    This resource file contains
-                    <span class="redish-font">
-                        <%= results.fileStats.blankRows %> out of <%= results.fileStats.numOfRows %>
-                    </span> blank rows.
-                </p>
-            <% } %>
-        </div>
+    <%- include('../partials/spinner'); %>
+    <main id="main">
+        <div id="objectData" class="d-none" data-test="<%= JSON.stringify(objectData) %>"></div>
+        <div class="mt-3"><h1 class="text-center">
+            <%= objectData.name ? objectData.name : "Resource ID: " + objectData.object_id %>
+        </h1></div>
+        <%- include('../partials/charts/charts'); %>
     </main>
-
+    
     <%- include('../partials/footer'); %>
 
     <%- include('../partials/external_scripts'); %>
+    <script src='/scripts/loading.js'></script>
 </body>

@@ -124,13 +124,16 @@ module.exports = class Organization extends RateableObject {
         result.reuseChart.maxPointsInfo += ReusabilityChart.maxBasicInfo
         result.reuseChart.maxPointsExtras += ReusabilityChart.maxExtrasOrganization;
 
-        for (let dataset of (await this.fetchDatasets())) {
+        let datasets = await this.fetchDatasets();
+        for (let dataset of datasets) {
             await dataset.analyseDataset(result, !this.changed);
             result.add(dataset.result);
         }
         await result.updateDataInDB();
         await super.setChanged(this.object_id, false);
+
         this.result = result;
+        this.datasets = datasets;
     }
 };
 

@@ -3,7 +3,6 @@
 
 <head>
     <%- include('../partials/head'); %>
-    <link rel="stylesheet" type="text/css" href="/styles/main.css">
 </head>
 
 <body class="lightblue-bg">
@@ -26,15 +25,15 @@
                     <label for="typeOfElement" class="form-label">Choose type of element (URL must correspond to the type):</label>
                     <div class="mt-0 mb-2">
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="typeOfElement" id="radioPortal" required>
+                            <input class="form-check-input" type="radio" name="typeOfElement" id="typeOfElement" value="radioPortal" required>
                             <label class="form-check-label" for="radioPortal">Portal</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="typeOfElement" id="radioDataset" required>
+                            <input class="form-check-input" type="radio" name="typeOfElement" id="typeOfElement" value="radioDataset" required>
                             <label class="form-check-label" for="radioDataset">Dataset</label> 
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="typeOfElement" id="radioOrganization" required>
+                            <input class="form-check-input" type="radio" name="typeOfElement" id="typeOfElement" value="radioOrganization" required>
                             <label class="form-check-label" for="radioOrganization">Organization</label>
                         </div>
                     </div>

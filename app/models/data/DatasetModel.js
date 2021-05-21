@@ -171,16 +171,20 @@ module.exports = class Dataset extends RateableObject {
             result.add(resource.result);
         }
         // 3.2. format diversity (get from resources in database)
-        organizationResult.interChart.format_diversity -= result.interChart.format_diversity;
+        if (organizationResult)
+            organizationResult.interChart.format_diversity -= result.interChart.format_diversity;
         result.interChart.format_diversity -= result.interChart.format_diversity;
         result.interChart.checkFormatDiversity(formats.size);
         result.interChart.format_diversity += result.interChart.format_diversity;
-        organizationResult.interChart.format_diversity += result.interChart.format_diversity;
+        if (organizationResult)
+            organizationResult.interChart.format_diversity += result.interChart.format_diversity;
         result.interChart.maxPointsFormatDiv += InteroperabilityChart.maxFormatDiversity;
 
         await result.updateDataInDB();
         await super.setChanged(this.object_id, false);
+
         this.result = result;
+        this.resources = resources;
     }
 };
 

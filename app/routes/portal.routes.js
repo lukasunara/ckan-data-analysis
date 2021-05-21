@@ -9,7 +9,8 @@ const { createPortal } = require('../public/scripts/create/portalCreation.js');
 // get '/portal/:portalName
 router.get('/', function (req, res) {
     (async () => {
-        var portalName = req.params.portalName;
+        let params = req.params.portalName.split('-');
+        var portalName = params.length == 1 ? params[0] : params[0] + '/' + params[1];
 
         if (!portalName) {
             redirectToWithError(res, req, '/menu');
@@ -55,7 +56,8 @@ router.get('/', function (req, res) {
 // get '/portal/:portalName/dataset/:datasetID
 router.get('/dataset/:datasetID', function (req, res) {
     (async () => {
-        var portalName = req.params.portalName;
+        let params = req.params.portalName.split('-');
+        var portalName = params.length == 1 ? params[0] : params[0] + '/' + params[1];
         var datasetID = req.params.datasetID;
 
         if (!datasetID) {
@@ -68,13 +70,14 @@ router.get('/dataset/:datasetID', function (req, res) {
                 redirectToWithError(res, req, '/portal/' + portalName);
             } else {
                 let dataset = await createDataset(portalName, datasetData.data.result);
-                dataset.analyseDataset();
+                await dataset.analyseDataset();
 
                 res.render('dataset', {
                     linkActive: 'menu',
                     title: "Dataset analysis results",
                     portalName: portalName,
-                    objectData: dataset
+                    objectData: dataset,
+                    overallResults: dataset.result.getOverallRating()
                 });
             }
         }
@@ -84,7 +87,8 @@ router.get('/dataset/:datasetID', function (req, res) {
 // get '/portal/:portalName/organization/:organizationID
 router.get('/organization/:organizationID', function (req, res) {
     (async () => {
-        var portalName = req.params.portalName;
+        let params = req.params.portalName.split('-');
+        var portalName = params.length == 1 ? params[0] : params[0] + '/' + params[1];
         var organizationID = req.params.organizationID;
 
         if (!organizationID) {
@@ -104,7 +108,8 @@ router.get('/organization/:organizationID', function (req, res) {
                     linkActive: 'menu',
                     title: "Organization analysis results",
                     portalName: portalName,
-                    objectData: organization
+                    objectData: organization,
+                    overallResults: organization.result.getOverallRating()
                 });
             }
         }
@@ -114,7 +119,8 @@ router.get('/organization/:organizationID', function (req, res) {
 // get '/portal/:portalName/resource/:resourceID
 router.get('/resource/:resourceID', function (req, res) {
     (async () => {
-        var portalName = req.params.portalName;
+        let params = req.params.portalName.split('-');
+        var portalName = params.length == 1 ? params[0] : params[0] + '/' + params[1];
         var resourceID = req.params.resourceID;
 
         if (!resourceID) {
@@ -127,12 +133,13 @@ router.get('/resource/:resourceID', function (req, res) {
                 redirectToWithError(res, req, '/portal/' + portalName);
             } else {
                 let resource = await createResource(resourceData.data.result);
-                resource.analyseResource();
+                await resource.analyseResource();
 
                 res.render('resource', {
                     linkActive: 'menu',
                     title: "Resource analysis results",
-                    objectData: resource
+                    objectData: resource,
+                    overallResults: resource.result.getOverallRating()
                 });
             }
         }

@@ -3,24 +3,25 @@
 
 <head>
     <%- include('../partials/head'); %>
-    <link rel="stylesheet" type="text/css" href="/styles/main.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body class="lightblue-bg">
     <%- include('../partials/header'); %>
     
-    <div id="objectData" class="d-none" data-test="<%= JSON.stringify(objectData) %>"></div>
-    <main>
+    <%- include('../partials/spinner'); %>
+    <main id="main">
+        <div id="objectData" class="d-none" data-test="<%= JSON.stringify(objectData) %>"></div>
         <div class="mt-3"><h1 class="text-center">
             <%= objectData.title ? objectData.title : objectData.object_id %>
         </h1></div>
-        <section class="container d-flex flex-column align-items-center justify-content-evenly p-2">
-            <%- include('../partials/charts/charts'); %>
-        </section>
+        <%- include('../partials/charts/charts'); %>
+
+        <%- include('../partials/accordion_list', { list: objectData.organizations, typeOfObject: 'organization' }); %>
     </main>
     
     <%- include('../partials/footer'); %>
 
     <%- include('../partials/external_scripts'); %>
+    <script src='/scripts/loading.js'></script>
 </body>

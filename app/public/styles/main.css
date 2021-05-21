@@ -71,3 +71,8 @@ canvas.smaller-chart {
     height: 85%;
     width: 85%;
 }
+
+.accordion-list-div {
+    max-height: 200px;
+    min-width: 75%;
+}

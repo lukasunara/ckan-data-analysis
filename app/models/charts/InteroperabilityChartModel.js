@@ -144,7 +144,7 @@ module.exports = class InteroperabilityChart extends Chart {
     // checks compatibility of format and media type
     checkCompatibility(mediaType, format) {
         // if compatible, add 1 point
-        if (mediaType && mediaType.toLowerCase() == format.toLowerCase()) {
+        if (mediaType && mediaType == format.toLowerCase()) {
             this.compatibility++;
         }
     }

@@ -13,6 +13,8 @@ var createDataset = async (portalName, dataset) => {
     let metadataCreated = new Date(dataset.metadata_created);
     let metadataModified = new Date(dataset.metadata_modified);
     let numOfKeywords = dataset.tags ? dataset.tags.length : (dataset.keywords ? dataset.keywords.length : 0);
+    let numOfGroups = dataset.groups ? dataset.groups.length : 0;
+    let numOfExtras = dataset.extras ? dataset.extras.length : 0;
 
     // if dataset doesn't exists in database create a new one
     if (!newDataset) {
@@ -21,7 +23,7 @@ var createDataset = async (portalName, dataset) => {
             name: dataset.name, title: dataset.title, owner_org: dataset.owner_org, author: dataset.author,
             maintainer: dataset.maintainer, private: dataset.private, state: dataset.state,
             description: description, metadata_created: metadataCreated, metadata_modified: metadataModified,
-            num_of_extras: dataset.extras.length, num_of_groups: dataset.groups.length,
+            num_of_extras: numOfExtras, num_of_groups: numOfGroups,
             num_of_keywords: numOfKeywords, license_title: dataset.license_title,
             license_url: dataset.license_url, url: dataset.url
         }
@@ -39,7 +41,7 @@ var createDataset = async (portalName, dataset) => {
                 name: dataset.name, title: dataset.title, owner_org: dataset.owner_org, author: dataset.author,
                 maintainer: dataset.maintainer, private: dataset.private, state: dataset.state,
                 description: description, metadataCreated: metadataCreated, metadataModified: metadataModified,
-                num_of_extras: dataset.extras.length, num_of_groups: dataset.groups.length,
+                num_of_extras: numOfExtras, num_of_groups: numOfGroups,
                 num_of_keywords: numOfKeywords, license_title: dataset.license_title,
                 license_url: dataset.license_url, url: dataset.url
             }
