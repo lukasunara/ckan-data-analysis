@@ -185,8 +185,7 @@ var dbUpdateResource = async (resource) => {
 
 // gets resource from database (by its' id)
 var dbGetResource = async (resource_id) => {
-    const sql = `SELECT * FROM resource
-                    WHERE object_id = '${resource_id}';`;
+    const sql = `SELECT * FROM resource WHERE object_id = '${resource_id}';`;
     try {
         const result = await db.query(sql, []);
         return result.rows[0];

@@ -6,7 +6,7 @@ const Dataset = require('../../../models/data/DatasetModel.js');
 var createDataset = async (portalName, dataset) => {
     let checkResources = false; //should I check resources or not
     // fetch dataset from database (if exists)
-    let newDataset = await Dataset.fetchDatasetById(dataset.id, portalName);
+    let newDataset = await Dataset.fetchDatasetById(dataset.id);
 
     let orgID = dataset.owner_org ? dataset.owner_org : dataset.organization.id;
     let description = dataset.notes ? dataset.notes : dataset.description;
@@ -56,7 +56,7 @@ var createDataset = async (portalName, dataset) => {
                 + '/api/3/action/resource_show?id=' + dataset.resources[i].id;
             let resourceData = await fetchData(resourceUrl);
 
-            if (resourceData.error || resourceData.data === undefined) {
+            if (resourceData.error || resourceData.data === undefined || !resourceData.data.result) {
                 ;
             } else {
                 await createResource(resourceData.data.result, dataset.id);

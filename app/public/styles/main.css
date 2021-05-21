@@ -26,53 +26,12 @@ body {
     color: red;
 }
 
-.italic-font {
-    font-style: italic;
-}
-
-span.bigger-font {
-    font-size: 2em;
-}
-
-.slightly-bigger-text {
-    font-size: 1.2em;
-}
-
-hr.dotted {
-    border-top: 2px dotted rgba(110, 243, 243, 0.801);
-    width: 100%;
-}
-
-.pre-not-styled {
-    font-family: inherit;
-}
-
-li {
-    list-style-type: square;
-}
-
-li::marker {
-    color: blue;
-}
-
-ul.list-in-two-columns {
-    column-count: 2;
-}
-
-ul.list-in-five-columns {
-    column-count: 5;
-}
-
-.light-border {
-    border: 1px solid rgba(0, 0, 0, .125);
-}
-
 canvas.smaller-chart {
     height: 85%;
     width: 85%;
 }
 
 .accordion-list-div {
-    max-height: 200px;
+    max-height: 300px;
     min-width: 75%;
 }

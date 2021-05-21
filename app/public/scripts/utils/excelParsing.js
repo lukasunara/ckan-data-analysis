@@ -7,21 +7,24 @@ var parseExcelFile = (data, extension) => {
     numOfRows = 0;
     blankRows = 0;
 
-    if (extension == 'xlsx' || extension == 'xls') {
-        var workbook = XLSX.read(data, { type: 'array', sheetStubs: true });
-    } else if (extension == 'csv' || extension == 'xml') {
-        var workbook = XLSX.read(data, { type: 'buffer', sheetStubs: true });
+    try {
+        if (extension == 'xlsx' || extension == 'xls') {
+            var workbook = XLSX.read(data, { type: 'array', sheetStubs: true });
+        } else if (extension == 'csv' || extension == 'xml') {
+            var workbook = XLSX.read(data, { type: 'buffer', sheetStubs: true });
+        }
+        var sheetNamesList = workbook.SheetNames; // list of sheet names
+
+        // iterate over all sheets and analyse them
+        sheetNamesList.forEach(sheet => {
+            let worksheetJSON = XLSX.utils.sheet_to_json(
+                workbook.Sheets[sheet], { defval: null, blankrows: true }
+            );
+            analyseFile(worksheetJSON);
+        });
+    } catch (err) {
+        console.log(err);
     }
-    var sheetNamesList = workbook.SheetNames; // list of sheet names
-
-    // iterate over all sheets and analyse them
-    sheetNamesList.forEach(sheet => {
-        let worksheetJSON = XLSX.utils.sheet_to_json(
-            workbook.Sheets[sheet], { defval: null, blankrows: true }
-        );
-        analyseFile(worksheetJSON);
-    });
-
     // console.log(blankRows + '/' + numOfRows + '\n');
 
     return {
@@ -35,7 +38,11 @@ var parseJSONFile = (jsonData) => {
     numOfRows = 0;
     blankRows = 0;
 
-    analyseFile(jsonData);
+    try {
+        analyseFile(jsonData);
+    } catch (err) {
+        console.log(err);
+    }
 
     return {
         numOfRows: numOfRows,

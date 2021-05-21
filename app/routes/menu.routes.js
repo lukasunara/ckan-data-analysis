@@ -32,7 +32,7 @@ router.post('/portal', [
 
         switch (req.body.typeOfElement) {
             case 'radioPortal': {
-                if (pathName) {
+                if (pathName.length > 1 && pathName[1] != '') {
                     portalName += '-' + pathName[1];
                 }
                 res.redirect('/portal/' + portalName);

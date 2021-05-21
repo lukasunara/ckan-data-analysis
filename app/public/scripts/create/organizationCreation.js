@@ -5,7 +5,7 @@ const Organization = require('../../../models/data/OrganizationModel.js');
 // creates new Organization object (or fetches existing one from database)
 var createOrganization = async (portalName, organization) => {
     // fetch organization from database (if exists)
-    let newOrganization = await Organization.fetchOrganizationById(organization.id, portalName);
+    let newOrganization = await Organization.fetchOrganizationById(organization.id);
 
     let title = organization.title ? organization.title : organization.display_name;
     let numOfExtras = organization.extras ? organization.extras.length : 0;

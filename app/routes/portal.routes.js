@@ -42,7 +42,7 @@ router.get('/', function (req, res) {
                 res.render('portal', {
                     linkActive: 'menu',
                     title: "Portal analysis results",
-                    portalName: portalName,
+                    portalName: req.params.portalName,
                     datasets: datasets.data.result,
                     organizations: organizations.data.result,
                     objectData: portal,
@@ -75,7 +75,7 @@ router.get('/dataset/:datasetID', function (req, res) {
                 res.render('dataset', {
                     linkActive: 'menu',
                     title: "Dataset analysis results",
-                    portalName: portalName,
+                    portalName: req.params.portalName,
                     objectData: dataset,
                     overallResults: dataset.result.getOverallRating()
                 });
@@ -107,7 +107,7 @@ router.get('/organization/:organizationID', function (req, res) {
                 res.render('organization', {
                     linkActive: 'menu',
                     title: "Organization analysis results",
-                    portalName: portalName,
+                    portalName: req.params.portalName,
                     objectData: organization,
                     overallResults: organization.result.getOverallRating()
                 });

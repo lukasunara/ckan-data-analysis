@@ -24,13 +24,13 @@ const sql_drop_tables = `
 `;
 
 const sql_create_rateableObject = `CREATE TABLE rateableObject (
-    object_id VARCHAR(36) PRIMARY KEY,
+    object_id VARCHAR(200) PRIMARY KEY,
     changed BOOLEAN
 );`;
 const sql_create_rateableObject_id_index = `CREATE UNIQUE INDEX idx_rateableObjectId ON rateableObject(object_id);`;
 
 const sql_create_portal = `CREATE TABLE portal (
-    name VARCHAR(36) NOT NULL UNIQUE,
+    name VARCHAR(200) NOT NULL UNIQUE,
     title VARCHAR(250),
     description TEXT,
     num_of_vocabularies INTEGER,
@@ -44,7 +44,7 @@ const sql_create_portal_id_index = `CREATE UNIQUE INDEX idx_portalId ON portal(o
 const sql_create_portal_name_index = `CREATE UNIQUE INDEX idx_portalName ON portal(name);`;
 
 const sql_create_organization = `CREATE TABLE organization (
-    portal_id VARCHAR(36),
+    portal_id VARCHAR(200),
     name VARCHAR(300),
     title VARCHAR(300),
     description TEXT,
@@ -64,8 +64,8 @@ const sql_create_organization_id_index = `CREATE UNIQUE INDEX idx_organizationId
 const sql_create_organization_portal_index = `CREATE INDEX idx_organizationPortal ON organization(portal_id);`;
 
 const sql_create_dataset = `CREATE TABLE dataset (
-    portal_id VARCHAR(36),
-    organization_id VARCHAR(36),
+    portal_id VARCHAR(200),
+    organization_id VARCHAR(200),
     name VARCHAR(300),
     title VARCHAR(300),
     owner_org VARCHAR(300),
@@ -95,8 +95,8 @@ const sql_create_dataset_portal_index = `CREATE INDEX idx_datasetPortal ON datas
 const sql_create_dataset_organization_index = `CREATE INDEX idx_datasetOrganization ON dataset(organization_id);`;
 
 const sql_create_resource = `CREATE TABLE resource (
-    dataset_id VARCHAR(36),
-    revision_id VARCHAR(36),
+    dataset_id VARCHAR(200),
+    revision_id VARCHAR(200),
     name VARCHAR(300),
     size INTEGER,
     format VARCHAR(40),
@@ -118,7 +118,7 @@ const sql_create_resource_dataset_index = `CREATE INDEX idx_resourceDataset ON r
 
 const sql_create_chart = `CREATE TABLE chart (
     chart_id SERIAL PRIMARY KEY,
-    object_id VARCHAR(36),
+    object_id VARCHAR(200),
     missing_params TEXT,
     CONSTRAINT fkChartObject FOREIGN KEY (object_id) REFERENCES rateableObject(object_id)
         ON DELETE CASCADE

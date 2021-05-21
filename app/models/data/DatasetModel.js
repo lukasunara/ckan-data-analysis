@@ -67,8 +67,8 @@ module.exports = class Dataset extends RateableObject {
     }
 
     // fetch dataset by id
-    static async fetchDatasetById(dataset_id, portal_id) {
-        let result = await dbGetDataset(dataset_id, portal_id);
+    static async fetchDatasetById(dataset_id) {
+        let result = await dbGetDataset(dataset_id);
         let dataset = null;
         if (result) {
             dataset = new Dataset(result);
@@ -214,20 +214,18 @@ var dbNewDataset = async (dataset) => {
 // updates dataset data in database
 var dbUpdateDataset = async (dataset) => {
     const sql = `UPDATE dataset
-                    SET changed = $2, name = $5, title = $6, owner_org = $7, author = $8,
-                        maintainer = $9, private = $10, state = $11, description = $12,
-                        metadata_created = $13, metadata_modified = $14, num_of_extras = $15,
-                        num_of_groups = $16, num_of_keywords = $17, license_title = $18,
-                        license_url = $19, url = $20
-                    WHERE object_id = $1
-                        AND portal_id = $3
-                        AND organization_id = $4;`;
+                    SET changed = $2, name = $3, title = $4, owner_org = $5, author = $6,
+                        maintainer = $7, private = $8, state = $9, description = $10,
+                        metadata_created = $11, metadata_modified = $12, num_of_extras = $13,
+                        num_of_groups = $14, num_of_keywords = $15, license_title = $16,
+                        license_url = $17, url = $18
+                    WHERE object_id = $1;`;
     const values = [
-        dataset.object_id, dataset.changed, dataset.portal_id, dataset.organization_id,
-        dataset.name, dataset.title, dataset.owner_org, dataset.author, dataset.maintainer,
-        dataset.private, dataset.state, dataset.description, dataset.metadata_created,
-        dataset.metadata_modified, dataset.num_of_extras, dataset.num_of_groups,
-        dataset.num_of_keywords, dataset.license_title, dataset.license_url, dataset.url
+        dataset.object_id, dataset.changed, dataset.name, dataset.title, dataset.owner_org,
+        dataset.author, dataset.maintainer, dataset.private, dataset.state, dataset.description,
+        dataset.metadata_created, dataset.metadata_modified, dataset.num_of_extras,
+        dataset.num_of_groups, dataset.num_of_keywords, dataset.license_title, dataset.license_url,
+        dataset.url
     ];
     try {
         const result = await db.query(sql, values);
@@ -239,9 +237,9 @@ var dbUpdateDataset = async (dataset) => {
 };
 
 // gets dataset from database (by its' id)
-var dbGetDataset = async (dataset_id, portal_id) => {
+var dbGetDataset = async (dataset_id) => {
     const sql = `SELECT * FROM dataset
-                    WHERE object_id = '${dataset_id}' AND portal_id = '${portal_id}';`;
+                    WHERE object_id = '${dataset_id}';`;
     try {
         const result = await db.query(sql, []);
         return result.rows[0];

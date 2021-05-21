@@ -52,8 +52,8 @@ module.exports = class Organization extends RateableObject {
     }
 
     // fetch organization by id
-    static async fetchOrganizationById(organization_id, portal_id) {
-        let result = await dbGetOrganization(organization_id, portal_id);
+    static async fetchOrganizationById(organization_id) {
+        let result = await dbGetOrganization(organization_id);
         let organization = null;
         if (result) {
             organization = new Organization(result);
@@ -64,7 +64,7 @@ module.exports = class Organization extends RateableObject {
 
     // fetch all datasets created by this organization
     async fetchDatasets() {
-        let results = await dbGetDatasets(this.object_id, this.portal_id);
+        let results = await dbGetDatasets(this.object_id);
         let datasets = [];
 
         for (let dataset of results) {
@@ -160,14 +160,13 @@ var dbNewOrganization = async (org) => {
 // updates organization data in database
 var dbUpdateOrganization = async (org) => {
     const sql = `UPDATE organization
-                    SET changed = $2, name = $4, title = $5, description = $6, state = $7,
-                        approval_status = $8, num_of_extras = $9, num_of_members = $10,
-                        date_created = $11, image_display_url = $12, date_of_storage = $13
-                    WHERE object_id = $1
-                        AND portal_id = $3;`;
+                    SET changed = $2, name = $3, title = $4, description = $5, state = $6,
+                        approval_status = $7, num_of_extras = $8, num_of_members = $9,
+                        date_created = $10, image_display_url = $11, date_of_storage = $12
+                    WHERE object_id = $1;`;
     const values = [
-        org.object_id, org.changed, org.portal_id, org.name, org.title, org.description,
-        org.state, org.approval_status, org.num_of_extras, org.num_of_members, org.date_created,
+        org.object_id, org.changed, org.name, org.title, org.description, org.state,
+        org.approval_status, org.num_of_extras, org.num_of_members, org.date_created,
         org.image_display_url, org.date_of_storage
     ];
     try {
@@ -180,9 +179,8 @@ var dbUpdateOrganization = async (org) => {
 };
 
 // gets organization from database (by its' id)
-var dbGetOrganization = async (organization_id, portal_id) => {
-    const sql = `SELECT * FROM organization
-                    WHERE object_id = '${organization_id}' AND portal_id = '${portal_id}';`;
+var dbGetOrganization = async (organization_id) => {
+    const sql = `SELECT * FROM organization WHERE object_id = '${organization_id}';`;
     try {
         const result = await db.query(sql, []);
         return result.rows[0];
@@ -193,9 +191,8 @@ var dbGetOrganization = async (organization_id, portal_id) => {
 }
 
 // gets all datasets from database for this organization
-var dbGetDatasets = async (organization_id, portal_id) => {
-    const sql = `SELECT * FROM dataset
-                    WHERE organization_id = '${organization_id}' AND portal_id = '${portal_id}';`;
+var dbGetDatasets = async (organization_id) => {
+    const sql = `SELECT * FROM dataset WHERE organization_id = '${organization_id}';`;
     try {
         const result = await db.query(sql, []);
         return result.rows;
