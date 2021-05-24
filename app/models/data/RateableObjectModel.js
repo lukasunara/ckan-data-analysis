@@ -3,12 +3,13 @@ const db = require('../../db');
 // class RateableObject encapsulates a rateable object
 module.exports = class RateableObject {
 
-    constructor(object_id, changed) {
+    constructor(object_id, changed, last_updated) {
         if (this.constructor === RateableObject) {
             throw new TypeError('Abstract class "RateableObject" cannot be instantiated directly.');
         }
         this.object_id = object_id;
         this.changed = changed;
+        this.last_updated = last_updated;
         this.persisted = false;
     }
 

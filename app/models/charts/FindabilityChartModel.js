@@ -18,14 +18,13 @@ module.exports = class FindabilityChart extends Chart {
         this.lightColor = '#71c495';
 
         this.identification = data.identification;
+        this.max_id = data.max_id;
         this.keywords = data.keywords;
+        this.max_key = data.max_key;
         this.categories = data.categories;
+        this.max_cat = data.max_cat;
         this.state = data.state;
-
-        this.maxPointsID = 0;
-        this.maxPointsKeywords = 0;
-        this.maxPointsCategories = 0;
-        this.maxPointsState = 0;
+        this.max_state = data.max_state;
     }
 
     // creates a new empty FindabilityChart
@@ -35,15 +34,19 @@ module.exports = class FindabilityChart extends Chart {
             object_id: object_id,
             missing_params: new Set(),
             identification: 0,
+            max_id: 0,
             keywords: 0,
+            max_key: 0,
             categories: 0,
-            state: 0
+            max_cat: 0,
+            state: 0,
+            max_state: 0
         });
     }
 
     // gets maximum of points an object could have received
     getMaxPoints() {
-        return this.maxPointsID + this.maxPointsKeywords + this.maxPointsCategories + this.maxPointsState;
+        return this.max_id + this.max_key + this.max_cat + this.max_state;
     }
 
     // gets number of points an object has earned
@@ -54,40 +57,37 @@ module.exports = class FindabilityChart extends Chart {
     // sets all points to zero
     reset() {
         this.identification = 0;
+        this.max_id = 0;
         this.keywords = 0;
+        this.max_key = 0;
         this.categories = 0;
+        this.max_cat = 0;
         this.state = 0;
-
-        this.maxPointsID = 0;
-        this.maxPointsKeywords = 0;
-        this.maxPointsCategories = 0;
-        this.maxPointsState = 0;
+        this.max_state = 0;
     }
 
     // reduces points by other chart values
     reduce(other) {
         this.identification -= other.identification;
+        this.max_id -= other.max_id;
         this.keywords -= other.keywords;
+        this.max_key -= other.max_key;
         this.categories -= other.categories;
+        this.max_cat -= other.max_cat;
         this.state -= other.state;
-
-        this.maxPointsID -= other.maxPointsID;
-        this.maxPointsKeywords -= other.maxPointsKeywords;
-        this.maxPointsCategories -= other.maxPointsCategories;
-        this.maxPointsState -= other.maxPointsState;
+        this.max_state -= other.max_state;
     }
 
     // adds points from other chart values
     add(other) {
         this.identification += other.identification;
+        this.max_id += other.max_id;
         this.keywords += other.keywords;
+        this.max_key += other.max_key;
         this.categories += other.categories;
+        this.max_cat += other.max_cat;
         this.state += other.state;
-
-        this.maxPointsID += other.maxPointsID;
-        this.maxPointsKeywords += other.maxPointsKeywords;
-        this.maxPointsCategories += other.maxPointsCategories;
-        this.maxPointsState += other.maxPointsState;
+        this.max_state += other.max_state;
     }
 
     // fetch chart from database for given object id
@@ -154,11 +154,12 @@ module.exports = class FindabilityChart extends Chart {
 
 // inserts a new findability chart into database
 var dbNewFindabilityChart = async (chart, missingParams) => {
-    const sql = `INSERT INTO findability (object_id, missing_params, identification,
-                                keywords, categories, state) VALUES ($1, $2, $3, $4, $5, $6);`;
+    const sql = `INSERT INTO findability (object_id, missing_params, identification, max_id,
+                    keywords, max_key, categories, max_cat, state, max_state) VALUES (
+                        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10);`;
     const values = [
-        chart.object_id, missingParams, chart.identification,
-        chart.keywords, chart.categories, chart.state,
+        chart.object_id, missingParams, chart.identification, chart.max_id, chart.keywords,
+        chart.max_key, chart.categories, chart.max_cat, chart.state, chart.max_state
     ];
     try {
         const result = await db.query(sql, values);
@@ -172,14 +173,15 @@ var dbNewFindabilityChart = async (chart, missingParams) => {
 // updates findability chart data in database
 var dbUpdateFindability = async (chart, missingParams) => {
     const sql = `UPDATE findability
-                    SET missing_params = '${missingParams}',
-                        identification = ${chart.identification},
-                        keywords = ${chart.keywords},
-                        categories = ${chart.categories},
-                        state = ${chart.state}
-                    WHERE chart_id = '${chart.chart_id}';`;
+                    SET missing_params = $2, identification = $3, max_id = $4, keywords = $5,
+                        max_key = $6, categories = $7, max_cat = $8, state = $9, max_state = $10
+                    WHERE chart_id = $1;`;
+    const values = [
+        chart.chart_id, missingParams, chart.identification, chart.max_id, chart.keywords,
+        chart.max_key, chart.categories, chart.max_cat, chart.state, chart.max_state
+    ];
     try {
-        const result = await db.query(sql, []);
+        const result = await db.query(sql, values);
         return result.rowCount;
     } catch (err) {
         console.log(err);

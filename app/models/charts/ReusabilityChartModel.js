@@ -18,14 +18,13 @@ module.exports = class ReusabilityChart extends Chart {
         this.lightColor = '#da92f7';
 
         this.license = data.license;
+        this.max_license = max_license;
         this.basic_info = data.basic_info;
+        this.max_basic_info = max_basic_info;
         this.extras = data.extras;
+        this.max_extras = max_extras;
         this.publisher = data.publisher;
-
-        this.maxPointsLicense = 0;
-        this.maxPointsInfo = 0;
-        this.maxPointsExtras = 0;
-        this.maxPointsPublisher = 0;
+        this.max_publisher = max_publisher;
     }
 
     // creates a new empty ReusabilityChart
@@ -35,15 +34,19 @@ module.exports = class ReusabilityChart extends Chart {
             object_id: object_id,
             missing_params: new Set(),
             license: 0,
+            max_license: 0,
             basic_info: 0,
+            max_basic_info: 0,
             extras: 0,
-            publisher: 0
+            max_extras: 0,
+            publisher: 0,
+            max_publisher: 0
         });
     }
 
     // gets maximum of points an object could have received
     getMaxPoints() {
-        return this.maxPointsLicense + this.maxPointsInfo + this.maxPointsExtras + this.maxPointsPublisher;
+        return this.max_license + this.max_basic_info + this.max_extras + this.max_publisher;
     }
 
     // gets number of points an object has earned
@@ -54,40 +57,37 @@ module.exports = class ReusabilityChart extends Chart {
     // sets all points to zero
     reset() {
         this.license = 0;
+        this.max_license = 0;
         this.basic_info = 0;
+        this.max_basic_info = 0;
         this.extras = 0;
+        this.max_extras = 0;
         this.publisher = 0;
-
-        this.maxPointsLicense = 0;
-        this.maxPointsInfo = 0;
-        this.maxPointsExtras = 0;
-        this.maxPointsPublisher = 0;
+        this.max_publisher = 0;
     }
 
     // reduces points by other chart values
     reduce(other) {
         this.license -= other.license;
+        this.max_license -= other.max_license;
         this.basic_info -= other.basic_info;
+        this.max_basic_info -= other.max_basic_info;
         this.extras -= other.extras;
+        this.max_extras -= other.max_extras;
         this.publisher -= other.publisher;
-
-        this.maxPointsLicense -= other.maxPointsLicense;
-        this.maxPointsInfo -= other.maxPointsInfo;
-        this.maxPointsExtras -= other.maxPointsExtras;
-        this.maxPointsPublisher -= other.maxPointsPublisher;
+        this.max_publisher -= other.max_publisher;
     }
 
     // adds points from other chart values
     add(other) {
         this.license += other.license;
+        this.max_license += other.max_license;
         this.basic_info += other.basic_info;
+        this.max_basic_info += other.max_basic_info;
         this.extras += other.extras;
+        this.max_extras += other.max_extras;
         this.publisher += other.publisher;
-
-        this.maxPointsLicense += other.maxPointsLicense;
-        this.maxPointsInfo += other.maxPointsInfo;
-        this.maxPointsExtras += other.maxPointsExtras;
-        this.maxPointsPublisher += other.maxPointsPublisher;
+        this.max_publisher += other.max_publisher;
     }
 
     isPersisted() {
@@ -182,11 +182,12 @@ module.exports = class ReusabilityChart extends Chart {
 
 // inserts a new reusability chart into database
 var dbNewReusabilityChart = async (chart, missingParams) => {
-    const sql = `INSERT INTO reusability (object_id, missing_params, license,
-        basic_info, extras, publisher) VALUES ($1, $2, $3, $4, $5, $6);`;
+    const sql = `INSERT INTO reusability (object_id, missing_params, license, max_license,
+                    basic_info, max_basic_info, extras, max_extras, publisher, max_publisher)
+                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);`;
     const values = [
-        chart.object_id, missingParams, chart.license,
-        chart.basic_info, chart.extras, chart.publisher
+        chart.object_id, missingParams, chart.license, chart.max_license, chart.basic_info,
+        chart.max_basic_info, chart.extras, chart.max_extras, chart.publisher, chart.max_publisher
     ];
     try {
         const result = await db.query(sql, values);
@@ -200,14 +201,15 @@ var dbNewReusabilityChart = async (chart, missingParams) => {
 // updates reusability chart data in database
 var dbUpdateReusability = async (chart, missingParams) => {
     const sql = `UPDATE reusability
-                    SET missing_params = '${missingParams}',
-                        license = ${chart.license},
-                        basic_info = ${chart.basic_info},
-                        extras = ${chart.extras},
-                        publisher = ${chart.publisher}
-                    WHERE chart_id = '${chart.chart_id}';`;
+                    SET missing_params = $2, license = $3, max_license = $4, basic_info = $5,
+                        max_basic_info = $6, extras = $7, max_extras = $8, publisher = $9, max_publisher = $10
+                    WHERE chart_id = $1;`;
+    const values = [
+        chart.chart_id, missingParams, chart.license, chart.max_license, chart.basic_info,
+        chart.max_basic_info, chart.extras, chart.max_extras, chart.publisher, chart.max_publisher
+    ];
     try {
-        const result = await db.query(sql, []);
+        const result = await db.query(sql, values);
         return result.rowCount;
     } catch (err) {
         console.log(err);

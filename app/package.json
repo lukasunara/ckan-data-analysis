@@ -30,6 +30,7 @@
     "express-validator": "^6.9.0",
     "mime-types": "^2.1.28",
     "node-fetch": "^2.6.1",
+    "node-schedule": "^2.0.0",
     "pg": "^8.5.1",
     "xlsx": "^0.16.9"
   }

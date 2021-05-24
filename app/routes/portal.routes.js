@@ -1,10 +1,26 @@
 const express = require('express');
 const router = express.Router({ mergeParams: true });
-const { fetchData, redirectToWithError } = require('../public/scripts/utils/fetching.js');
-const { createDataset } = require('../public/scripts/create/datasetCreation.js');
-const { createOrganization } = require('../public/scripts/create/organizationCreation.js');
-const { createResource } = require('../public/scripts/create/resourceCreation.js');
-const { createPortal } = require('../public/scripts/create/portalCreation.js');
+
+const Portal = require('../models/data/PortalModel.js');
+const Organization = require('../models/data/OrganizationModel.js');
+const Dataset = require('../models/data/DatasetModel.js');
+const Resource = require('../models/data/ResourceModel.js');
+
+const { redirectToWithError } = require('../public/scripts/utils/fetching.js');
+const { analysePortal } = require('../public/scripts/analysis/analysePortal.js');
+const {
+    analyseOrganization,
+    fetchOrganizationData
+} = require('../public/scripts/analysis/analyseOrganization.js');
+const {
+    analyseDataset,
+    fetchDatasetData
+} = require('../public/scripts/analysis/analyseDataset.js');
+const {
+    fetchResourceData,
+    analyseResource
+} = require('../public/scripts/analysis/analyseResource.js');
+const AnalysisResult = require('../models/data/AnalysisResult.js');
 
 // get '/portal/:portalName
 router.get('/', function (req, res) {
@@ -15,40 +31,24 @@ router.get('/', function (req, res) {
         if (!portalName) {
             redirectToWithError(res, req, '/menu');
         } else {
-            let datasetsUrl = 'http://' + portalName + '/api/3/action/package_list';
-            let datasets = await fetchData(datasetsUrl);
-
-            let organizationsUrl = 'http://' + portalName + '/api/3/action/organization_list';
-            let organizations = await fetchData(organizationsUrl);
-
-            let basicInfoUrl = 'http://' + portalName + '/api/3/action/status_show';
-            let basicInfo = await fetchData(basicInfoUrl);
-
-            let vocabulariesUrl = 'http://' + portalName + '/api/3/action/vocabulary_list';
-            let vocabularies = await fetchData(vocabulariesUrl);
-
-            if (datasets.error || datasets.data === undefined ||
-                organizations.error || organizations.data === undefined ||
-                basicInfo.error || basicInfo.data === undefined ||
-                vocabularies.error || vocabularies.data === undefined
-            ) {
-                redirectToWithError(res, req, '/menu');
+            let portal = await Portal.fetchPortalWithCharts();
+            if (!portal) {
+                portal = analysePortal(portalName);
+                if (portal.failed) {
+                    redirectToWithError(res, req, '/menu');
+                }
             } else {
-                let portal = await createPortal(portalName, datasets.data.result,
-                    organizations.data.result, basicInfo.data.result, vocabularies.data.result
-                );
-                await portal.analysePortal();
-
-                res.render('portal', {
-                    linkActive: 'menu',
-                    title: "Portal analysis results",
-                    portalName: req.params.portalName,
-                    datasets: datasets.data.result,
-                    organizations: organizations.data.result,
-                    objectData: portal,
-                    overallResults: portal.result.getOverallRating()
-                });
+                portal.result = AnalysisResult.createAnalysisResult(portal.object_id);
             }
+            res.render('portal', {
+                linkActive: 'menu',
+                title: "Portal analysis results",
+                portalName: req.params.portalName,
+                datasets: datasets.data.result,
+                organizations: organizations.data.result,
+                objectData: portal,
+                overallResults: portal.result.getOverallRating()
+            });
         }
     })();
 });
@@ -63,15 +63,19 @@ router.get('/dataset/:datasetID', function (req, res) {
         if (!datasetID) {
             redirectToWithError(res, req, '/portal/' + portalName);
         } else {
-            let datasetUrl = 'http://' + portalName + '/api/3/action/package_show?id=' + datasetID;
-            let datasetData = await fetchData(datasetUrl);
-
-            if (datasetData.error || datasetData.data === undefined) {
+            let result = await fetchDatasetData(portalName, datasetID);
+            if (result.failed) {
                 redirectToWithError(res, req, '/portal/' + portalName);
             } else {
-                let dataset = await createDataset(portalName, datasetData.data.result);
-                await dataset.analyseDataset();
-
+                let dataset = await Dataset.fetchDatasetById(result.datasetData.id);
+                if (!dataset) {
+                    dataset = analyseDataset(portalName, datasetID);
+                    if (dataset.failed) {
+                        redirectToWithError(res, req, '/portal/' + portalName);
+                    }
+                } else {
+                    dataset.result = AnalysisResult.createAnalysisResult(dataset.object_id);
+                }
                 res.render('dataset', {
                     linkActive: 'menu',
                     title: "Dataset analysis results",
@@ -94,16 +98,19 @@ router.get('/organization/:organizationID', function (req, res) {
         if (!organizationID) {
             redirectToWithError(res, req, '/portal/' + portalName);
         } else {
-            let organizationUrl = 'http://' + portalName
-                + '/api/3/action/organization_show?id=' + organizationID;
-            let organizationData = await fetchData(organizationUrl);
-
-            if (organizationData.error || organizationData.data === undefined) {
+            let result = await fetchOrganizationData(portalName, organizationID);
+            if (result.failed) {
                 redirectToWithError(res, req, '/portal/' + portalName);
             } else {
-                let organization = await createOrganization(portalName, organizationData.data.result);
-                await organization.analyseOrganization();
-
+                let organization = await Organization.fetchOrganizationById(result.organizationData.id);
+                if (!organization) {
+                    organization = analyseOrganization(portalName, organizationID);
+                    if (organization.failed) {
+                        redirectToWithError(res, req, '/portal/' + portalName);
+                    }
+                } else {
+                    organization.result = AnalysisResult.createAnalysisResult(organization.object_id);
+                }
                 res.render('organization', {
                     linkActive: 'menu',
                     title: "Organization analysis results",
@@ -126,15 +133,19 @@ router.get('/resource/:resourceID', function (req, res) {
         if (!resourceID) {
             redirectToWithError(res, req, '/portal/' + portalName);
         } else {
-            let resourceUrl = 'http://' + portalName + '/api/3/action/resource_show?id=' + resourceID;
-            let resourceData = await fetchData(resourceUrl);
-
-            if (resourceData.error || resourceData.data === undefined) {
+            let result = await fetchResourceData(portalName, resourceID);
+            if (result.failed) {
                 redirectToWithError(res, req, '/portal/' + portalName);
             } else {
-                let resource = await createResource(resourceData.data.result);
-                await resource.analyseResource();
-
+                let resource = await Resource.fetchResourceById(result.resourceData.id);
+                if (!resource) {
+                    resource = analyseResource(portalName, resourceID);
+                    if (resource.failed) {
+                        redirectToWithError(res, req, '/portal/' + portalName);
+                    }
+                } else {
+                    resource.result = AnalysisResult.createAnalysisResult(resource.object_id);
+                }
                 res.render('resource', {
                     linkActive: 'menu',
                     title: "Resource analysis results",

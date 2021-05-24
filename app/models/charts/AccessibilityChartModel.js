@@ -16,12 +16,11 @@ module.exports = class AccessibilityChart extends Chart {
         this.lightColor = '#d1594c';
 
         this.dataset_accessibility = data.dataset_accessibility;
+        this.max_dataset_acc = data.max_dataset_acc;
         this.url_accessibility = data.url_accessibility;
+        this.max_url_acc = data.max_url_acc;
         this.download_url = data.download_url;
-
-        this.maxPointsDataset = 0;
-        this.maxPointsUrl = 0;
-        this.maxPointsDownload = 0;
+        this.max_download_url = data.max_download_url;
     }
 
     // creates a new empty AccessibilityChart
@@ -31,14 +30,17 @@ module.exports = class AccessibilityChart extends Chart {
             object_id: object_id,
             missing_params: new Set(),
             dataset_accessibility: 0,
+            max_dataset_acc: 0,
             url_accessibility: 0,
-            download_url: 0
+            max_url_acc: 0,
+            download_url: 0,
+            max_download_url: 0
         });
     }
 
     // gets maximum of points an object could have received
     getMaxPoints() {
-        return this.maxPointsDataset + this.maxPointsUrl + this.maxPointsDownload;
+        return this.max_dataset_acc + this.max_url_acc + this.max_download_url;
     }
 
     // gets number of points an object has earned
@@ -49,34 +51,31 @@ module.exports = class AccessibilityChart extends Chart {
     // sets all points to zero
     reset() {
         this.dataset_accessibility = 0;
+        this.max_dataset_acc = 0;
         this.url_accessibility = 0;
+        this.max_url_acc = 0;
         this.download_url = 0;
-
-        this.maxPointsDataset = 0;
-        this.maxPointsUrl = 0;
-        this.maxPointsDownload = 0;
+        this.max_download_url = 0;
     }
 
     // reduces points by other chart values
     reduce(other) {
         this.dataset_accessibility -= other.dataset_accessibility;
+        this.max_dataset_acc -= other.max_dataset_acc;
         this.url_accessibility -= other.url_accessibility;
+        this.max_url_acc -= other.max_url_acc;
         this.download_url -= other.download_url;
-
-        this.maxPointsDataset -= other.maxPointsDataset;
-        this.maxPointsUrl -= other.maxPointsUrl;
-        this.maxPointsDownload -= other.maxPointsDownload;
+        this.max_download_url -= other.max_download_url;
     }
 
     // adds points from other chart values
     add(other) {
         this.dataset_accessibility += other.dataset_accessibility;
+        this.max_dataset_acc += other.max_dataset_acc;
         this.url_accessibility += other.url_accessibility;
+        this.max_url_acc += other.max_url_acc;
         this.download_url += other.download_url;
-
-        this.maxPointsDataset += other.maxPointsDataset;
-        this.maxPointsUrl += other.maxPointsUrl;
-        this.maxPointsDownload += other.maxPointsDownload;
+        this.max_download_url += other.max_download_url;
     }
 
     // fetch chart from database for given object id
@@ -157,10 +156,11 @@ module.exports = class AccessibilityChart extends Chart {
 // inserts a new accessibility chart into database
 var dbNewAccessibilityChart = async (chart, missingParams) => {
     const sql = `INSERT INTO accessibility (object_id, missing_params, dataset_accessibility,
-        url_accessibility, download_url) VALUES ($1, $2, $3, $4, $5);`;
+                    max_dataset_acc, url_accessibility, max_url_acc, download_url, max_download_url)
+                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`;
     const values = [
-        chart.object_id, missingParams, chart.dataset_accessibility,
-        chart.url_accessibility, chart.download_url
+        chart.object_id, missingParams, chart.dataset_accessibility, chart.max_dataset_acc,
+        chart.url_accessibility, chart.max_url_acc, chart.download_url, chart.max_download_url
     ];
     try {
         const result = await db.query(sql, values);
@@ -174,13 +174,15 @@ var dbNewAccessibilityChart = async (chart, missingParams) => {
 // updates accessibility chart data in database
 var dbUpdateAccessibility = async (chart, missingParams) => {
     const sql = `UPDATE accessibility
-                    SET missing_params = '${missingParams}',
-                        dataset_accessibility = ${chart.dataset_accessibility},
-                        url_accessibility = ${chart.url_accessibility},
-                        download_url = ${chart.download_url}
-                    WHERE chart_id = '${chart.chart_id}';`;
+                    SET missing_params = $2, dataset_accessibility = $3, max_dataset_acc = $4,
+                        url_accessibility = $5, max_url_acc = $6, download_url = $7, max_download_url = $8
+                    WHERE chart_id = $1;`;
+    const values = [
+        chart.chart_id, missingParams, chart.dataset_accessibility, chart.max_dataset_acc,
+        chart.url_accessibility, chart.max_url_acc, chart.download_url, chart.max_download_url
+    ];
     try {
-        const result = await db.query(sql, []);
+        const result = await db.query(sql, values);
         return result.rowCount;
     } catch (err) {
         console.log(err);

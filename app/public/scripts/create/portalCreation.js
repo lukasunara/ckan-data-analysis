@@ -18,22 +18,22 @@ var createPortal = async (portalName, datasets, organizations, basicInfo, vocabu
     // if portal doesn't exists in database create a new one
     if (!newPortal) {
         let data = {
-            object_id: portalName, changed: true, name: portalName, title: basicInfo.site_title,
-            description: basicInfo.site_description, num_of_vocabularies: vocabularies.length,
-            num_of_extensions: extensions.size, dcat_or_rdf: dcatOrRdf,
-            url: basicInfo.site_url, date_of_storage: currentDate
+            object_id: portalName, changed: true, last_updated: currentDate, name: portalName,
+            title: basicInfo.site_title, description: basicInfo.site_description,
+            num_of_vocabularies: vocabularies.length, num_of_extensions: extensions.size,
+            dcat_or_rdf: dcatOrRdf, url: basicInfo.site_url
         }
         newPortal = new Portal(data);
         await newPortal.persist();
     } else {
         // if exists in database => check if it has passed 7 days since last update
         let sevenDays = 7 * 24 * 60 * 60 * 1000; //7 days in miliseconds
-        if (currentDate - newPortal.date_of_storage >= sevenDays) {
+        if (currentDate - newPortal.last_updated >= sevenDays) {
             // update data about organization
             let dataForUpdate = {
-                name: portalName, title: basicInfo.site_title, description: basicInfo.site_description,
-                num_of_vocabularies: vocabularies.length, num_of_extensions: extensions.size,
-                dcat_or_rdf: dcatOrRdf, url: basicInfo.site_url, date_of_storage: currentDate
+                last_updated: currentDate, name: portalName, title: basicInfo.site_title,
+                description: basicInfo.site_description, num_of_vocabularies: vocabularies.length,
+                num_of_extensions: extensions.size, dcat_or_rdf: dcatOrRdf, url: basicInfo.site_url
             }
             await newPortal.update(dataForUpdate);
         }

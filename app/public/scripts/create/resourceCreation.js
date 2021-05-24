@@ -9,17 +9,19 @@ var createResource = async (resource, dataset_id) => {
 
     let dateOfIssue = new Date(resource.created);
     let lastModified = new Date(resource.last_modified);
+    let currentDate = new Date();
 
     let result = null;
     // if resource doesn't exists in database create a new one
     if (!newResource) {
         result = await getUrlData(resource.url, resource.format);
         let data = {
-            object_id: resource.id, changed: true, dataset_id: dataset_id, revision_id: resource.revision_id,
-            name: resource.name, size: resource.size, format: resource.format, media_type: result.mediaType,
-            state: resource.state, description: resource.description, created: dateOfIssue,
-            last_modified: lastModified, actually_last_modified: result.actuallyLastModified,
-            empty_rows: result.emptyRows, url: resource.url
+            object_id: resource.id, changed: true, last_updated: currentDate, dataset_id: dataset_id,
+            revision_id: resource.revision_id, name: resource.name, size: resource.size,
+            format: resource.format, media_type: result.mediaType, state: resource.state,
+            description: resource.description, created: dateOfIssue, last_modified: lastModified,
+            actually_last_modified: result.actuallyLastModified, empty_rows: result.emptyRows,
+            url: resource.url
         }
         // create new Resource object by the loaded data
         newResource = new Resource(data);
@@ -32,11 +34,11 @@ var createResource = async (resource, dataset_id) => {
             result = getUrlData(resource.url, resource.format);
             // update all info that can be updated about this resource
             let dataForUpdate = {
-                revision_id: resource.revision_id, name: resource.name, size: resource.size,
-                format: resource.format, media_type: result.mediaType, state: resource.state,
-                description: resource.description, created: dateOfIssue, last_modified: lastModified,
-                actually_last_modified: result.actuallyLastModified, empty_rows: result.emptyRows,
-                url: resource.url
+                last_updated: currentDate, revision_id: resource.revision_id, name: resource.name,
+                size: resource.size, format: resource.format, media_type: result.mediaType,
+                state: resource.state, description: resource.description, created: dateOfIssue,
+                last_modified: lastModified, actually_last_modified: result.actuallyLastModified,
+                empty_rows: result.emptyRows, url: resource.url
             }
             await newResource.update(dataForUpdate);
         }

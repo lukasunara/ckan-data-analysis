@@ -12,7 +12,7 @@ module.exports = class Organization extends RateableObject {
 
     // constructor for Organization
     constructor(data) {
-        super(data.object_id, data.changed);
+        super(data.object_id, data.changed, data.last_updated);
         this.portal_id = data.portal_id;
         this.name = data.name;
         this.title = data.title;
@@ -23,7 +23,6 @@ module.exports = class Organization extends RateableObject {
         this.num_of_members = data.num_of_members;
         this.date_created = data.date_created;
         this.image_display_url = data.image_display_url;
-        this.date_of_storage = data.date_of_storage;
     }
 
     isPersisted() {
@@ -46,7 +45,7 @@ module.exports = class Organization extends RateableObject {
         this.num_of_members = data.num_of_members;
         this.date_created = data.date_created;
         this.image_display_url = data.image_display_url;
-        this.date_of_storage = data.date_of_storage;
+        this.last_updated = data.last_updated;
 
         await super.update(dbUpdateOrganization);
     }
@@ -88,16 +87,19 @@ module.exports = class Organization extends RateableObject {
             result.findChart.checkIdentification(checkParam, 'id', this.object_id);
             result.findChart.checkIdentification(checkParam, 'name', this.name);
             result.findChart.checkIdentification(checkParam, 'title', this.title);
+            result.findChart.max_id += FindabilityChart.maxIdentification;
             // 1.2. keywords (only from datasets)
             // 1.3. categories (only from datasets)
             // 1.4. state + from datasets
             result.findChart.checkState(checkParam, 'state', this.state);
             result.findChart.checkState(checkParam, 'approval_status', this.approval_status);
+            result.findChart.max_state += FindabilityChart.maxStateOrganization;
 
             // 2. accessibility
             // 2.1. dataset accessibility (only from datasets)
             // 2.2. URL accessibility + from datasets
             await result.accessChart.checkUrlAccess(checkParam, 'image_display_url', this.image_display_url);
+            result.accessChart.max_url_acc += AccessibilityChart.maxUrlAccessibility;
             // 2.3. download URL (only from datasets)
 
             // 3. interoperability
@@ -111,19 +113,15 @@ module.exports = class Organization extends RateableObject {
             // 4.1. license (only from datasets)
             // 4.2. basic info + from datasets
             result.reuseChart.checkBasicInfo(checkParam, 'description', this.description);
+            result.reuseChart.max_basic_info += ReusabilityChart.maxBasicInfo
             // 4.3. extras + from datasets
             result.reuseChart.checkExtras(this.num_of_extras);
             result.reuseChart.checkMembers(this.num_of_members);
+            result.reuseChart.max_extras += ReusabilityChart.maxExtrasOrganization;
             // 4.4. publisher (only from datasets)
 
             // 5. contextuality (only from dataasets)
         }
-        result.findChart.maxPointsID += FindabilityChart.maxIdentification;
-        result.findChart.maxPointsState += FindabilityChart.maxStateOrganization;
-        result.accessChart.maxPointsUrl += AccessibilityChart.maxUrlAccessibility;
-        result.reuseChart.maxPointsInfo += ReusabilityChart.maxBasicInfo
-        result.reuseChart.maxPointsExtras += ReusabilityChart.maxExtrasOrganization;
-
         let datasets = await this.fetchDatasets();
         for (let dataset of datasets) {
             await dataset.analyseDataset(result, !this.changed);
@@ -139,14 +137,14 @@ module.exports = class Organization extends RateableObject {
 
 // inserts a new organization into database
 var dbNewOrganization = async (org) => {
-    const sql = `INSERT INTO organization (object_id, changed, portal_id, name,
+    const sql = `INSERT INTO organization (object_id, changed, last_updated, portal_id, name,
                 title, description, state, approval_status, num_of_extras, num_of_members,
-                date_created, image_display_url, date_of_storage) VALUES ($1, $2, $3, $4,
-                $5, $6, $7, $8, $9, $10, $11, $12, $13);`;
+                date_created, image_display_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,
+                                                    $10, $11, $12, $13);`;
     const values = [
-        org.object_id, org.changed, org.portal_id, org.name, org.title, org.description,
-        org.state, org.approval_status, org.num_of_extras, org.num_of_members, org.date_created,
-        org.image_display_url, org.date_of_storage
+        org.object_id, org.changed, org.last_updated, org.portal_id, org.name, org.title,
+        org.description, org.state, org.approval_status, org.num_of_extras, org.num_of_members,
+        org.date_created, org.image_display_url
     ];
     try {
         const result = await db.query(sql, values);
@@ -160,14 +158,14 @@ var dbNewOrganization = async (org) => {
 // updates organization data in database
 var dbUpdateOrganization = async (org) => {
     const sql = `UPDATE organization
-                    SET changed = $2, name = $3, title = $4, description = $5, state = $6,
-                        approval_status = $7, num_of_extras = $8, num_of_members = $9,
-                        date_created = $10, image_display_url = $11, date_of_storage = $12
+                    SET changed = $2, last_updated = $3, name = $4, title = $5, description = $6,
+                        state = $7, approval_status = $8, num_of_extras = $9, num_of_members = $10,
+                        date_created = $11, image_display_url = $12
                     WHERE object_id = $1;`;
     const values = [
-        org.object_id, org.changed, org.name, org.title, org.description, org.state,
-        org.approval_status, org.num_of_extras, org.num_of_members, org.date_created,
-        org.image_display_url, org.date_of_storage
+        org.object_id, org.changed, org.last_updated, org.name, org.title, org.description,
+        org.state, org.approval_status, org.num_of_extras, org.num_of_members, org.date_created,
+        org.image_display_url
     ];
     try {
         const result = await db.query(sql, values);

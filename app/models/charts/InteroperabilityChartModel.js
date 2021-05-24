@@ -17,16 +17,15 @@ module.exports = class InteroperabilityChart extends Chart {
         this.lightColor = '#a0c3c5';
 
         this.format = data.format;
+        this.max_format = data.max_format;
         this.format_diversity = data.format_diversity;
+        this.max_format_div = data.max_format_div;
         this.compatibility = data.compatibility;
+        this.max_comp = data.max_comp;
         this.machine_readable = data.machine_readable;
+        this.max_machine_readable = data.max_machine_readable;
         this.linked_open_data = data.linked_open_data;
-
-        this.maxPointsFormat = 0;
-        this.maxPointsFormatDiv = 0;
-        this.maxPointsComp = 0;
-        this.maxPointsMachine = 0;
-        this.maxPointsLOD = 0;
+        this.max_lod = data.max_lod;
     }
 
     // creates a new empty InteroperabilityChart
@@ -36,17 +35,22 @@ module.exports = class InteroperabilityChart extends Chart {
             object_id: object_id,
             missing_params: new Set(),
             format: 0,
+            max_format: 0,
             format_diversity: 0,
+            max_format_div: 0,
             compatibility: 0,
+            max_comp: 0,
             machine_readable: 0,
-            linked_open_data: 0
+            max_machine_readable: 0,
+            linked_open_data: 0,
+            max_lod: 0
         });
     }
 
     // gets maximum of points an object could have received
     getMaxPoints() {
-        return this.maxPointsFormat + this.maxPointsFormatDiv + this.maxPointsComp
-            + this.maxPointsMachine + this.maxPointsLOD;
+        return this.max_formatmax_format + this.max_format_div + this.max_comp
+            + this.max_machine_readable + this.max_lod;
     }
 
     // gets number of points an object has earned
@@ -58,46 +62,43 @@ module.exports = class InteroperabilityChart extends Chart {
     // sets all points to zero
     reset() {
         this.format = 0;
+        this.max_formatmax_format = 0;
         this.format_diversity = 0;
+        this.max_format_div = 0;
         this.compatibility = 0;
+        this.max_comp = 0;
         this.machine_readable = 0;
+        this.max_machine_readable = 0;
         this.linked_open_data = 0;
-
-        this.maxPointsFormat = 0;
-        this.maxPointsFormatDiv = 0;
-        this.maxPointsComp = 0;
-        this.maxPointsMachine = 0;
-        this.maxPointsLOD = 0;
+        this.max_lod = 0;
     }
 
     // reduces points by other chart values
     reduce(other) {
         this.format -= other.format;
+        this.max_format -= other.max_format;
         this.format_diversity -= other.format_diversity;
+        this.max_format_div -= other.max_format_div;
         this.compatibility -= other.compatibility;
+        this.max_comp -= other.max_comp;
         this.machine_readable -= other.machine_readable;
+        this.max_machine_readable -= other.max_machine_readable;
         this.linked_open_data -= other.linked_open_data;
-
-        this.maxPointsFormat -= other.maxPointsFormat;
-        this.maxPointsFormatDiv -= other.maxPointsFormatDiv;
-        this.maxPointsComp -= other.maxPointsComp;
-        this.maxPointsMachine -= other.maxPointsMachine;
-        this.maxPointsLOD -= other.maxPointsLOD;
+        this.max_lod -= other.max_lod;
     }
 
     // adds points from other chart values
     add(other) {
         this.format += other.format;
+        this.max_format += other.max_format;
         this.format_diversity += other.format_diversity;
+        this.max_format_div += other.max_format_div;
         this.compatibility += other.compatibility;
+        this.max_comp += other.max_comp;
         this.machine_readable += other.machine_readable;
+        this.max_machine_readable += other.max_machine_readable;
         this.linked_open_data += other.linked_open_data;
-
-        this.maxPointsFormat += other.maxPointsFormat;
-        this.maxPointsFormatDiv += other.maxPointsFormatDiv;
-        this.maxPointsComp += other.maxPointsComp;
-        this.maxPointsMachine += other.maxPointsMachine;
-        this.maxPointsLOD += other.maxPointsLOD;
+        this.max_lod += other.max_lod;
     }
 
     isPersisted() {
@@ -181,12 +182,13 @@ module.exports = class InteroperabilityChart extends Chart {
 
 // inserts a new interoperability chart into database
 var dbNewInteroperabilityChart = async (chart, missingParams) => {
-    const sql = `INSERT INTO interoperability (object_id, missing_params, format,
-        format_diversity, compatibility, machine_readable, linked_open_data)
-        VALUES ($1, $2, $3, $4, $5, $6, $7);`;
+    const sql = `INSERT INTO interoperability (object_id, missing_params, format, max_format,
+        format_diversity, max_format_div, compatibility, max_comp, machine_readable, max_machine_readable,
+        linked_open_data, max_lod) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);`;
     const values = [
-        chart.object_id, missingParams, chart.format, chart.format_diversity,
-        chart.compatibility, chart.machine_readable, chart.linked_open_data
+        chart.object_id, missingParams, chart.format, chart.max_format, chart.format_diversity,
+        chart.max_format_div, chart.compatibility, chart.max_comp, chart.machine_readable,
+        chart.max_machine_readable, chart.linked_open_data, chart.max_lod
     ];
     try {
         const result = await db.query(sql, values);
@@ -200,15 +202,17 @@ var dbNewInteroperabilityChart = async (chart, missingParams) => {
 // updates interoperability chart data in database
 var dbUpdateInteroperability = async (chart, missingParams) => {
     const sql = `UPDATE interoperability
-                    SET missing_params = '${missingParams}',
-                        format = ${chart.format},
-                        format_diversity = ${chart.format_diversity},
-                        compatibility = ${chart.compatibility},
-                        machine_readable = ${chart.machine_readable},
-                        linked_open_data = ${chart.linked_open_data}
-                    WHERE chart_id = '${chart.chart_id}';`;
+                    SET missing_params = $2, format = $3, max_format = $4, format_diversity = $5,
+                        max_format_div = $6, compatibility = $7, max_comp = $8, machine_readable = $9,
+                        max_machine_readable = $10, linked_open_data = $11, max_lod = $12
+                    WHERE chart_id = $1;`;
+    const values = [
+        chart.chart_id, missingParams, chart.format, chart.max_format, chart.format_diversity,
+        chart.max_format_div, chart.compatibility, chart.max_comp, chart.machine_readable,
+        chart.max_machine_readable, chart.linked_open_data, chart.max_lod
+    ];
     try {
-        const result = await db.query(sql, []);
+        const result = await db.query(sql, values);
         return result.rowCount;
     } catch (err) {
         console.log(err);

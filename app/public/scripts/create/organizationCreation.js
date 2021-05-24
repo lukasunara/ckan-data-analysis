@@ -15,11 +15,12 @@ var createOrganization = async (portalName, organization) => {
     // if organization doesn't exists in database create a new one
     if (!newOrganization) {
         let data = {
-            object_id: organization.id, changed: true, portal_id: portalName, name: organization.name,
-            title: title, description: organization.description, state: organization.state,
+            object_id: organization.id, changed: true, last_updated: currentDate,
+            portal_id: portalName, name: organization.name, title: title,
+            description: organization.description, state: organization.state,
             approval_status: organization.approval_status, num_of_extras: numOfExtras,
             num_of_members: numOfMembers, date_created: organization.created,
-            image_display_url: organization.image_display_url, date_of_storage: currentDate
+            image_display_url: organization.image_display_url
         }
         newOrganization = new Organization(data);
         await newOrganization.persist();
@@ -29,11 +30,11 @@ var createOrganization = async (portalName, organization) => {
         if (currentDate - newOrganization.date_of_storage >= sevenDays) {
             // update data about organization
             let dataForUpdate = {
-                name: organization.name, title: title, description: organization.description,
-                state: organization.state, approval_status: organization.approval_status,
-                num_of_extras: numOfExtras, num_of_members: numOfMembers,
-                date_created: organization.created, image_display_url: organization.image_display_url,
-                date_of_storage: currentDate
+                last_updated: currentDate, name: organization.name, title: title,
+                description: organization.description, state: organization.state,
+                approval_status: organization.approval_status, num_of_extras: numOfExtras,
+                num_of_members: numOfMembers, date_created: organization.created,
+                image_display_url: organization.image_display_url
             }
             await newOrganization.update(dataForUpdate);
         }

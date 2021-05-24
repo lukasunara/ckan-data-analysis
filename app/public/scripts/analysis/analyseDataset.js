@@ -1,0 +1,34 @@
+const { fetchData } = require('../utils/fetching.js');
+const { createDataset } = require('../create/datasetCreation.js');
+
+// method for refreshing data about portals
+var analyseDataset = async (portalName, datasetID) => {
+    let failed = false;
+
+    let result = await fetchDatasetData(portalName, datasetID);
+
+    if (result.failed) {
+        failed = true;
+    } else {
+        let dataset = await createDataset(portalName, result.datasetData.data.result);
+        await dataset.analyseDataset();
+    }
+    return failed;
+};
+
+// fetch metadata from CKAN
+var fetchDatasetData = async (portalName, datasetID) => {
+    let failed = false;
+
+    let datasetUrl = 'http://' + portalName + '/api/3/action/package_show?id=' + datasetID;
+    let datasetData = await fetchData(datasetUrl);
+
+    if (datasetData.error || datasetData.data === undefined) {
+        failed = true;
+    }
+    return { failed: failed, datasetData: datasetData };
+}
+
+module.exports = {
+    analyseDataset, fetchDatasetData
+};

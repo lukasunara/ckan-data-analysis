@@ -18,16 +18,15 @@ module.exports = class ContextualityChart extends Chart {
         this.lightColor = '#f1d872';
 
         this.num_of_resources = data.num_of_resources;
+        this.max_num_of_res = max_num_of_res;
         this.file_size = data.file_size;
+        this.max_file_size = max_file_size;
         this.empty_data = data.empty_data;
+        this.max_empty = max_empty;
         this.date_of_issue = data.date_of_issue;
+        this.max_date_of_issue = max_date_of_issue;
         this.modification_date = data.modification_date;
-
-        this.maxPointsResources = 0;
-        this.maxPointsFSize = 0;
-        this.maxPointsEmpty = 0;
-        this.maxPointsIssue = 0;
-        this.maxPointsModified = 0;
+        this.max_modification_date = max_modification_date;
     }
 
     // creates a new empty ContextualityChart
@@ -37,17 +36,22 @@ module.exports = class ContextualityChart extends Chart {
             object_id: object_id,
             missing_params: new Set(),
             num_of_resources: 0,
+            max_num_of_res: 0,
             file_size: 0,
+            max_file_size: 0,
             empty_data: 0,
+            max_empty: 0,
             date_of_issue: 0,
-            modification_date: 0
+            max_date_of_issue: 0,
+            modification_date: 0,
+            max_modification_date: 0
         });
     }
 
     // gets maximum of points an object could have received
     getMaxPoints() {
-        return this.maxPointsResources + this.maxPointsFSize
-            + this.maxPointsEmpty + this.maxPointsIssue + this.maxPointsModified;
+        return this.max_num_of_res + this.max_file_size
+            + this.max_empty + this.max_date_of_issue + this.max_modification_date;
     }
 
     // gets number of points an object has earned
@@ -59,46 +63,43 @@ module.exports = class ContextualityChart extends Chart {
     // sets all points to zero
     reset() {
         this.num_of_resources = 0;
+        this.max_num_of_res = 0;
         this.file_size = 0;
+        this.max_file_size = 0;
         this.empty_data = 0;
+        this.max_empty = 0;
         this.date_of_issue = 0;
+        this.max_date_of_issue = 0;
         this.modification_date = 0;
-
-        this.maxPointsResources = 0;
-        this.maxPointsFSize = 0;
-        this.maxPointsEmpty = 0;
-        this.maxPointsIssue = 0;
-        this.maxPointsModified = 0;
+        this.max_modification_date = 0;
     }
 
     // reduces points by other chart values
     reduce(other) {
         this.num_of_resources -= other.num_of_resources;
+        this.max_num_of_res -= other.max_num_of_res;
         this.file_size -= other.file_size;
+        this.max_file_size -= other.max_file_size;
         this.empty_data -= other.empty_data;
+        this.max_empty -= other.max_empty;
         this.date_of_issue -= other.date_of_issue;
+        this.max_date_of_issue -= other.max_date_of_issue;
         this.modification_date -= other.modification_date;
-
-        this.maxPointsResources -= other.maxPointsResources;
-        this.maxPointsFSize -= other.maxPointsFSize;
-        this.maxPointsEmpty -= other.maxPointsEmpty;
-        this.maxPointsIssue -= other.maxPointsIssue;
-        this.maxPointsModified -= other.maxPointsModified;
+        this.max_modification_date -= other.max_modification_date;
     }
 
     // adds points from other chart values
     add(other) {
         this.num_of_resources += other.num_of_resources;
+        this.max_num_of_res += other.max_num_of_res;
         this.file_size += other.file_size;
+        this.max_file_size += other.max_file_size;
         this.empty_data += other.empty_data;
+        this.max_empty += other.max_empty;
         this.date_of_issue += other.date_of_issue;
+        this.max_date_of_issue += other.max_date_of_issue;
         this.modification_date += other.modification_date;
-
-        this.maxPointsResources += other.maxPointsResources;
-        this.maxPointsFSize += other.maxPointsFSize;
-        this.maxPointsEmpty += other.maxPointsEmpty;
-        this.maxPointsIssue += other.maxPointsIssue;
-        this.maxPointsModified += other.maxPointsModified;
+        this.max_modification_date += other.max_modification_date;
     }
 
     isPersisted() {
@@ -192,11 +193,14 @@ module.exports = class ContextualityChart extends Chart {
 
 // inserts a new contextuality chart into database
 var dbNewContextualityChart = async (chart, missingParams) => {
-    const sql = `INSERT INTO contextuality (object_id, missing_params, num_of_resources,
-        file_size, empty_data, date_of_issue, modification_date) VALUES ($1, $2, $3, $4, $5, $6, $7);`;
+    const sql = `INSERT INTO contextuality (object_id, missing_params, num_of_resources, max_num_of_res,
+                        file_size, max_file_size, empty_data, max_empty, date_of_issue, max_date_of_issue,
+                        modification_date, max_modification_date) VALUES ($1, $2, $3, $4, $5, $6, $7,
+                                                                    $8, $9, $10, $11, $12);`;
     const values = [
-        chart.object_id, missingParams, chart.num_of_resources, chart.file_size,
-        chart.empty_data, chart.date_of_issue, chart.modification_date
+        chart.object_id, missingParams, chart.num_of_resources, chart.max_num_of_res, chart.file_size,
+        chart.max_file_size, chart.empty_data, chart.max_empty, chart.date_of_issue, chart.max_date_of_issue,
+        chart.modification_date, chart.max_modification_date
     ];
     try {
         const result = await db.query(sql, values);
@@ -210,15 +214,17 @@ var dbNewContextualityChart = async (chart, missingParams) => {
 // updates contextuality chart data in database
 var dbUpdateContextuality = async (chart, missingParams) => {
     const sql = `UPDATE contextuality
-                    SET missing_params = '${missingParams}',
-                        num_of_resources = ${chart.num_of_resources},
-                        file_size = ${chart.file_size},
-                        empty_data = ${chart.empty_data},
-                        date_of_issue = ${chart.date_of_issue},
-                        modification_date = ${chart.modification_date}
-                    WHERE chart_id = '${chart.chart_id}';`;
+                    SET missing_params = $2, num_of_resources = $3, max_num_of_res = $4, file_size = $5,
+                        max_file_size = $6, empty_data = $7, max_empty = $8, date_of_issue = $9,
+                        max_date_of_issue = $10, modification_date = $11, max_modification_date = $12
+                    WHERE chart_id = $1;`;
+    const values = [
+        chart.chart_id, missingParams, chart.num_of_resources, chart.max_num_of_res, chart.file_size,
+        chart.max_file_size, chart.empty_data, chart.max_empty, chart.date_of_issue, chart.max_date_of_issue,
+        chart.modification_date, chart.max_modification_date
+    ];
     try {
-        const result = await db.query(sql, []);
+        const result = await db.query(sql, values);
         return result.rowCount;
     } catch (err) {
         console.log(err);

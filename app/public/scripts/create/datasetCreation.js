@@ -15,15 +15,16 @@ var createDataset = async (portalName, dataset) => {
     let numOfKeywords = dataset.tags ? dataset.tags.length : (dataset.keywords ? dataset.keywords.length : 0);
     let numOfGroups = dataset.groups ? dataset.groups.length : 0;
     let numOfExtras = dataset.extras ? dataset.extras.length : 0;
+    let currentDate = new Date();
 
     // if dataset doesn't exists in database create a new one
     if (!newDataset) {
         let data = {
-            object_id: dataset.id, changed: true, portal_id: portalName, organization_id: orgID,
-            name: dataset.name, title: dataset.title, owner_org: dataset.owner_org, author: dataset.author,
-            maintainer: dataset.maintainer, private: dataset.private, state: dataset.state,
-            description: description, metadata_created: metadataCreated, metadata_modified: metadataModified,
-            num_of_extras: numOfExtras, num_of_groups: numOfGroups,
+            object_id: dataset.id, changed: true, last_updated: currentDate, portal_id: portalName,
+            organization_id: orgID, name: dataset.name, title: dataset.title, owner_org: dataset.owner_org,
+            author: dataset.author, maintainer: dataset.maintainer, private: dataset.private,
+            state: dataset.state, description: description, metadata_created: metadataCreated,
+            metadata_modified: metadataModified, num_of_extras: numOfExtras, num_of_groups: numOfGroups,
             num_of_keywords: numOfKeywords, license_title: dataset.license_title,
             license_url: dataset.license_url, url: dataset.url
         }
@@ -38,12 +39,12 @@ var createDataset = async (portalName, dataset) => {
         if (metadataModified && (metadataModified - savedLastModified >= 45)) {
             // update all info that can be updated about this dataset
             let dataForUpdate = {
-                name: dataset.name, title: dataset.title, owner_org: dataset.owner_org, author: dataset.author,
-                maintainer: dataset.maintainer, private: dataset.private, state: dataset.state,
-                description: description, metadataCreated: metadataCreated, metadataModified: metadataModified,
-                num_of_extras: numOfExtras, num_of_groups: numOfGroups,
-                num_of_keywords: numOfKeywords, license_title: dataset.license_title,
-                license_url: dataset.license_url, url: dataset.url
+                last_updated: currentDate, name: dataset.name, title: dataset.title,
+                owner_org: dataset.owner_org, author: dataset.author, maintainer: dataset.maintainer,
+                private: dataset.private, state: dataset.state, description: description,
+                metadataCreated: metadataCreated, metadataModified: metadataModified,
+                num_of_extras: numOfExtras, num_of_groups: numOfGroups, num_of_keywords: numOfKeywords,
+                license_title: dataset.license_title, license_url: dataset.license_url, url: dataset.url
             }
             await newDataset.update(dataForUpdate);
             checkResources = true; //also I need to check resources now

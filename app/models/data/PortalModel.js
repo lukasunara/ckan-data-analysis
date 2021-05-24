@@ -13,7 +13,7 @@ module.exports = class Portal extends RateableObject {
 
     // constructor for Portal
     constructor(data) {
-        super(data.object_id, data.changed);
+        super(data.object_id, data.changed, data.last_updated);
         this.name = data.name;
         this.title = data.title;
         this.description = data.description;
@@ -21,7 +21,6 @@ module.exports = class Portal extends RateableObject {
         this.num_of_extensions = data.num_of_extensions;
         this.dcat_or_rdf = data.dcat_or_rdf;
         this.url = data.url;
-        this.date_of_storage = data.date_of_storage;
     }
 
     isPersisted() {
@@ -42,7 +41,7 @@ module.exports = class Portal extends RateableObject {
         this.num_of_extensions = data.num_of_extensions;
         this.dcat_or_rdf = data.dcat_or_rdf;
         this.url = data.url;
-        this.date_of_storage = data.date_of_storage;
+        this.last_updated = data.last_updated;
 
         await super.update(dbUpdatePortal);
     }
@@ -56,6 +55,11 @@ module.exports = class Portal extends RateableObject {
             portal.persisted = true;
         }
         return portal;
+    }
+
+    // fetch all portals from database
+    static async fetchAllPortalsFromDB() {
+        return await dbGetAllPortals();
     }
 
     // fetch all organizations used by this portal
@@ -79,6 +83,7 @@ module.exports = class Portal extends RateableObject {
             // 1.1. identification + from organizations
             result.findChart.checkIdentification(checkParam, 'name', this.name);
             result.findChart.checkIdentification(checkParam, 'title', this.title);
+            result.findChart.max_id += FindabilityChart.maxIdentificationPortal;
             // 1.2. keywords (only from organizations)
             // 1.3. categories (only from organizations)
             // 1.4. state (only from organizations)
@@ -87,6 +92,7 @@ module.exports = class Portal extends RateableObject {
             // 2.1. dataset accessibility (only from organizations)
             // 2.2. URL accessibility + from organizations
             await result.accessChart.checkUrlAccess(checkParam, 'url', this.url);
+            result.accessChart.max_url_acc += AccessibilityChart.maxUrlAccessibility;
             // 2.3. download URL (only from organizations)
 
             // 3. interoperability
@@ -97,21 +103,18 @@ module.exports = class Portal extends RateableObject {
             // 3.5. linked open data
             result.interChart.checkVocabularies(this.num_of_vocabularies);
             result.interChart.checkExtensions(this.num_of_extensions, this.dcat_or_rdf);
+            result.interChart.max_lod += InteroperabilityChart.maxLinkedOpenData;
 
             // 4. reusability
             // 4.1. license (only from organizations)
             // 4.2. basic info + from organizations
             result.reuseChart.checkBasicInfo(checkParam, 'description', this.description);
+            result.reuseChart.max_basic_info += ReusabilityChart.maxBasicInfo;
             // 4.3. extras (only from organizations)
             // 4.4. publisher (only from organizations)
 
             // 5. contextuality (only from organizations)
         }
-        result.findChart.maxPointsID += FindabilityChart.maxIdentificationPortal;
-        result.accessChart.maxPointsUrl += AccessibilityChart.maxUrlAccessibility;
-        result.interChart.maxPointsLOD += InteroperabilityChart.maxLinkedOpenData;
-        result.reuseChart.maxPointsInfo += ReusabilityChart.maxBasicInfo;
-
         let organizations = await this.fetchOrganizations();
         for (let organization of organizations) {
             await organization.analyseOrganization(result, !this.changed);
@@ -127,12 +130,13 @@ module.exports = class Portal extends RateableObject {
 
 // inserts a new portal into database
 var dbNewPortal = async (portal) => {
-    const sql = `INSERT INTO portal (object_id, changed, name, title, description,
-                        num_of_vocabularies, num_of_extensions, dcat_or_rdf, url, date_of_storage)
+    const sql = `INSERT INTO portal (object_id, changed, last_updated, name, title,
+                        description, num_of_vocabularies, num_of_extensions, dcat_or_rdf, url)
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);`;
     const values = [
-        portal.object_id, portal.changed, portal.name, portal.title, portal.description,
-        portal.num_of_vocabularies, portal.num_of_extensions, portal.dcat_or_rdf, portal.url, portal.date_of_storage
+        portal.object_id, portal.changed, portal.last_updated, portal.name, portal.title, portal.description,
+        portal.num_of_vocabularies, portal.num_of_extensions, portal.dcat_or_rdf, portal.url
+
     ];
     try {
         const result = await db.query(sql, values);
@@ -146,13 +150,13 @@ var dbNewPortal = async (portal) => {
 // updates portal data in database
 var dbUpdatePortal = async (portal) => {
     const sql = `UPDATE portal
-                    SET changed = $2, name = $3, title = $4, description = $5, num_of_vocabularies = $6,
-                        num_of_extensions = $7, dcat_or_rdf = $8, url = $9, date_of_storage = $10
+                    SET changed = $2, last_updated = $3, name = $4, title = $5, description = $6,
+                        num_of_vocabularies = $7, num_of_extensions = $8, dcat_or_rdf = $9, url = $10
                     WHERE object_id = $1;`;
     const values = [
-        portal.object_id, portal.changed, portal.name, portal.title, portal.description,
-        portal.num_of_vocabularies, portal.num_of_extensions, portal.dcat_or_rdf, portal.url,
-        portal.date_of_storage
+        portal.object_id, portal.changed, portal.last_updated, portal.name, portal.title, portal.description,
+        portal.num_of_vocabularies, portal.num_of_extensions, portal.dcat_or_rdf, portal.url
+
     ];
     try {
         const result = await db.query(sql, values);
@@ -162,6 +166,18 @@ var dbUpdatePortal = async (portal) => {
         throw err;
     }
 };
+
+// get all portals from database
+var dbGetAllPortals = async () => {
+    const sql = `SELECT object_id FROM portal';`;
+    try {
+        const result = await db.query(sql, []);
+        return result.rows;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    }
+}
 
 // gets portal from database (by its' unique name)
 var dbGetPortal = async (name) => {

@@ -14,7 +14,7 @@ module.exports = class Dataset extends RateableObject {
 
     // constructor for Dataset
     constructor(data) {
-        super(data.object_id, data.changed);
+        super(data.object_id, data.changed, data.last_updated);
         this.portal_id = data.portal_id;
         this.organization_id = data.organization_id;
         this.name = data.name;
@@ -62,6 +62,7 @@ module.exports = class Dataset extends RateableObject {
         this.license_title = data.license_title;
         this.license_url = data.license_url;
         this.url = data.url;
+        this.last_updated = data.last_updated;
 
         await super.update(dbUpdateDataset);
     }
@@ -104,23 +105,30 @@ module.exports = class Dataset extends RateableObject {
             result.findChart.checkIdentification(checkParam, 'id', this.object_id);
             result.findChart.checkIdentification(checkParam, 'name', this.name);
             result.findChart.checkIdentification(checkParam, 'title', this.title);
+            result.findChart.max_id += FindabilityChart.maxIdentification;
             // 1.2. keywords
             result.findChart.checkKeywords(this.num_of_keywords);
+            result.findChart.max_key += FindabilityChart.maxKeywords;
             // 1.3. categories
             result.findChart.checkCategories(checkParam, 'categories', this.num_of_groups);
+            result.findChart.max_cat += FindabilityChart.maxCategories;
             // 1.4. state + from resources
             result.findChart.checkState(checkParam, 'state', this.state);
+            result.findChart.max_state += FindabilityChart.maxState;
 
             // 2. accessibility
             // 2.1. dataset accessibility
             result.accessChart.checkDatasetAccess(checkParam, 'private', this.private);
+            result.accessChart.max_dataset_acc += AccessibilityChart.maxDatasetAccessibility;
             // 2.2. URL accessibility
             await result.accessChart.checkUrlAccess(checkParam, 'url', this.url);
+            result.accessChart.max_url_acc += AccessibilityChart.maxUrlAccessibility;
             // 2.3. download URL (only from resources)
 
             // 3. interoperability
             // 3.1. format (only from resources)
             // 3.2. format diversity (get from resources in database)
+            result.interChart.maxPointsFormatDiv += InteroperabilityChart.maxFormatDiversity;
             // 3.3. compatibility (only from resources)
             // 3.4. machine readable (only from resources)
             // 3.5. linked open data (not calculated)
@@ -129,39 +137,32 @@ module.exports = class Dataset extends RateableObject {
             // 4.1. license
             result.reuseChart.checkLicenseTitle(checkParam, 'license_title', this.license_title);
             await result.reuseChart.checkLicenseUrl(checkParam, 'license_url', this.license_url);
+            result.reuseChart.max_license += ReusabilityChart.maxLicense;
             // 4.2. basic info + from resources
             result.reuseChart.checkBasicInfo(checkParam, 'notes', this.description);
+            result.reuseChart.max_basic_info += ReusabilityChart.maxBasicInfo;
             // 4.3. extras
             result.reuseChart.checkExtras(this.num_of_extras);
+            result.reuseChart.max_extras += ReusabilityChart.maxExtras;
             // 4.4. publisher
             result.reuseChart.checkPublisher(checkParam, 'author', this.author);
             result.reuseChart.checkPublisher(checkParam, 'maintainer', this.maintainer);
             result.reuseChart.checkPublisher(checkParam, 'owmner_org', this.owner_org);
+            result.reuseChart.max_publisher += ReusabilityChart.maxPublisher;
 
             // 5. contextuality
             // 5.1. number of resources (get from database)
             result.contextChart.checkNumOfResources(resources.length);
+            result.contextChart.max_num_of_res += ContextualityChart.maxNumOfResources;
             // 5.2. file size (only from resources)
             // 5.3. empty data (only from resources)
             // 5.4. date of issue + from resources
             result.contextChart.checkDateOfIssue(this.metadata_created);
+            result.contextChart.max_date_of_issue += ContextualityChart.maxDateOfIssue;
             // 5.5. modification date + from resources
             result.contextChart.checkLastModified(this.metadata_modified);
+            result.contextChart.max_modification_date += ContextualityChart.maxModificationDate;
         }
-        result.findChart.maxPointsID += FindabilityChart.maxIdentification;
-        result.findChart.maxPointsKeywords += FindabilityChart.maxKeywords;
-        result.findChart.maxPointsCategories += FindabilityChart.maxCategories;
-        result.findChart.maxPointsState += FindabilityChart.maxState;
-        result.accessChart.maxPointsDataset += AccessibilityChart.maxDatasetAccessibility;
-        result.accessChart.maxPointsUrl += AccessibilityChart.maxUrlAccessibility;
-        result.reuseChart.maxPointsLicense += ReusabilityChart.maxLicense;
-        result.reuseChart.maxPointsInfo += ReusabilityChart.maxBasicInfo;
-        result.reuseChart.maxPointsExtras += ReusabilityChart.maxExtras;
-        result.reuseChart.maxPointsPublisher += ReusabilityChart.maxPublisher;
-        result.contextChart.maxPointsResources += ContextualityChart.maxNumOfResources;
-        result.contextChart.maxPointsIssue += ContextualityChart.maxDateOfIssue;
-        result.contextChart.maxPointsModified += ContextualityChart.maxModificationDate;
-
         let formats = new Set();
         for (let resource of resources) {
             if (resource.format && !formats.has(resource.format))
@@ -178,7 +179,6 @@ module.exports = class Dataset extends RateableObject {
         result.interChart.format_diversity += result.interChart.format_diversity;
         if (organizationResult)
             organizationResult.interChart.format_diversity += result.interChart.format_diversity;
-        result.interChart.maxPointsFormatDiv += InteroperabilityChart.maxFormatDiversity;
 
         await result.updateDataInDB();
         await super.setChanged(this.object_id, false);
@@ -190,17 +190,17 @@ module.exports = class Dataset extends RateableObject {
 
 // inserts a new dataset into database
 var dbNewDataset = async (dataset) => {
-    const sql = `INSERT INTO dataset (object_id, changed, portal_id, organization_id,
+    const sql = `INSERT INTO dataset (object_id, changed, last_updated, portal_id, organization_id,
         name, title, owner_org, author, maintainer, private, state, description, metadata_created,
         metadata_modified, num_of_extras, num_of_groups, num_of_keywords, license_title,
-        license_url, url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,
-                                        $14, $15, $16, $17, $18, $19, $20);`;
+        license_url, url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14,
+                            $15, $16, $17, $18, $19, $20, $21);`;
     const values = [
-        dataset.object_id, dataset.changed, dataset.portal_id, dataset.organization_id,
+        dataset.object_id, dataset.changed, dataset.last_updated, dataset.portal_id, dataset.organization_id,
         dataset.name, dataset.title, dataset.owner_org, dataset.author, dataset.maintainer,
         dataset.private, dataset.state, dataset.description, dataset.metadata_created,
-        dataset.metadata_modified, dataset.num_of_extras, dataset.num_of_groups,
-        dataset.num_of_keywords, dataset.license_title, dataset.license_url, dataset.url
+        dataset.metadata_modified, dataset.num_of_extras, dataset.num_of_groups, dataset.num_of_keywords,
+        dataset.license_title, dataset.license_url, dataset.url
     ];
     try {
         const result = await db.query(sql, values);
@@ -214,16 +214,16 @@ var dbNewDataset = async (dataset) => {
 // updates dataset data in database
 var dbUpdateDataset = async (dataset) => {
     const sql = `UPDATE dataset
-                    SET changed = $2, name = $3, title = $4, owner_org = $5, author = $6,
-                        maintainer = $7, private = $8, state = $9, description = $10,
-                        metadata_created = $11, metadata_modified = $12, num_of_extras = $13,
-                        num_of_groups = $14, num_of_keywords = $15, license_title = $16,
-                        license_url = $17, url = $18
+                    SET changed = $2, last_updated = &3, name = $4, title = $5, owner_org = $6,
+                        author = $7, maintainer = $8, private = $9, state = $10, description = $11,
+                        metadata_created = $12, metadata_modified = $13, num_of_extras = $14,
+                        num_of_groups = $15, num_of_keywords = $16, license_title = $17,
+                        license_url = $18, url = $19
                     WHERE object_id = $1;`;
     const values = [
-        dataset.object_id, dataset.changed, dataset.name, dataset.title, dataset.owner_org,
-        dataset.author, dataset.maintainer, dataset.private, dataset.state, dataset.description,
-        dataset.metadata_created, dataset.metadata_modified, dataset.num_of_extras,
+        dataset.object_id, dataset.changed, dataset.last_updated, dataset.name, dataset.title,
+        dataset.owner_org, dataset.author, dataset.maintainer, dataset.private, dataset.state,
+        dataset.description, dataset.metadata_created, dataset.metadata_modified, dataset.num_of_extras,
         dataset.num_of_groups, dataset.num_of_keywords, dataset.license_title, dataset.license_url,
         dataset.url
     ];
@@ -238,8 +238,7 @@ var dbUpdateDataset = async (dataset) => {
 
 // gets dataset from database (by its' id)
 var dbGetDataset = async (dataset_id) => {
-    const sql = `SELECT * FROM dataset
-                    WHERE object_id = '${dataset_id}';`;
+    const sql = `SELECT * FROM dataset WHERE object_id = '${dataset_id}';`;
     try {
         const result = await db.query(sql, []);
         return result.rows[0];
