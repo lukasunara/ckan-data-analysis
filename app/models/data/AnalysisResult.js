@@ -114,4 +114,18 @@ module.exports = class AnalysisResult {
         this.reuseChart.add(other.reuseChart);
         this.contextChart.add(other.contextChart);
     }
+
+    isEmpty() {
+        this.findChart.maxPoints = this.findChart.getMaxPoints();
+        this.accessChart.maxPoints = this.accessChart.getMaxPoints();
+        this.interChart.maxPoints = this.interChart.getMaxPoints();
+        this.reuseChart.maxPoints = this.reuseChart.getMaxPoints();
+        this.contextChart.maxPoints = this.contextChart.getMaxPoints();
+
+        let maxPoints = this.findChart.maxPoints + this.accessChart.maxPoints
+            + this.interChart.maxPoints + this.reuseChart.maxPoints
+            + this.contextChart.maxPoints;
+
+        return maxPoints == 0;
+    }
 };

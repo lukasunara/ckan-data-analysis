@@ -120,7 +120,7 @@ module.exports = class AccessibilityChart extends Chart {
         // if URL exists, add 1 point
         if (param) {
             this.url_accessibility++;
-            var urlData = await fetchData(param);
+            let urlData = await fetchData(param);
             // if url does not work, report it
             if (!urlData || urlData.error) {
                 /*var urlError = {

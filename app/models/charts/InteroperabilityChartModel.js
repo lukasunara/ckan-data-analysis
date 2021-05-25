@@ -9,6 +9,8 @@ module.exports = class InteroperabilityChart extends Chart {
     static maxCompatiblity = 1;
     static maxMachineReadable = 5;
     static maxLinkedOpenData = 7;
+    static maxDatasetLOD = 5;
+    static maxPortalLOD = 7;
 
     // constructor for InteroperabilityChart
     constructor(data) {
@@ -49,7 +51,7 @@ module.exports = class InteroperabilityChart extends Chart {
 
     // gets maximum of points an object could have received
     getMaxPoints() {
-        return this.max_formatmax_format + this.max_format_div + this.max_comp
+        return this.max_format + this.max_format_div + this.max_comp
             + this.max_machine_readable + this.max_lod;
     }
 
@@ -62,7 +64,7 @@ module.exports = class InteroperabilityChart extends Chart {
     // sets all points to zero
     reset() {
         this.format = 0;
-        this.max_formatmax_format = 0;
+        this.max_format = 0;
         this.format_diversity = 0;
         this.max_format_div = 0;
         this.compatibility = 0;
@@ -177,6 +179,22 @@ module.exports = class InteroperabilityChart extends Chart {
                 this.linked_open_data += 4; //if there are linked open data exensions, add 4 points
             }
         }
+    }
+
+    // https://{ckan-instance-host}/dataset/{dataset-id}.{format}
+    static formatsLOD = ['rdf', 'xml', 'ttl', 'n3', 'jsonld'];
+    checkDatasetLOD(portalName, datasetID) {
+        InteroperabilityChart.formatsLOD.forEach(format => {
+            let url = 'https://' + portalName + '/dataset/' + datasetID + '.' + format;
+
+            let urlData = await fetchData(url);
+            if (!urlData || urlData.error) {
+                // link not working
+            } else {
+                this.linked_open_data++; //if URL works, add 1 point
+            }
+        });
+
     }
 };
 

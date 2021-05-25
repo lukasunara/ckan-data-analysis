@@ -3,16 +3,16 @@
     <div class="card-body">
         <p class="text-center">These indicators show how easy it is for people and machines to find data</p>
         <div class="d-flex flex-row flex-wrap justify-content-center">
-            <% if(chart.maxPointsID> 0) { %>
+            <% if(chart.max_id> 0) { %>
                 <div><canvas id="identificationChart" class="smaller-chart"></canvas></div>
             <% } %>
-            <% if(chart.maxPointsKeywords> 0) { %>
+            <% if(chart.max_key> 0) { %>
                 <div><canvas id="keywordsChart" class="smaller-chart"></canvas></div>
             <% } %>
-            <% if(chart.maxPointsCategories> 0) { %>
+            <% if(chart.max_cat> 0) { %>
                 <div><canvas id="categoriesChart" class="smaller-chart"></canvas></div>
             <% } %>
-            <% if(chart.maxPointsState> 0) { %>
+            <% if(chart.max_state> 0) { %>
                 <div><canvas id="stateChart" class="smaller-chart"></canvas></div>
             <% } %>
         </div>

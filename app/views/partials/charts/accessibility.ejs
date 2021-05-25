@@ -3,13 +3,13 @@
     <div class="card-body">
         <p class="text-center">These indicators show how easy it is for people and machines to access data</p>
         <div class="d-flex flex-row flex-wrap justify-content-center">
-            <% if (chart.maxPointsDataset > 0) { %>
+            <% if (chart.max_dataset_acc > 0) { %>
                 <div><canvas id="datasetAccessibilityChart" class="smaller-chart"></canvas></div>
             <% } %>
-            <% if (chart.maxPointsUrl> 0) { %>
+            <% if (chart.max_url_acc> 0) { %>
                 <div><canvas id="urlAccessibilityChart" class="smaller-chart"></canvas></div>
             <% } %>
-            <% if (chart.maxPointsDownload> 0) { %>
+            <% if (chart.max_download_url> 0) { %>
                 <div><canvas id="downloadUrlChart" class="smaller-chart"></canvas></div>
             <% } %>
         </div>

@@ -107,7 +107,7 @@ module.exports = class Organization extends RateableObject {
             // 3.2. format diversity (only from datasets)
             // 3.3. compatibility (only from datasets)
             // 3.4. machine readable (only from datasets)
-            // 3.5. linked open data (not calculated)
+            // 3.5. linked open data (only from datasets)
 
             // 4. reusability
             // 4.1. license (only from datasets)

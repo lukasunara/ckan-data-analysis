@@ -6,15 +6,17 @@ const { createPortal } = require('../create/portalCreation.js');
 var analysePortal = async (portalName) => {
     let failed = false;
     // if portalName is undefined => analyse all portals from database
+    let result = null;
     if (!portalName) {
         let portals = await Portal.fetchAllPortalsFromDB();
         for (let portalID of portals) {
-            failed = startAnalysingPortal(portalID);
+            failed = await startAnalysingPortal(portalID).failed;
         }
     } else {
-        failed = startAnalysingPortal(portalName);
+        result = await startAnalysingPortal(portalName);
+        failed = result.failed;
     }
-    return failed;
+    return { failed: failed, portal: result.portalData };
 };
 
 // start analysing portal
@@ -33,6 +35,7 @@ var startAnalysingPortal = async (portalName) => {
     let vocabulariesUrl = 'http://' + portalName + '/api/3/action/vocabulary_list';
     let vocabularies = await fetchData(vocabulariesUrl);
 
+    let portal = null;
     if (datasets.error || datasets.data === undefined ||
         organizations.error || organizations.data === undefined ||
         basicInfo.error || basicInfo.data === undefined ||
@@ -40,12 +43,12 @@ var startAnalysingPortal = async (portalName) => {
     ) {
         failed = true;
     } else {
-        let portal = await createPortal(portalName, datasets.data.result,
+        portal = await createPortal(portalName, datasets.data.result,
             organizations.data.result, basicInfo.data.result, vocabularies.data.result
         );
         await portal.analysePortal();
     }
-    return failed;
+    return { failed: failed, portalData: portal };
 }
 
 module.exports = {

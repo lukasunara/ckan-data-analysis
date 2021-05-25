@@ -4,16 +4,17 @@ const { createResource } = require('../create/resourceCreation.js');
 // method for refreshing data about resources
 var analyseResource = async (portalName, resourceID) => {
     let failed = false;
+    let resource = null;
 
     let result = await fetchResourceData(portalName, resourceID);
 
     if (result.failed) {
         failed = true;
     } else {
-        let resource = await createResource(resourceData.data.result);
+        resource = await createResource(result.resourceData);
         await resource.analyseResource();
     }
-    return failed;
+    return { failed: failed, resource: resource };
 };
 
 // fetch metadata from CKAN
@@ -26,7 +27,7 @@ var fetchResourceData = async (portalName, resourceID) => {
     if (resourceData.error || resourceData.data === undefined) {
         failed = true;
     }
-    return { failed: failed, resourceData: resourceData };
+    return { failed: failed, resourceData: resourceData.data.result };
 }
 
 module.exports = {

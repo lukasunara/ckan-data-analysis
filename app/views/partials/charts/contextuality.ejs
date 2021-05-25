@@ -3,19 +3,19 @@
     <div class="card-body">
         <p class="text-center">These indicators show the quality of data</p>
         <div class="d-flex flex-row flex-wrap justify-content-center">
-            <% if(chart.maxPointsResources> 0) { %>
+            <% if(chart.max_num_of_res> 0) { %>
                 <div><canvas id="numOfResourcesChart" class="smaller-chart"></canvas></div>
             <% } %>
-            <% if(chart.maxPointsFSize> 0) { %>
+            <% if(chart.max_file_size> 0) { %>
                 <div><canvas id="fileSizeChart" class="smaller-chart"></canvas></div>
             <% } %>
-            <% if(chart.maxPointsEmpty > 0) { %>
+            <% if(chart.max_empty > 0) { %>
                 <div><canvas id="emptyDataChart" class="smaller-chart"></canvas></div>
             <% } %>
-            <% if(chart.maxPointsIssue> 0) { %>
+            <% if(chart.max_date_of_issue> 0) { %>
                 <div><canvas id="dateOfIssueChart" class="smaller-chart"></canvas></div>
             <% } %>
-            <% if(chart.maxPointsModified> 0) { %>
+            <% if(chart.max_modification_date> 0) { %>
                 <div><canvas id="modificationDateChart" class="smaller-chart"></canvas></div>
             <% } %>
         </div>

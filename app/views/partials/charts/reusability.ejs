@@ -3,16 +3,16 @@
     <div class="card-body">
         <p class="text-center">These indicators show how easy it is to reuse available data</p>
         <div class="d-flex flex-row flex-wrap justify-content-center">
-            <% if(chart.maxPointsLicense> 0) { %>
+            <% if(chart.max_license> 0) { %>
                 <div><canvas id="licenseChart" class="smaller-chart"></canvas></div>
             <% } %>
-            <% if(chart.maxPointsInfo> 0) { %>
+            <% if(chart.max_basic_info> 0) { %>
                 <div><canvas id="basicInfoChart" class="smaller-chart"></canvas></div>
             <% } %>
-            <% if(chart.maxPointsExtras> 0) { %>
+            <% if(chart.max_extras> 0) { %>
                 <div><canvas id="extrasChart" class="smaller-chart"></canvas></div>
             <% } %>
-            <% if(chart.maxPointsPublisher> 0) { %>
+            <% if(chart.max_publisher> 0) { %>
                 <div><canvas id="publisherChart" class="smaller-chart"></canvas></div>
             <% } %>
         </div>

@@ -131,7 +131,8 @@ module.exports = class Dataset extends RateableObject {
             result.interChart.maxPointsFormatDiv += InteroperabilityChart.maxFormatDiversity;
             // 3.3. compatibility (only from resources)
             // 3.4. machine readable (only from resources)
-            // 3.5. linked open data (not calculated)
+            // 3.5. linked open data (always calculated)
+            result.interChart.max_lod += InteroperabilityChart.maxDatasetLOD;
 
             // 4. reusability
             // 4.1. license
@@ -179,6 +180,15 @@ module.exports = class Dataset extends RateableObject {
         result.interChart.format_diversity += result.interChart.format_diversity;
         if (organizationResult)
             organizationResult.interChart.format_diversity += result.interChart.format_diversity;
+
+        // 3.5. linked open data (not calculated)
+        if (organizationResult)
+            organizationResult.interChart.linked_open_data -= result.interChart.linked_open_data;
+        result.interChart.linked_open_data -= result.interChart.linked_open_data;
+        result.interChart.checkDatasetLOD(this.portal_id, this.object_id);
+        result.interChart.linked_open_data += result.interChart.linked_open_data;
+        if (organizationResult)
+            organizationResult.interChart.linked_open_data += result.interChart.linked_open_data;
 
         await result.updateDataInDB();
         await super.setChanged(this.object_id, false);

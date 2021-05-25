@@ -7,53 +7,51 @@
 
 <body class="lightblue-bg">
     <%- include('../partials/header'); %>
-
+    
     <main>
-        <section class="container justify-content-center p-4">
-            <div class="row row-cols-md-2">
-                <div class="col">
-                    <div class="card bg-light h-100 rounded-3">
-                        <img class="card-img-top" src="/images/data_analysis.jpg" alt="data_analysis.jpg" />
-                        <div class="card-body">
-                            <h4 class="card-title">Analyse portals</h4>
-                            <p class="card-text mb-0">
-                                Analyse the quality of open datasets available on CKAN platform in just a few steps.<br>
-                                Choose between analysing:
-                            </p>
-                            <ul>
-                                <li>portals</li>
-                                <li>datasets</li>
-                                <li>organizations</li>
-                            </ul>
+        <section class="container justify-content-center align-items-center p-4 w-75">
+            <div class="bg-light light-border rounded-3 m-1 p-2">
+                <p class="text-center mb-0">
+                    Analyse the quality of open datasets available on <span class="fw-bold">CKAN</span>
+                    platform in just a few steps.
+                </p>
+                <div class="p-4">
+                    <h4>Choose analysis option</h4>
+                    <form class="row mt-5" action="/portal" method="POST">
+                        <div class="mb-3">
+                            <label for="url" class="form-label">URL of a portal, dataset or organization</label>
+                            <input type="text" class="form-control <% if (errorURL) { %> is-invalid <% } %>" id="url"
+                                name="url" aria-describedby="validationURL" placeholder="Insert URL..." required
+                            >
+                            <div id="validationURL" class="invalid-feedback">
+                                Error loading URL. Please provide a valid URL.
+                            </div>
                         </div>
-                        <div class="card-footer btn">
-                            <a class="link-dark" href="/menu" title="Start analysing data">Start analysing data</a>
+                        <label for="typeOfElement" class="form-label">Choose type of element (URL must correspond to the type):</label>
+                        <div class="mt-0 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="typeOfElement" id="typeOfElement" value="radioPortal" required>
+                                <label class="form-check-label" for="radioPortal">Portal</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="typeOfElement" id="typeOfElement" value="radioDataset" required>
+                                <label class="form-check-label" for="radioDataset">Dataset</label> 
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="typeOfElement" id="typeOfElement" value="radioOrganization" required>
+                                <label class="form-check-label" for="radioOrganization">Organization</label>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card bg-light h-100 rounded-3">
-                        <img class="card-img-top" src="/images/question_marks.png" alt="question_marks.jpg" />
-                        <div class="card-body">
-                            <h4 class="card-title">About CKAN</h5>
-                            <p class="card-text">
-                                CKAN is the world’s leading Open Source data portal platform.<br>
-                                It is a powerful data management system that makes data easily accessible.
-                                CKAN collects data all around the world and has simplified its publishig,
-                                sharing, finding and using.</p>
+                        <div class="mb-1 d-flex justify-content-center">
+                            <input class="btn btn-secondary w-25" type="submit">
                         </div>
-                        <div class="card-footer btn">
-                            <a class="link-dark" href="https://ckan.org/" title="Go to CKAN website" target="_blank">
-                                Go to CKAN website
-                            </a>
-                        </div>
-                    </div>
+                    </form>
                 </div>
             </div>
         </section>
     </main>
 
     <%- include('../partials/footer'); %>
-
+    
     <%- include('../partials/external_scripts'); %>
 </body>

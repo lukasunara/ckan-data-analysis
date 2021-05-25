@@ -18,15 +18,15 @@ module.exports = class ContextualityChart extends Chart {
         this.lightColor = '#f1d872';
 
         this.num_of_resources = data.num_of_resources;
-        this.max_num_of_res = max_num_of_res;
+        this.max_num_of_res = data.max_num_of_res;
         this.file_size = data.file_size;
-        this.max_file_size = max_file_size;
+        this.max_file_size = data.max_file_size;
         this.empty_data = data.empty_data;
-        this.max_empty = max_empty;
+        this.max_empty = data.max_empty;
         this.date_of_issue = data.date_of_issue;
-        this.max_date_of_issue = max_date_of_issue;
+        this.max_date_of_issue = data.max_date_of_issue;
         this.modification_date = data.modification_date;
-        this.max_modification_date = max_modification_date;
+        this.max_modification_date = data.max_modification_date;
     }
 
     // creates a new empty ContextualityChart

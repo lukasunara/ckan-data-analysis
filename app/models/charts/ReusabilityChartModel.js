@@ -18,13 +18,13 @@ module.exports = class ReusabilityChart extends Chart {
         this.lightColor = '#da92f7';
 
         this.license = data.license;
-        this.max_license = max_license;
+        this.max_license = data.max_license;
         this.basic_info = data.basic_info;
-        this.max_basic_info = max_basic_info;
+        this.max_basic_info = data.max_basic_info;
         this.extras = data.extras;
-        this.max_extras = max_extras;
+        this.max_extras = data.max_extras;
         this.publisher = data.publisher;
-        this.max_publisher = max_publisher;
+        this.max_publisher = data.max_publisher;
     }
 
     // creates a new empty ReusabilityChart

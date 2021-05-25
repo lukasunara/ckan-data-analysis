@@ -100,10 +100,10 @@ module.exports = class Portal extends RateableObject {
             // 3.2. format diversity (only from organizations)
             // 3.3. compatibility (only from organizations)
             // 3.4. machine readable (only from organizations)
-            // 3.5. linked open data
+            // 3.5. linked open data + from organizations
             result.interChart.checkVocabularies(this.num_of_vocabularies);
             result.interChart.checkExtensions(this.num_of_extensions, this.dcat_or_rdf);
-            result.interChart.max_lod += InteroperabilityChart.maxLinkedOpenData;
+            result.interChart.max_lod += InteroperabilityChart.maxPortalLOD;
 
             // 4. reusability
             // 4.1. license (only from organizations)
