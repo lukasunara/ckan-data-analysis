@@ -3,7 +3,12 @@ const Chart = require('./ChartModel');
 
 // class FindabilityChart encapsulates a findability chart
 module.exports = class FindabilityChart extends Chart {
-    // max number of points for each category of evaluation
+    // max number of points for each indicator of evaluation
+    static weightID = 30;
+    static weightKeywords = 30;
+    static weightCategories = 30;
+    static weightState = 10;
+
     static maxIdentification = 3;
     static maxIdentificationPortal = 2;
     static maxKeywords = 3;
@@ -52,6 +57,34 @@ module.exports = class FindabilityChart extends Chart {
     // gets number of points an object has earned
     getEarnedPoints() {
         return this.identification + this.keywords + this.categories + this.state;
+    }
+
+    // gets total weight of findability charts
+    getTotalWeight() {
+        let wID = this.max_id == 0 ? 0 : FindabilityChart.weightID;
+        let wKeywords = this.max_key == 0 ? 0 : FindabilityChart.weightKeywords;
+        let wCategories = this.max_cat == 0 ? 0 : FindabilityChart.weightCategories;
+        let wState = this.max_state == 0 ? 0 : FindabilityChart.weightState;
+
+        return wID + wKeywords + wCategories + wState;
+    }
+
+    // gets earned weight of this chart
+    getEarnedWeight() {
+        let earnedWID = this.max_id == 0 ? 0 : (
+            this.identification / this.max_id * FindabilityChart.weightID
+        );
+        let earnedWKeywords = this.max_key == 0 ? 0 : (
+            this.keywords / this.max_key * FindabilityChart.weightKeywords
+        );
+        let earnedWCategories = this.max_cat == 0 ? 0 : (
+            this.categories / this.max_cat * FindabilityChart.weightCategories
+        );
+        let earnedWState = this.max_state == 0 ? 0 : (
+            this.state / this.max_state * FindabilityChart.weightState
+        );
+
+        return earnedWID + earnedWKeywords + earnedWCategories + earnedWState;
     }
 
     // sets all points to zero

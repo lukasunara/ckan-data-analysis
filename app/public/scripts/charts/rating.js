@@ -8,11 +8,11 @@ var getRatingsChar = (objectData) => {
             {
                 label: 'Number of points for each chart group',
                 data: [
-                    objectData.result.findChart.earnedPoints,
-                    objectData.result.accessChart.earnedPoints,
-                    objectData.result.interChart.earnedPoints,
-                    objectData.result.reuseChart.earnedPoints,
-                    objectData.result.contextChart.earnedPoints
+                    objectData.result.findChart.earnedWeight.toFixed(2),
+                    objectData.result.accessChart.earnedWeight.toFixed(2),
+                    objectData.result.interChart.earnedWeight.toFixed(2),
+                    objectData.result.reuseChart.earnedWeight.toFixed(2),
+                    objectData.result.contextChart.earnedWeight.toFixed(2)
                 ],
                 backgroundColor: ["#2ecc71", "#e74c3c", "#3e6669", "#9b59b6", "#f1c40f"]
             }

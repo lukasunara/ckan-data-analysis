@@ -1,6 +1,7 @@
 const db = require('../../db');
 const { checkParam } = require('../../public/scripts/utils/analysis');
 const AccessibilityChart = require('../charts/AccessibilityChartModel');
+const ContextualityChart = require('../charts/ContextualityChartModel');
 const FindabilityChart = require('../charts/FindabilityChartModel');
 const ReusabilityChart = require('../charts/ReusabilityChartModel');
 const AnalysisResult = require('./AnalysisResult');
@@ -21,7 +22,7 @@ module.exports = class Organization extends RateableObject {
         this.approval_status = data.approval_status;
         this.num_of_extras = data.num_of_extras;
         this.num_of_members = data.num_of_members;
-        this.date_created = data.date_created;
+        this.created = data.created;
         this.image_display_url = data.image_display_url;
     }
 
@@ -43,7 +44,7 @@ module.exports = class Organization extends RateableObject {
         this.approval_status = data.approval_status;
         this.num_of_extrasfExtras = data.num_of_extras;
         this.num_of_members = data.num_of_members;
-        this.date_created = data.date_created;
+        this.created = data.created;
         this.image_display_url = data.image_display_url;
         this.last_updated = data.last_updated;
 
@@ -77,8 +78,7 @@ module.exports = class Organization extends RateableObject {
     async analyseOrganization(portalResult, shouldReduce) {
         let result = await AnalysisResult.createAnalysisResult(this.object_id);
         // if portal has been reseted => no need for reduce()
-        if (shouldReduce)
-            portalResult.reduce(result);
+        if (shouldReduce) portalResult.reduce(result);
 
         if (this.changed) {
             result.reset();
@@ -120,7 +120,14 @@ module.exports = class Organization extends RateableObject {
             result.reuseChart.max_extras += ReusabilityChart.maxExtrasOrganization;
             // 4.4. publisher (only from datasets)
 
-            // 5. contextuality (only from dataasets)
+            // 5. contextuality
+            // 5.1. number of resources (only from dataasets)
+            // 5.2. file size (only from dataasets)
+            // 5.3. empty data (only from dataasets)
+            // 5.4. date of issue + from datasets
+            result.contextChart.checkDateOfIssue(this.created);
+            result.contextChart.max_date_of_issue += ContextualityChart.maxDateOfIssue;
+            // 5.5. modification date (only from dataasets)
         }
         let datasets = await this.fetchDatasets();
         for (let dataset of datasets) {
@@ -139,12 +146,12 @@ module.exports = class Organization extends RateableObject {
 var dbNewOrganization = async (org) => {
     const sql = `INSERT INTO organization (object_id, changed, last_updated, portal_id, name,
                 title, description, state, approval_status, num_of_extras, num_of_members,
-                date_created, image_display_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,
+                created, image_display_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,
                                                     $10, $11, $12, $13);`;
     const values = [
         org.object_id, org.changed, org.last_updated, org.portal_id, org.name, org.title,
         org.description, org.state, org.approval_status, org.num_of_extras, org.num_of_members,
-        org.date_created, org.image_display_url
+        org.created, org.image_display_url
     ];
     try {
         const result = await db.query(sql, values);
@@ -160,11 +167,11 @@ var dbUpdateOrganization = async (org) => {
     const sql = `UPDATE organization
                     SET changed = $2, last_updated = $3, name = $4, title = $5, description = $6,
                         state = $7, approval_status = $8, num_of_extras = $9, num_of_members = $10,
-                        date_created = $11, image_display_url = $12
+                        created = $11, image_display_url = $12
                     WHERE object_id = $1;`;
     const values = [
         org.object_id, org.changed, org.last_updated, org.name, org.title, org.description,
-        org.state, org.approval_status, org.num_of_extras, org.num_of_members, org.date_created,
+        org.state, org.approval_status, org.num_of_extras, org.num_of_members, org.created,
         org.image_display_url
     ];
     try {

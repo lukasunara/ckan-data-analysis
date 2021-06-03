@@ -33,7 +33,7 @@ module.exports = class Portal extends RateableObject {
     }
 
     // update portal data in database
-    async update() {
+    async update(data) {
         this.name = data.name;
         this.title = data.title;
         this.description = data.description;
@@ -169,7 +169,7 @@ var dbUpdatePortal = async (portal) => {
 
 // get all portals from database
 var dbGetAllPortals = async () => {
-    const sql = `SELECT object_id FROM portal';`;
+    const sql = `SELECT object_id FROM portal;`;
     try {
         const result = await db.query(sql, []);
         return result.rows;

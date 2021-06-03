@@ -11,9 +11,19 @@
             <div id="listPanel" class="accordion-collapse collapse" aria-labelledby="listHeading">
                 <div class="accordion-body overflow-auto accordion-list-div bg-light">
                     <% if (list.length > 0) { %>
-                    <ul class="list-group list-group-flush bg-light">
+                    <div class="d-flex flex-row justify-content-evenly align-items-center mb-2">
+                        <span class="tw-bold">Sort by:</span>
+                        <button id="sortByNameAscBtn" class="btn btn-secondary">Name (Ascending)</button>
+                        <button id="sortByNameDescBtn" class="btn btn-secondary">Name (Descending)</button>
+                        <button id="sortByDateAscBtn" class="btn btn-secondary">Oldest</button>
+                        <button id="sortByDateDescBtn" class="btn btn-secondary">Newest</button>
+                    </div>
+                    <ul id="listOfElements" class="list-group list-group-flush bg-light">
                         <% for (let element of list) { %>
-                        <li class="list-group-item bg-light">
+                        <li class="list-group-item bg-light"
+                            data-name="<%= element.title ? element.title : element.name ? element.name : 'Unknown' %>"
+                            data-date="<% element.last_modified ? element.last_modified : element.created %>"
+                        >
                             <%= element.title ? element.title : element.name ? element.name : "Unknown " + typeOfObject %>:
                             <a class="link-primary" href="/portal/<%= portalName %>/<%= typeOfObject %>/<%= element.object_id %>">
                                 <%= element.object_id %>
@@ -22,10 +32,12 @@
                         <% } %>
                     </ul>
                     <% } else { %>
-                        <p>There are no resources for this dataset</p>
+                        <p>There are no <%=typeOfObject%>s available</p>
                     <% } %>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<script src="/scripts/sort_list.js"></script>

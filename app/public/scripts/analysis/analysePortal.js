@@ -9,8 +9,9 @@ var analysePortal = async (portalName) => {
     let result = null;
     if (!portalName) {
         let portals = await Portal.fetchAllPortalsFromDB();
-        for (let portalID of portals) {
-            failed = await startAnalysingPortal(portalID).failed;
+        for (let portal of portals) {
+            result = await startAnalysingPortal(portal.object_id);
+            failed = result.failed;
         }
     } else {
         result = await startAnalysingPortal(portalName);

@@ -4,7 +4,13 @@ const { analyseDate } = require('../../public/scripts/utils/analysis');
 
 // class ContextualityChart encapsulates an contextuality chart
 module.exports = class ContextualityChart extends Chart {
-    // max number of points for each category of evaluation
+    // max number of points for each indicator of evaluation
+    static weightNumOfResources = 25;
+    static weightFileSize = 5;
+    static weightEmptyData = 25;
+    static weightDateOfIssue = 5;
+    static weightModifDate = 15;
+
     static maxNumOfResources = 5;
     static maxFileSize = 1;
     static maxEmptyData = 4;
@@ -58,6 +64,38 @@ module.exports = class ContextualityChart extends Chart {
     getEarnedPoints() {
         return this.num_of_resources + this.file_size + this.empty_data
             + this.date_of_issue + this.modification_date;
+    }
+
+    // gets total weight of contextuality charts
+    getTotalWeight() {
+        let wNumOfRes = this.max_num_of_res == 0 ? 0 : ContextualityChart.weightNumOfResources;
+        let wFileSize = this.max_file_size == 0 ? 0 : ContextualityChart.weightFileSize;
+        let wEmptyData = this.max_empty == 0 ? 0 : ContextualityChart.weightEmptyData;
+        let wIssueDate = this.max_date_of_issue == 0 ? 0 : ContextualityChart.weightDateOfIssue;
+        let wModifDate = this.max_modification_date == 0 ? 0 : ContextualityChart.weightModifDate;
+
+        return wNumOfRes + wFileSize + wEmptyData + wIssueDate + wModifDate;
+    }
+
+    // gets earned weight of this chart
+    getEarnedWeight() {
+        let earnedWNumOfRes = this.max_num_of_res == 0 ? 0 : (
+            this.num_of_resources / this.max_num_of_res * ContextualityChart.weightNumOfResources
+        );
+        let earnedWSize = this.max_file_size == 0 ? 0 : (
+            this.file_size / this.max_file_size * ContextualityChart.weightFileSize
+        );
+        let earnedWEmpty = this.max_empty == 0 ? 0 : (
+            this.empty_data / this.max_empty * ContextualityChart.weightEmptyData
+        );
+        let earnedWIssueDate = this.max_date_of_issue == 0 ? 0 : (
+            this.date_of_issue / this.max_date_of_issue * ContextualityChart.weightDateOfIssue
+        );
+        let earnedWModifDate = this.max_modification_date == 0 ? 0 : (
+            this.modification_date / this.max_modification_date * ContextualityChart.weightModifDate
+        );
+
+        return earnedWNumOfRes + earnedWSize + earnedWEmpty + earnedWIssueDate + earnedWModifDate;
     }
 
     // sets all points to zero

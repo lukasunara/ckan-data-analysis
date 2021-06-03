@@ -72,8 +72,7 @@ module.exports = class Resource extends RateableObject {
     async analyseResource(datasetResult, shouldReduce) {
         let result = await AnalysisResult.createAnalysisResult(this.object_id);
         // if dataset has been reseted => no need for reduce()
-        if (shouldReduce)
-            datasetResult.reduce(result);
+        if (shouldReduce) datasetResult.reduce(result);
 
         if (this.changed) {
             result.reset();

@@ -4,7 +4,12 @@ const { fetchData } = require('../../public/scripts/utils/fetching.js');
 
 // class ReusabilityChart encapsulates an reusability chart
 module.exports = class ReusabilityChart extends Chart {
-    // max number of points for each category of evaluation
+    // max number of points for each indicator of evaluation
+    static weightLicense = 25;
+    static weightBasicInfo = 20;
+    static weightExtras = 20;
+    static weightPublisher = 10;
+
     static maxLicense = 3;
     static maxBasicInfo = 1;
     static maxExtras = 3;
@@ -52,6 +57,34 @@ module.exports = class ReusabilityChart extends Chart {
     // gets number of points an object has earned
     getEarnedPoints() {
         return this.license + this.basic_info + this.extras + this.publisher;
+    }
+
+    // gets total weight of reusability charts
+    getTotalWeight() {
+        let wLicense = this.max_license == 0 ? 0 : ReusabilityChart.weightLicense;
+        let wBasicInfo = this.max_basic_info == 0 ? 0 : ReusabilityChart.weightBasicInfo;
+        let wExtras = this.max_extras == 0 ? 0 : ReusabilityChart.weightExtras;
+        let wPublisher = this.max_publisher == 0 ? 0 : ReusabilityChart.weightPublisher;
+
+        return wLicense + wBasicInfo + wExtras + wPublisher;
+    }
+
+    // gets earned weight of this chart
+    getEarnedWeight() {
+        let earnedWLicense = this.max_license == 0 ? 0 : (
+            this.license / this.max_license * ReusabilityChart.weightLicense
+        );
+        let earnedWBasicInfo = this.max_basic_info == 0 ? 0 : (
+            this.basic_info / this.max_basic_info * ReusabilityChart.weightBasicInfo
+        );
+        let earnedWExtras = this.max_extras == 0 ? 0 : (
+            this.extras / this.max_extras * ReusabilityChart.weightExtras
+        );
+        let earnedWPublisher = this.max_publisher == 0 ? 0 : (
+            this.publisher / this.max_publisher * ReusabilityChart.weightPublisher
+        );
+
+        return earnedWLicense + earnedWBasicInfo + earnedWExtras + earnedWPublisher;
     }
 
     // sets all points to zero

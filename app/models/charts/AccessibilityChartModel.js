@@ -4,7 +4,11 @@ const { fetchData } = require('../../public/scripts/utils/fetching.js');
 
 // class AccessibilityChart encapsulates an accessibility chart
 module.exports = class AccessibilityChart extends Chart {
-    // max number of points for each category of evaluation
+    // max number of points for each indicator of evaluation
+    static weightDatasetAcc = 40;
+    static weightURLAcc = 20;
+    static weightDownoadURL = 40;
+
     static maxDatasetAccessibility = 1;
     static maxUrlAccessibility = 2;
     static maxDownloadURL = 2;
@@ -46,6 +50,30 @@ module.exports = class AccessibilityChart extends Chart {
     // gets number of points an object has earned
     getEarnedPoints() {
         return this.dataset_accessibility + this.url_accessibility + this.download_url;
+    }
+
+    // gets total weight of accessibility charts
+    getTotalWeight() {
+        let wDatasetAcc = this.max_dataset_acc == 0 ? 0 : AccessibilityChart.weightDatasetAcc;
+        let wURLAcc = this.max_url_acc == 0 ? 0 : AccessibilityChart.weightURLAcc;
+        let wDownloadURL = this.max_download_url == 0 ? 0 : AccessibilityChart.weightDownoadURL;
+
+        return wDatasetAcc + wURLAcc + wDownloadURL;
+    }
+
+    // gets earned weight of this chart
+    getEarnedWeight() {
+        let earnedWDataset = this.max_dataset_acc == 0 ? 0 : (
+            this.dataset_accessibility / this.max_dataset_acc * AccessibilityChart.weightDatasetAcc
+        );
+        let earnedWUrl = this.max_url_acc == 0 ? 0 : (
+            this.url_accessibility / this.max_url_acc * AccessibilityChart.weightURLAcc
+        );
+        let earnedWDownload = this.max_download_url == 0 ? 0 : (
+            this.download_url / this.max_download_url * AccessibilityChart.weightDownoadURL
+        );
+
+        return earnedWDataset + earnedWUrl + earnedWDownload;
     }
 
     // sets all points to zero

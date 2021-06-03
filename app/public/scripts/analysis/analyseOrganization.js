@@ -19,8 +19,8 @@ var analyseOrganization = async (portalName, organizationID) => {
             organization = await createOrganization(portalName, result.organizationData);
             await organization.analyseOrganization();
         }
-        return { failed: failed, organization: organization };
     }
+    return { failed: failed, organization: organization };
 };
 
 // fetch metadata from CKAN

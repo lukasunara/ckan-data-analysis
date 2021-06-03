@@ -30,7 +30,7 @@ var createResource = async (resource, dataset_id) => {
         // if exists in database => check if same lastModified timestamp
         let savedLastModified = new Date(newResource.last_modified);
         // if last modified timestamps are almost equal continue, else update
-        if (lastModified && (lastModified - savedLastModified >= 45)) {
+        // if (lastModified && (lastModified - savedLastModified >= 45)) {
             result = getUrlData(resource.url, resource.format);
             // update all info that can be updated about this resource
             let dataForUpdate = {
@@ -41,7 +41,7 @@ var createResource = async (resource, dataset_id) => {
                 empty_rows: result.emptyRows, url: resource.url
             }
             await newResource.update(dataForUpdate);
-        }
+        // }
     }
     return newResource;
 };

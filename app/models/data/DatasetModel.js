@@ -25,8 +25,8 @@ module.exports = class Dataset extends RateableObject {
         this.private = data.private;
         this.state = data.state;
         this.description = data.description;
-        this.metadata_created = data.metadata_created;
-        this.metadata_modified = data.metadata_modified;
+        this.created = data.created;
+        this.last_modified = data.last_modified;
         this.num_of_extras = data.num_of_extras;
         this.num_of_groups = data.num_of_groups;
         this.num_of_keywords = data.num_of_keywords;
@@ -54,8 +54,8 @@ module.exports = class Dataset extends RateableObject {
         this.private = data.private;
         this.state = data.state;
         this.description = data.description;
-        this.metadata_created = data.metadata_created;
-        this.metadata_modified = data.metadata_modified;
+        this.created = data.created;
+        this.last_modified = data.last_modified;
         this.num_of_extras = data.num_of_extras;
         this.num_of_groups = data.num_of_groups;
         this.num_of_keywords = data.num_of_keywords;
@@ -94,8 +94,7 @@ module.exports = class Dataset extends RateableObject {
     async analyseDataset(organizationResult, shouldReduce) {
         let result = await AnalysisResult.createAnalysisResult(this.object_id);
         // if organization has been reseted => no need for reduce()
-        if (shouldReduce)
-            organizationResult.reduce(result);
+        if (shouldReduce) organizationResult.reduce(result);
 
         let resources = await this.fetchResources();
         if (this.changed) {
@@ -128,7 +127,7 @@ module.exports = class Dataset extends RateableObject {
             // 3. interoperability
             // 3.1. format (only from resources)
             // 3.2. format diversity (get from resources in database)
-            result.interChart.maxPointsFormatDiv += InteroperabilityChart.maxFormatDiversity;
+            result.interChart.max_format_div += InteroperabilityChart.maxFormatDiversity;
             // 3.3. compatibility (only from resources)
             // 3.4. machine readable (only from resources)
             // 3.5. linked open data (always calculated)
@@ -158,10 +157,10 @@ module.exports = class Dataset extends RateableObject {
             // 5.2. file size (only from resources)
             // 5.3. empty data (only from resources)
             // 5.4. date of issue + from resources
-            result.contextChart.checkDateOfIssue(this.metadata_created);
+            result.contextChart.checkDateOfIssue(this.created);
             result.contextChart.max_date_of_issue += ContextualityChart.maxDateOfIssue;
             // 5.5. modification date + from resources
-            result.contextChart.checkLastModified(this.metadata_modified);
+            result.contextChart.checkLastModified(this.last_modified);
             result.contextChart.max_modification_date += ContextualityChart.maxModificationDate;
         }
         let formats = new Set();
@@ -185,7 +184,7 @@ module.exports = class Dataset extends RateableObject {
         if (organizationResult)
             organizationResult.interChart.linked_open_data -= result.interChart.linked_open_data;
         result.interChart.linked_open_data -= result.interChart.linked_open_data;
-        result.interChart.checkDatasetLOD(this.portal_id, this.object_id);
+        await result.interChart.checkDatasetLOD(this.portal_id, this.object_id);
         result.interChart.linked_open_data += result.interChart.linked_open_data;
         if (organizationResult)
             organizationResult.interChart.linked_open_data += result.interChart.linked_open_data;
@@ -201,16 +200,16 @@ module.exports = class Dataset extends RateableObject {
 // inserts a new dataset into database
 var dbNewDataset = async (dataset) => {
     const sql = `INSERT INTO dataset (object_id, changed, last_updated, portal_id, organization_id,
-        name, title, owner_org, author, maintainer, private, state, description, metadata_created,
-        metadata_modified, num_of_extras, num_of_groups, num_of_keywords, license_title,
+        name, title, owner_org, author, maintainer, private, state, description, created,
+        last_modified, num_of_extras, num_of_groups, num_of_keywords, license_title,
         license_url, url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14,
                             $15, $16, $17, $18, $19, $20, $21);`;
     const values = [
         dataset.object_id, dataset.changed, dataset.last_updated, dataset.portal_id, dataset.organization_id,
         dataset.name, dataset.title, dataset.owner_org, dataset.author, dataset.maintainer,
-        dataset.private, dataset.state, dataset.description, dataset.metadata_created,
-        dataset.metadata_modified, dataset.num_of_extras, dataset.num_of_groups, dataset.num_of_keywords,
-        dataset.license_title, dataset.license_url, dataset.url
+        dataset.private, dataset.state, dataset.description, dataset.created, dataset.last_modified,
+        dataset.num_of_extras, dataset.num_of_groups, dataset.num_of_keywords, dataset.license_title,
+        dataset.license_url, dataset.url
     ];
     try {
         const result = await db.query(sql, values);
@@ -224,16 +223,16 @@ var dbNewDataset = async (dataset) => {
 // updates dataset data in database
 var dbUpdateDataset = async (dataset) => {
     const sql = `UPDATE dataset
-                    SET changed = $2, last_updated = &3, name = $4, title = $5, owner_org = $6,
+                    SET changed = $2, last_updated = $3, name = $4, title = $5, owner_org = $6,
                         author = $7, maintainer = $8, private = $9, state = $10, description = $11,
-                        metadata_created = $12, metadata_modified = $13, num_of_extras = $14,
+                        created = $12, last_modified = $13, num_of_extras = $14,
                         num_of_groups = $15, num_of_keywords = $16, license_title = $17,
                         license_url = $18, url = $19
                     WHERE object_id = $1;`;
     const values = [
         dataset.object_id, dataset.changed, dataset.last_updated, dataset.name, dataset.title,
         dataset.owner_org, dataset.author, dataset.maintainer, dataset.private, dataset.state,
-        dataset.description, dataset.metadata_created, dataset.metadata_modified, dataset.num_of_extras,
+        dataset.description, dataset.created, dataset.last_modified, dataset.num_of_extras,
         dataset.num_of_groups, dataset.num_of_keywords, dataset.license_title, dataset.license_url,
         dataset.url
     ];

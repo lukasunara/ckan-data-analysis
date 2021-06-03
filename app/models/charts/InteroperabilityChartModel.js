@@ -1,9 +1,16 @@
 const db = require('../../db');
+const { fetchData } = require('../../public/scripts/utils/fetching');
 const Chart = require('./ChartModel');
 
 // class InteroperabilityChart encapsulates an interoperability chart
 module.exports = class InteroperabilityChart extends Chart {
-    // max number of points for each category of evaluation
+    // max number of points for each indicator of evaluation
+    static weightFormat = 20;
+    static weightFormatDiv = 30;
+    static weightCompatibility = 20;
+    static weightMachineRead = 30;
+    static weightLOD = 50;
+
     static maxFormat = 1;
     static maxFormatDiversity = 4;
     static maxCompatiblity = 1;
@@ -59,6 +66,38 @@ module.exports = class InteroperabilityChart extends Chart {
     getEarnedPoints() {
         return this.format + this.format_diversity + this.compatibility
             + this.machine_readable + this.linked_open_data;
+    }
+
+    // gets total weight of interoperability charts
+    getTotalWeight() {
+        let wFormat = this.max_format == 0 ? 0 : InteroperabilityChart.weightFormat;
+        let wFormatDiv = this.max_format_div == 0 ? 0 : InteroperabilityChart.weightFormatDiv;
+        let wComp = this.max_comp == 0 ? 0 : InteroperabilityChart.weightCompatibility;
+        let wMachRead = this.max_machine_readable == 0 ? 0 : InteroperabilityChart.weightMachineRead;
+        let wLOD = this.max_lod == 0 ? 0 : InteroperabilityChart.weightLOD;
+
+        return wFormat + wFormatDiv + wComp + wMachRead + wLOD;
+    }
+
+    // gets earned weight of this chart
+    getEarnedWeight() {
+        let earnedWFormat = this.max_format == 0 ? 0 : (
+            this.format / this.max_format * InteroperabilityChart.weightFormat
+        );
+        let earnedWFormatDiv = this.max_format_div == 0 ? 0 : (
+            this.format_diversity / this.max_format_div * InteroperabilityChart.weightFormatDiv
+        );
+        let earnedWComp = this.max_comp == 0 ? 0 : (
+            this.compatibility / this.max_comp * InteroperabilityChart.weightCompatibility
+        );
+        let earnedWMachine = this.max_machine_readable == 0 ? 0 : (
+            this.machine_readable / this.max_machine_readable * InteroperabilityChart.weightMachineRead
+        );
+        let earnedWLOD = this.max_lod == 0 ? 0 : (
+            this.linked_open_data / this.max_lod * InteroperabilityChart.weightLOD
+        );
+
+        return earnedWFormat + earnedWFormatDiv + earnedWComp + earnedWMachine + earnedWLOD;
     }
 
     // sets all points to zero
@@ -168,6 +207,8 @@ module.exports = class InteroperabilityChart extends Chart {
     checkVocabularies(numOfVocabularies) {
         if (numOfVocabularies > 0) {
             this.linked_open_data += 2; //if they exist, add 2 points
+        } else {
+            this.missing_params.add('vocabularies');
         }
     }
 
@@ -178,13 +219,15 @@ module.exports = class InteroperabilityChart extends Chart {
             if (dcatOrRdf) {
                 this.linked_open_data += 4; //if there are linked open data exensions, add 4 points
             }
+        } else {
+            this.missingParams.add('extensions');
         }
     }
 
     // https://{ckan-instance-host}/dataset/{dataset-id}.{format}
     static formatsLOD = ['rdf', 'xml', 'ttl', 'n3', 'jsonld'];
-    checkDatasetLOD(portalName, datasetID) {
-        InteroperabilityChart.formatsLOD.forEach(format => {
+    async checkDatasetLOD(portalName, datasetID) {
+        InteroperabilityChart.formatsLOD.forEach(async format => {
             let url = 'https://' + portalName + '/dataset/' + datasetID + '.' + format;
 
             let urlData = await fetchData(url);

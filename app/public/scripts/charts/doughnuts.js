@@ -2,12 +2,14 @@ import { handleHover, handleLeave } from "./animations.js";
 
 // get everything needed for creation of ratings chart
 var getDoughnutChar = (earnedPoints, maxPoints, chartName, darkColor, lightColor) => {
+    var percentage = earnedPoints / maxPoints * 100;
+
     const charData = {
         labels: ['Earned points', 'Missing points'],
         datasets: [
             {
                 label: chartName,
-                data: [earnedPoints, maxPoints - earnedPoints],
+                data: [percentage.toFixed(0), 100 - percentage.toFixed(0)],
                 backgroundColor: [darkColor, lightColor]
             }
         ]
@@ -35,7 +37,7 @@ var getDoughnutChar = (earnedPoints, maxPoints, chartName, darkColor, lightColor
                     text: chartName
                 }
             }
-        },
+        }
     };
     return config;
 };

@@ -27,8 +27,8 @@ var createPortal = async (portalName, datasets, organizations, basicInfo, vocabu
         await newPortal.persist();
     } else {
         // if exists in database => check if it has passed 7 days since last update
-        let sevenDays = 7 * 24 * 60 * 60 * 1000; //7 days in miliseconds
-        if (currentDate - newPortal.last_updated >= sevenDays) {
+        // let sevenDays = 7 * 24 * 60 * 60 * 1000; //7 days in miliseconds
+        // if (currentDate - newPortal.last_updated >= sevenDays) {
             // update data about organization
             let dataForUpdate = {
                 last_updated: currentDate, name: portalName, title: basicInfo.site_title,
@@ -36,7 +36,7 @@ var createPortal = async (portalName, datasets, organizations, basicInfo, vocabu
                 num_of_extensions: extensions.size, dcat_or_rdf: dcatOrRdf, url: basicInfo.site_url
             }
             await newPortal.update(dataForUpdate);
-        }
+        // }
     }
     for (let i = 0; i < organizations.length; i++) {
         let organizationUrl = 'http://' + portalName + '/api/3/action/organization_show?id=' + organizations[i];

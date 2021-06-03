@@ -54,40 +54,39 @@ module.exports = class AnalysisResult {
 
     // calculates overall rating
     getOverallRating() {
-        this.findChart.maxPoints = this.findChart.getMaxPoints();
-        this.accessChart.maxPoints = this.accessChart.getMaxPoints();
-        this.interChart.maxPoints = this.interChart.getMaxPoints();
-        this.reuseChart.maxPoints = this.reuseChart.getMaxPoints();
-        this.contextChart.maxPoints = this.contextChart.getMaxPoints();
+        this.findChart.earnedWeight = this.findChart.getEarnedWeight();
+        this.accessChart.earnedWeight = this.accessChart.getEarnedWeight();
+        this.interChart.earnedWeight = this.interChart.getEarnedWeight();
+        this.reuseChart.earnedWeight = this.reuseChart.getEarnedWeight();
+        this.contextChart.earnedWeight = this.contextChart.getEarnedWeight();
 
-        let maxPoints = this.findChart.maxPoints + this.accessChart.maxPoints
-            + this.interChart.maxPoints + this.reuseChart.maxPoints
-            + this.contextChart.maxPoints;
+        let totalEarnedWeight = this.findChart.earnedWeight + this.accessChart.earnedWeight
+            + this.interChart.earnedWeight + this.reuseChart.earnedWeight
+            + this.contextChart.earnedWeight;
 
-        this.findChart.earnedPoints = this.findChart.getEarnedPoints();
-        this.accessChart.earnedPoints = this.accessChart.getEarnedPoints();
-        this.interChart.earnedPoints = this.interChart.getEarnedPoints();
-        this.reuseChart.earnedPoints = this.reuseChart.getEarnedPoints();
-        this.contextChart.earnedPoints = this.contextChart.getEarnedPoints();
+        let totalWeightFind = this.findChart.getTotalWeight();
+        let totalWeightAccess = this.accessChart.getTotalWeight();
+        let totalWeightInter = this.interChart.getTotalWeight();
+        let totalWeightReuse = this.reuseChart.getTotalWeight();
+        let totalWeightContext = this.contextChart.getTotalWeight();
 
-        let earnedPoints = this.findChart.earnedPoints + this.accessChart.earnedPoints
-            + this.interChart.earnedPoints + this.reuseChart.earnedPoints
-            + this.contextChart.earnedPoints;
+        let totalWeight = totalWeightFind + totalWeightAccess + totalWeightInter
+            + totalWeightReuse + totalWeightContext;
 
-        let percentage = earnedPoints / maxPoints * 100;
+        let percentageTotal = totalEarnedWeight / totalWeight * 100;
         let grade = null;
-        if (percentage >= 91) {
+        if (percentageTotal >= 91) {
             grade = 'EXCELLENT';
-        } else if (percentage >= 77) {
+        } else if (percentageTotal >= 77) {
             grade = 'VERY GOOD';
-        } else if (percentage >= 52) {
+        } else if (percentageTotal >= 52) {
             grade = 'GOOD';
-        } else if (percentage >= 36) {
+        } else if (percentageTotal >= 36) {
             grade = 'BAD';
         } else {
             grade = 'VERY BAD';
         }
-        return { percentage: percentage, grade: grade, max: maxPoints, earned: earnedPoints }
+        return { percentage: percentageTotal, grade: grade, max: totalWeight, earned: totalEarnedWeight }
     }
 
     // sets all chart values to zero
