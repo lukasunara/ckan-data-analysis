@@ -42,3 +42,11 @@ if (contextChart.max_modification_date > 0) {
     );
     new Chart(document.getElementById('modificationDateChart'), configModificationDate);
 }
+
+if (contextChart.max_data_age > 0) {
+    let configDataAge = getDoughnutChar(
+        contextChart.data_age, contextChart.max_data_age,
+        'Data Age', contextChart.darkColor, contextChart.lightColor
+    );
+    new Chart(document.getElementById('dataAgeChart'), configDataAge);
+}

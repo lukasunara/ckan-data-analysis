@@ -18,6 +18,9 @@
             <% if(chart.max_modification_date> 0) { %>
                 <div><canvas id="modificationDateChart" class="smaller-chart"></canvas></div>
             <% } %>
+            <% if(chart.max_data_age> 0) { %>
+                <div><canvas id="dataAgeChart" class="smaller-chart"></canvas></div>
+            <% } %>
         </div>
     </div>
     <%- include('./missing_params'); %>

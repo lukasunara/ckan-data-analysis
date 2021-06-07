@@ -8,7 +8,7 @@ module.exports = class ReusabilityChart extends Chart {
     static weightLicense = 25;
     static weightBasicInfo = 20;
     static weightExtras = 20;
-    static weightPublisher = 10;
+    static weightPublisher = 5;
 
     static maxLicense = 3;
     static maxBasicInfo = 1;

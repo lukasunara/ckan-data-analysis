@@ -189,6 +189,8 @@ const sql_create_contextuality = `CREATE TABLE contextuality (
     max_date_of_issue INTEGER CHECK (max_date_of_issue >= 0),
     modification_date INTEGER CHECK (modification_date >= 0),
     max_modification_date INTEGER CHECK (max_modification_date >= 0),
+    data_age INTEGER CHECK (data_age >= 0),
+    max_data_age INTEGER CHECK (max_data_age >= 0),
     CONSTRAINT pkContextuality PRIMARY KEY (chart_id)
 ) INHERITS (chart);`;
 const sql_create_contextuality_id_index = `CREATE UNIQUE INDEX idx_contextualityId ON contextuality(object_id);`;

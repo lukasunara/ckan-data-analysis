@@ -5,17 +5,19 @@ const { analyseDate } = require('../../public/scripts/utils/analysis');
 // class ContextualityChart encapsulates an contextuality chart
 module.exports = class ContextualityChart extends Chart {
     // max number of points for each indicator of evaluation
-    static weightNumOfResources = 25;
+    static weightNumOfResources = 20;
     static weightFileSize = 5;
     static weightEmptyData = 25;
     static weightDateOfIssue = 5;
-    static weightModifDate = 15;
+    static weightModifDate = 10;
+    static weightDataAge = 15;
 
     static maxNumOfResources = 5;
     static maxFileSize = 1;
     static maxEmptyData = 4;
     static maxDateOfIssue = 1;
     static maxModificationDate = 2;
+    static maxDataAge = 4;
 
     // constructor for ContextualityChart
     constructor(data) {
@@ -33,6 +35,8 @@ module.exports = class ContextualityChart extends Chart {
         this.max_date_of_issue = data.max_date_of_issue;
         this.modification_date = data.modification_date;
         this.max_modification_date = data.max_modification_date;
+        this.data_age = data.data_age;
+        this.max_data_age = data.max_data_age;
     }
 
     // creates a new empty ContextualityChart
@@ -50,20 +54,22 @@ module.exports = class ContextualityChart extends Chart {
             date_of_issue: 0,
             max_date_of_issue: 0,
             modification_date: 0,
-            max_modification_date: 0
+            max_modification_date: 0,
+            data_age: 0,
+            max_data_age: 0
         });
     }
 
     // gets maximum of points an object could have received
     getMaxPoints() {
-        return this.max_num_of_res + this.max_file_size
-            + this.max_empty + this.max_date_of_issue + this.max_modification_date;
+        return this.max_num_of_res + this.max_file_size + this.max_empty
+            + this.max_date_of_issue + this.max_modification_date + this.max_data_age;
     }
 
     // gets number of points an object has earned
     getEarnedPoints() {
         return this.num_of_resources + this.file_size + this.empty_data
-            + this.date_of_issue + this.modification_date;
+            + this.date_of_issue + this.modification_date + this.data_age;
     }
 
     // gets total weight of contextuality charts
@@ -73,8 +79,9 @@ module.exports = class ContextualityChart extends Chart {
         let wEmptyData = this.max_empty == 0 ? 0 : ContextualityChart.weightEmptyData;
         let wIssueDate = this.max_date_of_issue == 0 ? 0 : ContextualityChart.weightDateOfIssue;
         let wModifDate = this.max_modification_date == 0 ? 0 : ContextualityChart.weightModifDate;
+        let wDataAge = this.max_data_age == 0 ? 0 : ContextualityChart.weightDataAge;
 
-        return wNumOfRes + wFileSize + wEmptyData + wIssueDate + wModifDate;
+        return wNumOfRes + wFileSize + wEmptyData + wIssueDate + wModifDate + wDataAge;
     }
 
     // gets earned weight of this chart
@@ -94,8 +101,11 @@ module.exports = class ContextualityChart extends Chart {
         let earnedWModifDate = this.max_modification_date == 0 ? 0 : (
             this.modification_date / this.max_modification_date * ContextualityChart.weightModifDate
         );
+        let earnedWDataAge = this.max_data_age == 0 ? 0 : (
+            this.data_age / this.max_data_age * ContextualityChart.weightDataAge
+        );
 
-        return earnedWNumOfRes + earnedWSize + earnedWEmpty + earnedWIssueDate + earnedWModifDate;
+        return earnedWNumOfRes + earnedWSize + earnedWEmpty + earnedWIssueDate + earnedWModifDate + earnedWDataAge;
     }
 
     // sets all points to zero
@@ -110,6 +120,8 @@ module.exports = class ContextualityChart extends Chart {
         this.max_date_of_issue = 0;
         this.modification_date = 0;
         this.max_modification_date = 0;
+        this.data_age = 0;
+        this.max_data_age = 0;
     }
 
     // reduces points by other chart values
@@ -124,6 +136,8 @@ module.exports = class ContextualityChart extends Chart {
         this.max_date_of_issue -= other.max_date_of_issue;
         this.modification_date -= other.modification_date;
         this.max_modification_date -= other.max_modification_date;
+        this.data_age -= other.data_age;
+        this.max_data_age -= other.max_data_age;
     }
 
     // adds points from other chart values
@@ -138,6 +152,8 @@ module.exports = class ContextualityChart extends Chart {
         this.max_date_of_issue += other.max_date_of_issue;
         this.modification_date += other.modification_date;
         this.max_modification_date += other.max_modification_date;
+        this.data_age += other.data_age;
+        this.max_data_age += other.max_data_age;
     }
 
     isPersisted() {
@@ -211,6 +227,22 @@ module.exports = class ContextualityChart extends Chart {
         }
     }
 
+    // checks how old is this data
+    checkDataAge(actually_last_modified) {
+        let numOfMonthsOld = analyseDate(actually_last_modified);
+
+        if (numOfMonthsOld >= 0) {
+            let points;
+            if (numOfMonthsOld < 1) points = 4;
+            else if (numOfMonthsOld < 3) points = 3;
+            else if (numOfMonthsOld < 6) points = 2;
+            else if (numOfMonthsOld < 12) points = 1;
+            else points = 0;
+
+            this.data_age += points
+        }
+    }
+
     // checks empty rows in a file (if the file can be read by xlsx extension)
     checkEmptyRows(emptyRows) {
         let points; //points are in range [0, 4]
@@ -233,12 +265,12 @@ module.exports = class ContextualityChart extends Chart {
 var dbNewContextualityChart = async (chart, missingParams) => {
     const sql = `INSERT INTO contextuality (object_id, missing_params, num_of_resources, max_num_of_res,
                         file_size, max_file_size, empty_data, max_empty, date_of_issue, max_date_of_issue,
-                        modification_date, max_modification_date) VALUES ($1, $2, $3, $4, $5, $6, $7,
-                                                                    $8, $9, $10, $11, $12);`;
+                        modification_date, max_modification_date, data_age, max_data_age) VALUES
+                        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14);`;
     const values = [
         chart.object_id, missingParams, chart.num_of_resources, chart.max_num_of_res, chart.file_size,
         chart.max_file_size, chart.empty_data, chart.max_empty, chart.date_of_issue, chart.max_date_of_issue,
-        chart.modification_date, chart.max_modification_date
+        chart.modification_date, chart.max_modification_date, chart.data_age, chart.max_data_age
     ];
     try {
         const result = await db.query(sql, values);
@@ -254,12 +286,13 @@ var dbUpdateContextuality = async (chart, missingParams) => {
     const sql = `UPDATE contextuality
                     SET missing_params = $2, num_of_resources = $3, max_num_of_res = $4, file_size = $5,
                         max_file_size = $6, empty_data = $7, max_empty = $8, date_of_issue = $9,
-                        max_date_of_issue = $10, modification_date = $11, max_modification_date = $12
+                        max_date_of_issue = $10, modification_date = $11, max_modification_date = $12,
+                        data_age = $13, max_data_age = $14
                     WHERE chart_id = $1;`;
     const values = [
         chart.chart_id, missingParams, chart.num_of_resources, chart.max_num_of_res, chart.file_size,
         chart.max_file_size, chart.empty_data, chart.max_empty, chart.date_of_issue, chart.max_date_of_issue,
-        chart.modification_date, chart.max_modification_date
+        chart.modification_date, chart.max_modification_date, chart.data_age, chart.max_data_age
     ];
     try {
         const result = await db.query(sql, values);
