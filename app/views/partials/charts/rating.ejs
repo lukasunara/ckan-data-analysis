@@ -17,6 +17,15 @@
         </div>
         <div><canvas id="ratingsChart"></canvas></div>
     </div>
+    <div class="card-footer">
+        <div id="typeOfObject" class="d-none" data-test="<%= JSON.stringify({ typeOfObject: typeOfObject, id: objectData.object_id }) %>"></div>
+        <p>This analysis was last updated on <span class="fw-bold"><%= objectData.last_updated %></span></p>
+        <button class="btn btn-secondary" id="updateBtn">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Update now
+        </button>
+    </div>
 </div>
 
 <script type="module" src="/scripts/charts/rating.js"></script>
+<script type="module" src="/scripts/analysis/updateAnalysis.js"></script>
