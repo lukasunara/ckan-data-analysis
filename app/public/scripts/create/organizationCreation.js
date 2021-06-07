@@ -28,16 +28,16 @@ var createOrganization = async (portalName, organization) => {
         // if exists in database => check if it has passed 3 days since last update
         // let sevenDays = 3 * 24 * 60 * 60 * 1000; //3 days in miliseconds
         // if (currentDate - newOrganization.date_of_storage >= sevenDays) {
-            // update data about organization
-            let dataForUpdate = {
-                last_updated: currentDate, name: organization.name, title: title,
-                description: organization.description, state: organization.state,
-                approval_status: organization.approval_status, num_of_extras: numOfExtras,
-                num_of_members: numOfMembers, created: organization.created,
-                image_display_url: organization.image_display_url
-            }
-            await newOrganization.update(dataForUpdate);
+        // update data about organization
+        let dataForUpdate = {
+            last_updated: currentDate, name: organization.name, title: title,
+            description: organization.description, state: organization.state,
+            approval_status: organization.approval_status, num_of_extras: numOfExtras,
+            num_of_members: numOfMembers, created: organization.created,
+            image_display_url: organization.image_display_url
         }
+        await newOrganization.update(dataForUpdate);
+    }
     // }
     // create all datasets which were created by this organization
     if (organization.packages) {
@@ -46,7 +46,7 @@ var createOrganization = async (portalName, organization) => {
                 + '/api/3/action/package_show?id=' + organization.packages[i];
             let dataset = await fetchData(datasetUrl);
 
-            if (dataset.error) {
+            if (dataset.error || dataset.data === undefined || !dataset.data.result) {
                 continue;
             } else {
                 await createDataset(portalName, dataset.data.result);

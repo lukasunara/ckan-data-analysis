@@ -28,19 +28,19 @@ var createResource = async (resource, dataset_id) => {
         await newResource.persist();
     } else {
         // if exists in database => check if same lastModified timestamp
-        let savedLastModified = new Date(newResource.last_modified);
+        // let savedLastModified = new Date(newResource.last_modified);
         // if last modified timestamps are almost equal continue, else update
         // if (lastModified && (lastModified - savedLastModified >= 45)) {
-            result = getUrlData(resource.url, resource.format);
-            // update all info that can be updated about this resource
-            let dataForUpdate = {
-                last_updated: currentDate, revision_id: resource.revision_id, name: resource.name,
-                size: resource.size, format: resource.format, media_type: result.mediaType,
-                state: resource.state, description: resource.description, created: dateOfIssue,
-                last_modified: lastModified, actually_last_modified: result.actuallyLastModified,
-                empty_rows: result.emptyRows, url: resource.url
-            }
-            await newResource.update(dataForUpdate);
+        result = await getUrlData(resource.url, resource.format);
+        // update all info that can be updated about this resource
+        let dataForUpdate = {
+            last_updated: currentDate, revision_id: resource.revision_id, name: resource.name,
+            size: resource.size, format: resource.format, media_type: result.mediaType,
+            state: resource.state, description: resource.description, created: dateOfIssue,
+            last_modified: lastModified, actually_last_modified: result.actuallyLastModified,
+            empty_rows: result.emptyRows, url: resource.url
+        }
+        await newResource.update(dataForUpdate);
         // }
     }
     return newResource;

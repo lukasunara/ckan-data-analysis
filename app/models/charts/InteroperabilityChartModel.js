@@ -227,17 +227,16 @@ module.exports = class InteroperabilityChart extends Chart {
     // https://{ckan-instance-host}/dataset/{dataset-id}.{format}
     static formatsLOD = ['rdf', 'xml', 'ttl', 'n3', 'jsonld'];
     async checkDatasetLOD(portalName, datasetID) {
-        InteroperabilityChart.formatsLOD.forEach(async format => {
+        for (let format of InteroperabilityChart.formatsLOD) {
             let url = 'https://' + portalName + '/dataset/' + datasetID + '.' + format;
 
-            let urlData = await fetchData(url);
+            let urlData = await fetchData(url, 1000);
             if (!urlData || urlData.error) {
                 // link not working
             } else {
                 this.linked_open_data++; //if URL works, add 1 point
             }
-        });
-
+        }
     }
 };
 

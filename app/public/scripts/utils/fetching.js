@@ -1,19 +1,34 @@
 const fetch = require('node-fetch');
 const mime = require('mime-types');
+const AbortController = require("abort-controller");
 
-var fetchData = async (url) => {
+var fetchData = async (url, time) => {
     var fetchedData;
     var fetchedError;
 
     // console.log('URL: ' + url);
 
-    await fetch(url)
+    const controller = new AbortController();
+    const timeout = setTimeout(
+        () => { controller.abort(); },
+        time ? time : 8000,
+    );
+
+    await fetch(url, { signal: controller.signal })
         .then(handleResponse)
         .then(data => fetchedData = data)
-        .catch(error => fetchedError = error);
+        .catch(error => {
+            fetchedError = error
+            if (error.name === 'AbortError') {
+                fetchedError.error = 'Aborted fetch!';
+            }
+        })
+        .finally(() => {
+            clearTimeout(timeout)
+        });
 
     if (fetchedError) {
-        // console.log('fetch-error: ' + fetchedError.status + " " + fetchedError.statusText + "\n");
+
         return fetchedError;
     } else {
         // console.log(fetchedData.data + "\n");

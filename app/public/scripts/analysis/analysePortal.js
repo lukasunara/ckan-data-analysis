@@ -37,10 +37,10 @@ var startAnalysingPortal = async (portalName) => {
     let vocabularies = await fetchData(vocabulariesUrl);
 
     let portal = null;
-    if (datasets.error || datasets.data === undefined ||
-        organizations.error || organizations.data === undefined ||
-        basicInfo.error || basicInfo.data === undefined ||
-        vocabularies.error || vocabularies.data === undefined
+    if (datasets.error || datasets.data === undefined || !datasets.data.result ||
+        organizations.error || organizations.data === undefined || !organizations.data.result ||
+        basicInfo.error || basicInfo.data === undefined || !basicInfo.data.result ||
+        vocabularies.error || vocabularies.data === undefined || !vocabularies.data.result
     ) {
         failed = true;
     } else {

@@ -20,7 +20,11 @@ var parseExcelFile = (data, extension) => {
             let worksheetJSON = XLSX.utils.sheet_to_json(
                 workbook.Sheets[sheet], { defval: null, blankrows: true }
             );
-            analyseFile(worksheetJSON);
+            try {
+                analyseFile(worksheetJSON);
+            } catch (err) {
+                console.log(err);
+            }
         });
     } catch (err) {
         console.log(err);

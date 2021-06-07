@@ -30,7 +30,7 @@ var fetchDatasetData = async (portalName, datasetID) => {
     let datasetUrl = 'http://' + portalName + '/api/3/action/package_show?id=' + datasetID;
     let datasetData = await fetchData(datasetUrl);
 
-    if (datasetData.error || datasetData.data === undefined) {
+    if (datasetData.error || datasetData.data === undefined || !datasetData.data.result) {
         failed = true;
     }
     return { failed: failed, datasetData: datasetData.data.result };

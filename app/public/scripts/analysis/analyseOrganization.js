@@ -30,7 +30,7 @@ var fetchOrganizationData = async (portalName, organizationID) => {
     let organizationUrl = 'http://' + portalName + '/api/3/action/organization_show?id=' + organizationID;
     let organizationData = await fetchData(organizationUrl);
 
-    if (organizationData.error || organizationData.data === undefined) {
+    if (organizationData.error || organizationData.data === undefined || !organizationData.data.result) {
         failed = true;
     }
     return { failed: failed, organizationData: organizationData.data.result };

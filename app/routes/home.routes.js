@@ -24,7 +24,7 @@ router.post('/portal', [
 
     if (!errors.isEmpty()) {
         errorURL = true;
-        res.redirect('/home');
+        res.redirect('/');
     } else {
         let reqUrl = new URL(req.body.url);
         let portalName = reqUrl.host;
@@ -42,7 +42,7 @@ router.post('/portal', [
                 let datasetID = pathName[pathName.length - 1];
                 if (!datasetID) {
                     errorURL = true;
-                    res.redirect('/home');
+                    res.redirect('/');
                 } else {
                     res.redirect('/portal/' + portalName + '/dataset/' + datasetID);
                 }
@@ -52,7 +52,7 @@ router.post('/portal', [
                 let organizationID = pathName[pathName.length - 1];
                 if (!organizationID) {
                     errorURL = true;
-                    res.redirect('/home');
+                    res.redirect('/');
                 } else {
                     res.redirect('/portal/' + portalName + '/organization/' + organizationID);
                 }

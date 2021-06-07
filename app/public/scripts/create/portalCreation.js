@@ -29,20 +29,20 @@ var createPortal = async (portalName, datasets, organizations, basicInfo, vocabu
         // if exists in database => check if it has passed 7 days since last update
         // let sevenDays = 7 * 24 * 60 * 60 * 1000; //7 days in miliseconds
         // if (currentDate - newPortal.last_updated >= sevenDays) {
-            // update data about organization
-            let dataForUpdate = {
-                last_updated: currentDate, name: portalName, title: basicInfo.site_title,
-                description: basicInfo.site_description, num_of_vocabularies: vocabularies.length,
-                num_of_extensions: extensions.size, dcat_or_rdf: dcatOrRdf, url: basicInfo.site_url
-            }
-            await newPortal.update(dataForUpdate);
+        // update data about organization
+        let dataForUpdate = {
+            last_updated: currentDate, name: portalName, title: basicInfo.site_title,
+            description: basicInfo.site_description, num_of_vocabularies: vocabularies.length,
+            num_of_extensions: extensions.size, dcat_or_rdf: dcatOrRdf, url: basicInfo.site_url
+        }
+        await newPortal.update(dataForUpdate);
         // }
     }
     for (let i = 0; i < organizations.length; i++) {
         let organizationUrl = 'http://' + portalName + '/api/3/action/organization_show?id=' + organizations[i];
         let organization = await fetchData(organizationUrl);
 
-        if (organization.error) {
+        if (organization.error || organization.data === undefined || !organization.data.result) {
             continue;
         } else {
             await createOrganization(portalName, organization.data.result);
@@ -52,7 +52,7 @@ var createPortal = async (portalName, datasets, organizations, basicInfo, vocabu
         let datasetUrl = 'http://' + portalName + '/api/3/action/package_show?id=' + datasets[i];
         let dataset = await fetchData(datasetUrl);
 
-        if (dataset.error) {
+        if (dataset.error || dataset.data === undefined || !dataset.data.result) {
             continue;
         } else {
             await createDataset(portalName, dataset.data.result);

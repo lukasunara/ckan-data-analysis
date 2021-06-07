@@ -2,10 +2,10 @@ const { Pool } = require("pg");
 
 // created connection pool with the database
 const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'ckan-data-analysis',
-    password: 'bazepodataka',
+    user: 'postgres', // here should be postgres or name of user which has access to database 
+    host: 'localhost', // here should be localhost
+    database: 'ckan-data-analysis', // here comes database name
+    password: 'bazepodataka', // here comes database password
     port: 5432,
 });
 

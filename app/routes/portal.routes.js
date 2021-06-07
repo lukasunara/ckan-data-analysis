@@ -29,13 +29,14 @@ router.get('/', function (req, res) {
         var portalName = params.length == 1 ? params[0] : params[0] + '/' + params[1];
 
         if (!portalName) {
-            redirectToWithError(res, req, '/home');
+            redirectToWithError(res, req, '/');
         } else {
             let portal = await Portal.fetchPortalByName(portalName);
+            // portal = null;
             if (!portal) {
                 let result = await analysePortal(portalName);
                 if (result.failed) {
-                    redirectToWithError(res, req, '/home');
+                    redirectToWithError(res, req, '/');
                     return;
                 } else {
                     portal = result.portal;

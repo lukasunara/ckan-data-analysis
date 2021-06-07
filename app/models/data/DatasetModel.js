@@ -172,22 +172,12 @@ module.exports = class Dataset extends RateableObject {
             result.add(resource.result);
         }
         // 3.2. format diversity (get from resources in database)
-        if (organizationResult)
-            organizationResult.interChart.format_diversity -= result.interChart.format_diversity;
         result.interChart.format_diversity -= result.interChart.format_diversity;
         result.interChart.checkFormatDiversity(formats.size);
-        result.interChart.format_diversity += result.interChart.format_diversity;
-        if (organizationResult)
-            organizationResult.interChart.format_diversity += result.interChart.format_diversity;
 
-        // 3.5. linked open data (not calculated)
-        if (organizationResult)
-            organizationResult.interChart.linked_open_data -= result.interChart.linked_open_data;
+        // 3.5. linked open data
         result.interChart.linked_open_data -= result.interChart.linked_open_data;
         await result.interChart.checkDatasetLOD(this.portal_id, this.object_id);
-        result.interChart.linked_open_data += result.interChart.linked_open_data;
-        if (organizationResult)
-            organizationResult.interChart.linked_open_data += result.interChart.linked_open_data;
 
         await result.updateDataInDB();
         await super.setChanged(this.object_id, false);

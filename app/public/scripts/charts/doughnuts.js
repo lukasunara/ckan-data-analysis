@@ -5,11 +5,11 @@ var getDoughnutChar = (earnedPoints, maxPoints, chartName, darkColor, lightColor
     var percentage = earnedPoints / maxPoints * 100;
 
     const charData = {
-        labels: ['Earned points', 'Missing points'],
+        labels: ['Earned points (%)', 'Missing points (%)'],
         datasets: [
             {
                 label: chartName,
-                data: [percentage.toFixed(0), 100 - percentage.toFixed(0)],
+                data: [percentage.toFixed(2), 100 - percentage.toFixed(2)],
                 backgroundColor: [darkColor, lightColor]
             }
         ]

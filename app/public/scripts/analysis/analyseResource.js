@@ -24,7 +24,7 @@ var fetchResourceData = async (portalName, resourceID) => {
     let resourceUrl = 'http://' + portalName + '/api/3/action/resource_show?id=' + resourceID;
     let resourceData = await fetchData(resourceUrl);
 
-    if (resourceData.error || resourceData.data === undefined) {
+    if (resourceData.error || resourceData.data === undefined || !resourceData.data.result) {
         failed = true;
     }
     return { failed: failed, resourceData: resourceData.data.result };
