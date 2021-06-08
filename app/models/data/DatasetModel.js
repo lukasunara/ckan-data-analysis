@@ -1,13 +1,16 @@
 const db = require('../../db');
+
 const { checkParam } = require('../../public/scripts/utils/analysis');
-const AccessibilityChart = require('../charts/AccessibilityChartModel');
-const ContextualityChart = require('../charts/ContextualityChartModel');
+
 const FindabilityChart = require('../charts/FindabilityChartModel');
+const AccessibilityChart = require('../charts/AccessibilityChartModel');
 const InteroperabilityChart = require('../charts/InteroperabilityChartModel');
 const ReusabilityChart = require('../charts/ReusabilityChartModel');
-const AnalysisResult = require('./AnalysisResult');
+const ContextualityChart = require('../charts/ContextualityChartModel');
+
 const RateableObject = require('./RateableObjectModel');
 const Resource = require('./ResourceModel');
+const AnalysisResult = require('./AnalysisResult');
 
 // class Dataset encapsulates a CKAN dataset
 module.exports = class Dataset extends RateableObject {
@@ -162,6 +165,7 @@ module.exports = class Dataset extends RateableObject {
             // 5.5. modification date + from resources
             result.contextChart.checkLastModified(this.last_modified);
             result.contextChart.max_modification_date += ContextualityChart.maxModificationDate;
+            // 5.6. data age (only from resources)
         }
         let formats = new Set();
         for (let resource of resources) {

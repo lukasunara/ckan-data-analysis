@@ -1,12 +1,15 @@
 const db = require('../../db');
+
 const { checkParam } = require('../../public/scripts/utils/analysis');
-const AccessibilityChart = require('../charts/AccessibilityChartModel');
-const ContextualityChart = require('../charts/ContextualityChartModel');
+
 const FindabilityChart = require('../charts/FindabilityChartModel');
+const AccessibilityChart = require('../charts/AccessibilityChartModel');
 const ReusabilityChart = require('../charts/ReusabilityChartModel');
-const AnalysisResult = require('./AnalysisResult');
-const Dataset = require('./DatasetModel');
+const ContextualityChart = require('../charts/ContextualityChartModel');
+
 const RateableObject = require('./RateableObjectModel');
+const Dataset = require('./DatasetModel');
+const AnalysisResult = require('./AnalysisResult');
 
 // class Organization encapsulates a CKAN organization
 module.exports = class Organization extends RateableObject {
@@ -128,6 +131,7 @@ module.exports = class Organization extends RateableObject {
             result.contextChart.checkDateOfIssue(this.created);
             result.contextChart.max_date_of_issue += ContextualityChart.maxDateOfIssue;
             // 5.5. modification date (only from dataasets)
+            // 5.6. data age (only from datasets)
         }
         let datasets = await this.fetchDatasets();
         for (let dataset of datasets) {

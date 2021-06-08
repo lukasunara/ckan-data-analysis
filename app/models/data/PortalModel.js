@@ -1,12 +1,15 @@
 const db = require('../../db');
+
 const { checkParam } = require('../../public/scripts/utils/analysis');
-const AccessibilityChart = require('../charts/AccessibilityChartModel');
+
 const FindabilityChart = require('../charts/FindabilityChartModel');
+const AccessibilityChart = require('../charts/AccessibilityChartModel');
 const InteroperabilityChart = require('../charts/InteroperabilityChartModel');
 const ReusabilityChart = require('../charts/ReusabilityChartModel');
-const AnalysisResult = require('./AnalysisResult');
-const Organization = require('./OrganizationModel');
+
 const RateableObject = require('./RateableObjectModel');
+const Organization = require('./OrganizationModel');
+const AnalysisResult = require('./AnalysisResult');
 
 // class Portal encapsulates a CKAN portal
 module.exports = class Portal extends RateableObject {

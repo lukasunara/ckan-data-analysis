@@ -17,11 +17,13 @@
         </div>
         <div><canvas id="ratingsChart"></canvas></div>
     </div>
-    <div class="card-footer">
-        <div id="typeOfObject" class="d-none" data-test="<%= JSON.stringify({ typeOfObject: typeOfObject, id: objectData.object_id }) %>"></div>
-        <p>This analysis was last updated on <span class="fw-bold"><%= objectData.last_updated %></span></p>
+    <div class="card-footer d-flex flex-column justify-content-center align-items-center bg-light">
+        <div id="typeOfObject" class="d-none" data-test="
+            <%= JSON.stringify({ typeOfObject: typeOfObject, id: objectData.object_id, portalName: objectData.portal_id }) %>">
+        </div>
+        <p>This analysis was last updated on <span class="fw-bold"><%= objectData.last_updated.toLocaleString() %></span></p>
         <button class="btn btn-secondary" id="updateBtn">
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <span id="spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
             Update now
         </button>
     </div>

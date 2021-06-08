@@ -1,12 +1,15 @@
 const db = require('../../db');
+
 const { checkParam } = require('../../public/scripts/utils/analysis');
-const RateableObject = require('./RateableObjectModel');
-const AnalysisResult = require('./AnalysisResult');
+
 const FindabilityChart = require('../charts/FindabilityChartModel');
 const AccessibilityChart = require('../charts/AccessibilityChartModel');
 const InteroperabilityChart = require('../charts/InteroperabilityChartModel');
 const ReusabilityChart = require('../charts/ReusabilityChartModel');
 const ContextualityChart = require('../charts/ContextualityChartModel');
+
+const RateableObject = require('./RateableObjectModel');
+const AnalysisResult = require('./AnalysisResult');
 
 // class Resource encapsulates a CKAN resource
 module.exports = class Resource extends RateableObject {
@@ -132,6 +135,9 @@ module.exports = class Resource extends RateableObject {
             // 5.5. modification date
             result.contextChart.checkLastModified(this.last_modified, this.actually_last_modified);
             result.contextChart.max_modification_date += ContextualityChart.maxModificationDate;
+            // 5.6. data age
+            result.contextChart.checkDataAge(this.actually_last_modified);
+            result.contextChart.max_data_age += ContextualityChart.maxDataAge;
         }
         await result.updateDataInDB();
         await super.setChanged(this.object_id, false);

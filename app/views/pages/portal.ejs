@@ -14,7 +14,7 @@
         <div class="mt-3"><h1 class="text-center">
             <%= objectData.title ? objectData.title : objectData.object_id %>
         </h1></div>
-        <%- include('../partials/charts/charts', { typeOfObject: 'portal' ); %>
+        <%- include('../partials/charts/charts', { typeOfObject: 'portal' }); %>
 
         <%- include('../partials/charts/accordion_list', { list: objectData.organizations, typeOfObject: 'organization' }); %>
     </main>

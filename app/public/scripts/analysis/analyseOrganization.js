@@ -1,13 +1,13 @@
 const { fetchData } = require('../utils/fetching.js');
 const { createOrganization } = require('../create/organizationCreation.js');
-const { fetchPortalByName } = require('../../../models/data/PortalModel.js');
+const Portal = require('../../../models/data/PortalModel.js');
 
 // method for refreshing data about portals
 var analyseOrganization = async (portalName, organizationID) => {
     let failed = false;
     let organization = null;
 
-    let portal = await fetchPortalByName(portalName);
+    let portal = await Portal.fetchPortalByName(portalName);
     if (!portal) {
         failed = true;
     } else {

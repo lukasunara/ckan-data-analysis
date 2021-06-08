@@ -1,27 +1,8 @@
-const Portal = require('../../../models/data/PortalModel.js');
 const { fetchData } = require('../utils/fetching.js');
 const { createPortal } = require('../create/portalCreation.js');
 
 // method for refreshing data about portals
 var analysePortal = async (portalName) => {
-    let failed = false;
-    // if portalName is undefined => analyse all portals from database
-    let result = null;
-    if (!portalName) {
-        let portals = await Portal.fetchAllPortalsFromDB();
-        for (let portal of portals) {
-            result = await startAnalysingPortal(portal.object_id);
-            failed = result.failed;
-        }
-    } else {
-        result = await startAnalysingPortal(portalName);
-        failed = result.failed;
-    }
-    return { failed: failed, portal: result.portalData };
-};
-
-// start analysing portal
-var startAnalysingPortal = async (portalName) => {
     let failed = false;
 
     let datasetsUrl = 'http://' + portalName + '/api/3/action/package_list';
@@ -49,8 +30,8 @@ var startAnalysingPortal = async (portalName) => {
         );
         await portal.analysePortal();
     }
-    return { failed: failed, portalData: portal };
-}
+    return { failed: failed, portalData: result.portalData };
+};
 
 module.exports = {
     analysePortal

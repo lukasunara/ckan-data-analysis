@@ -6,6 +6,8 @@ const schedule = require('node-schedule');
 
 const homeRouter = require('./routes/home.routes');
 const portalRouter = require('./routes/portal.routes');
+
+const Portal = require('./models/data/PortalModel');
 const { analysePortal } = require('./public/scripts/analysis/analysePortal');
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -22,7 +24,10 @@ app.use('/portal/:portalName', portalRouter);
 schedule.scheduleJob('30 2 * * 0', async function () {
     // console.log('started');
     try {
-        await analysePortal();
+        let portals = await Portal.fetchAllPortalsFromDB();
+        for (let portal of portals) {
+            await analysePortal(portal.object_id);
+        }
     } catch (err) {
         console.log(err);
     }

@@ -1,6 +1,6 @@
 const db = require('../../db');
-const { fetchData } = require('../../public/scripts/utils/fetching');
 const Chart = require('./ChartModel');
+const { fetchData } = require('../../public/scripts/utils/fetching');
 
 // class InteroperabilityChart encapsulates an interoperability chart
 module.exports = class InteroperabilityChart extends Chart {
