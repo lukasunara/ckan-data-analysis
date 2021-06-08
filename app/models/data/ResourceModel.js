@@ -136,7 +136,7 @@ module.exports = class Resource extends RateableObject {
             result.contextChart.checkLastModified(this.last_modified, this.actually_last_modified);
             result.contextChart.max_modification_date += ContextualityChart.maxModificationDate;
             // 5.6. data age
-            result.contextChart.checkDataAge(this.actually_last_modified);
+            result.contextChart.checkDataAge(this.actually_last_modified ? this.actually_last_modified : this.last_modified);
             result.contextChart.max_data_age += ContextualityChart.maxDataAge;
         }
         await result.updateDataInDB();

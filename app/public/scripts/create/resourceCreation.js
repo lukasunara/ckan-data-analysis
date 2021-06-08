@@ -68,7 +68,7 @@ var getUrlData = async (url, format) => {
     }
     return {
         mediaType: mediaType, //type of media (extension of the media)
-        lastModified: urlData ? urlData.lastModified : null, //when was the file actually last modified
+        actuallyLastModified: urlData ? urlData.lastModified : null, //when was the file actually last modified
         emptyRows: emptyRows //percentage of empty rows in file
     };
 };

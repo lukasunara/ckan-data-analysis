@@ -28,7 +28,6 @@ var fetchData = async (url, time) => {
         });
 
     if (fetchedError) {
-
         return fetchedError;
     } else {
         // console.log(fetchedData.data + "\n");
