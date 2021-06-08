@@ -12,17 +12,19 @@
                 <div class="accordion-body overflow-auto accordion-list-div bg-light">
                     <% if (list.length > 0) { %>
                     <div class="d-flex flex-row justify-content-evenly align-items-center mb-2">
-                        <span class="tw-bold">Sort by:</span>
-                        <button id="sortByNameAscBtn" class="btn btn-secondary">Name (Ascending)</button>
-                        <button id="sortByNameDescBtn" class="btn btn-secondary">Name (Descending)</button>
-                        <button id="sortByDateAscBtn" class="btn btn-secondary">Oldest</button>
-                        <button id="sortByDateDescBtn" class="btn btn-secondary">Newest</button>
+                        <span class="fw-bold">Sort by:</span>
+                        <button id="sortByNameAscBtn" class="btn btn-secondary">Name (A-Z)</button>
+                        <button id="sortByNameDescBtn" class="btn btn-secondary">Name (Z-A)</button>
+                        <% if (typeOfObject == 'dataset' || typeOfObject == 'resource') { %>
+                            <button id="sortByDateDescBtn" class="btn btn-secondary">Newest</button>
+                            <button id="sortByDateAscBtn" class="btn btn-secondary">Oldest</button>
+                        <% } %>
                     </div>
                     <ul id="listOfElements" class="list-group list-group-flush bg-light">
                         <% for (let element of list) { %>
                         <li class="list-group-item bg-light"
                             data-name="<%= element.title ? element.title : element.name ? element.name : 'Unknown' %>"
-                            data-date="<% element.last_modified ? element.last_modified : element.created %>"
+                            data-date="<%= JSON.stringify(element.last_modified ? element.last_modified : element.created) %>"
                         >
                             <%= element.title ? element.title : element.name ? element.name : "Unknown " + typeOfObject %>:
                             <a class="link-primary" href="/portal/<%= portalName %>/<%= typeOfObject %>/<%= element.object_id %>">
