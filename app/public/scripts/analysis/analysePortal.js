@@ -30,7 +30,7 @@ var analysePortal = async (portalName) => {
         );
         await portal.analysePortal();
     }
-    return { failed: failed, portalData: result.portalData };
+    return { failed: failed, portalData: portal };
 };
 
 module.exports = {

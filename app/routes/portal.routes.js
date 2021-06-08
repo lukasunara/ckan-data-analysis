@@ -54,7 +54,8 @@ router.get('/', function (req, res) {
                 title: "Portal analysis results",
                 portalName: req.params.portalName,
                 objectData: portal,
-                overallResults: portal.result.getOverallRating()
+                overallResults: portal.result.getOverallRating(),
+                urlForUpdate: '/update/portal/' + portalName
             });
         }
     })();
@@ -96,7 +97,8 @@ router.get('/dataset/:datasetID', function (req, res) {
                     title: "Dataset analysis results",
                     portalName: req.params.portalName,
                     objectData: dataset,
-                    overallResults: dataset.result.getOverallRating()
+                    overallResults: dataset.result.getOverallRating(),
+                    urlForUpdate: '/update/portal/' + portalName + '/dataset/' + dataset.object_id
                 });
             }
         }
@@ -139,7 +141,8 @@ router.get('/organization/:organizationID', function (req, res) {
                     title: "Organization analysis results",
                     portalName: req.params.portalName,
                     objectData: organization,
-                    overallResults: organization.result.getOverallRating()
+                    overallResults: organization.result.getOverallRating(),
+                    urlForUpdate: '/update/portal/' + portalName + '/organization/' + organization.object_id
                 });
             }
         }
@@ -176,7 +179,9 @@ router.get('/resource/:resourceID', function (req, res) {
                     linkActive: 'home',
                     title: "Resource analysis results",
                     objectData: resource,
-                    overallResults: resource.result.getOverallRating()
+                    overallResults: resource.result.getOverallRating(),
+                    portalName: portalName,
+                    urlForUpdate: '/update/portal/' + portalName + '/resource/' + resource.object_id
                 });
             }
         }

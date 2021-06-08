@@ -58,10 +58,10 @@ var sortListByName = async (ascending) => {
 };
 
 // sort by name ascending
-document.getElementById("sortByNameAscBtn").onclick = sortListByName(true);
+document.getElementById("sortByNameAscBtn").addEventListener('click', sortListByName(true));
 // sort by name descending
-document.getElementById("sortByNameDescBtn").onclick = sortListByName(false);
+document.getElementById("sortByNameDescBtn").addEventListener('click', sortListByName(false));
 // sort by date ascending
-document.getElementById("sortByDateAscBtn").onclick = sortListByDate(true);
+document.getElementById("sortByDateAscBtn").addEventListener('click', sortListByDate(true));
 // sort by date descending
-document.getElementById("sortByDateDescBtn").onclick = sortListByDate(false);
+document.getElementById("sortByDateDescBtn").addEventListener('click', sortListByDate(false));

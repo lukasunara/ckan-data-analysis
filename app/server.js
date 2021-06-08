@@ -6,6 +6,7 @@ const schedule = require('node-schedule');
 
 const homeRouter = require('./routes/home.routes');
 const portalRouter = require('./routes/portal.routes');
+const updateRouter = require('./routes/update.routes');
 
 const Portal = require('./models/data/PortalModel');
 const { analysePortal } = require('./public/scripts/analysis/analysePortal');
@@ -19,6 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/', homeRouter);
 app.use('/portal/:portalName', portalRouter);
+app.use('/update/portal/:portalName', updateRouter);
 
 // "cron" job for refreshing data scheduled every Sunday at 02:30h
 schedule.scheduleJob('30 2 * * 0', async function () {
