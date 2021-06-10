@@ -1,16 +1,38 @@
 <div class="card align-items-center justify-content-center bg-light rounded-3 m-1 w-100">
-    <h2 class="class-title">Accessibility</h2>
+    <h2 class="class-title">
+        Accessibility
+        <i id="accessTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+            title="<p class='text-start'>Calculates number of earned points for each indicator by multiplying
+                <b>percentage</b> of earned points with its <b>weight</b>. Percentage can be seen in charts below.</p>"
+        ></i>
+    </h2>
     <div class="card-body">
         <p class="text-center">These indicators show how easy it is for people and machines to access data</p>
         <div class="d-flex flex-row flex-wrap justify-content-center">
             <% if (chart.max_dataset_acc > 0) { %>
-                <div><canvas id="datasetAccessibilityChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="datasetAccessTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks if datasets are <b>public</b>, because <b>private</b>
+                            ones are considered bad.<br/><b>weight</b> = 40 points</p>"
+                    ></i>
+                    <div><canvas id="datasetAccessibilityChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
             <% if (chart.max_url_acc> 0) { %>
-                <div><canvas id="urlAccessibilityChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="urlAccessTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks if <b>basic links</b> from metadata are functional.<br/><b>weight</b> = 20 points</p>"
+                    ></i>
+                    <div><canvas id="urlAccessibilityChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
             <% if (chart.max_download_url> 0) { %>
-                <div><canvas id="downloadUrlChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="downloadAccessTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks if <b>resource download links</b> are functional.<br/><b>weight</b> = 40 points</p>"
+                    ></i>
+                    <div><canvas id="downloadUrlChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
         </div>
     </div>

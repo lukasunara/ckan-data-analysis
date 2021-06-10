@@ -1,22 +1,55 @@
 <div class="card align-items-center justify-content-center bg-light rounded-3 m-1 w-100">
-    <h2 class="class-title">Interoperability</h2>
+    <h2 class="class-title">
+        Interoperability
+        <i id="interTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+            title="<p class='text-start'>Calculates number of earned points for each indicator by multiplying
+                <b>percentage</b> of earned points with its <b>weight</b>. Percentage can be seen in charts below.</p>"
+        ></i>
+    </h2>
     <div class="card-body">
         <p class="text-center">These indicators show how easy it is to access data as external sources</p>
         <div class="d-flex flex-row flex-wrap justify-content-center">
             <% if(chart.max_format> 0) { %>
-                <div><canvas id="formatChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="formatTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks metadata for information about resource <b>format</b>.<br/><b>weight</b> = 20 points</p>"
+                    ></i>
+                    <div><canvas id="formatChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
             <% if(chart.max_format_div> 0) { %>
-                <div><canvas id="formatDiversityChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="formatDivTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks <b>number of different resource formats</b> for each dataset.<br/><b>weight</b> = 30 points</p>"
+                    ></i>
+                    <div><canvas id="formatDiversityChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
             <% if(chart.max_comp> 0) { %>
-                <div><canvas id="compatibilityChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="compatibilityTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks if format from metadata is <b>compatible</b> with the
+                            actual type of media.<br/><b>weight</b> = 20 points</p>"
+                    ></i>
+                    <div><canvas id="compatibilityChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
             <% if(chart.max_machine_readable> 0) { %>
-                <div><canvas id="machineReadableChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="machineReadableTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks if given resource is <b>machine readable</b>.<br/><b>weight</b> = 30 points</p>"
+                    ></i>
+                    <div><canvas id="machineReadableChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
             <% if(chart.max_lod > 0) { %>
-                <div><canvas id="linkedOpenDataChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="LODTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks if portals support <b>linked open data</b> and
+                            availability of datasets as LOD.<br/><b>weight</b> = 50 points</p>"
+                    ></i>
+                    <div><canvas id="linkedOpenDataChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
         </div>
     </div>

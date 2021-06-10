@@ -1,25 +1,63 @@
 <div class="card align-items-center justify-content-center bg-light rounded-3 m-1 w-100">
-    <h2 class="class-title">Contextuality</h2>
+    <h2 class="class-title">
+        Contextuality
+        <i id="contextTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+            title="<p class='text-start'>Calculates number of earned points for each indicator by multiplying
+                <b>percentage</b> of earned points with its <b>weight</b>. Percentage can be seen in charts below.</p>"
+        ></i>
+    </h2>
     <div class="card-body">
         <p class="text-center">These indicators show the quality of data</p>
         <div class="d-flex flex-row flex-wrap justify-content-center">
             <% if(chart.max_num_of_res> 0) { %>
-                <div><canvas id="numOfResourcesChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="numOfResTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks <b>number of available resources</b> for each dataset.<br/><b>weight</b> = 20 points</p>"
+                    ></i>
+                    <div><canvas id="numOfResourcesChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
             <% if(chart.max_file_size> 0) { %>
-                <div><canvas id="fileSizeChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="fileSizeTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks metadata of resources for information about <b>file size</b>.<br/><b>weight</b> = 5 points</p>"
+                    ></i>
+                    <div><canvas id="fileSizeChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
             <% if(chart.max_empty > 0) { %>
-                <div><canvas id="emptyDataChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="emptyDataTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks <b>empty rows and columns</b> in resources
+                            with format like: XLSX, XML, JSON, CSV etc.<br/><b>weight</b> = 25 points</p>"
+                    ></i>
+                    <div><canvas id="emptyDataChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
             <% if(chart.max_date_of_issue> 0) { %>
-                <div><canvas id="dateOfIssueChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="dateOfIssueTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks metadata for information about the <b>date of issue</b>.<br/><b>weight</b> = 5 points</p>"
+                    ></i>
+                    <div><canvas id="dateOfIssueChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
             <% if(chart.max_modification_date> 0) { %>
-                <div><canvas id="modificationDateChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="modificationDateTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks if <b>last modified date</b> from metadata is the same as the actual
+                            last modified date.<br/><b>weight</b> = 10 points</p>"
+                    ></i>
+                    <div><canvas id="modificationDateChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
             <% if(chart.max_data_age> 0) { %>
-                <div><canvas id="dataAgeChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="dataAgeTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks how <b>old</b> are the available datasets and resources.<br/><b>weight</b> = 15 points</p>"
+                    ></i>
+                    <div><canvas id="dataAgeChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
         </div>
     </div>

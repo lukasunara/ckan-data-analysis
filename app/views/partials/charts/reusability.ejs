@@ -1,19 +1,49 @@
 <div class="card align-items-center justify-content-center bg-light rounded-3 m-1 w-100">
-    <h2 class="class-title">Reusability</h2>
+    <h2 class="class-title">
+        Reusability
+        <i id="reuseTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+            title="<p class='text-start'>Calculates number of earned points for each indicator by multiplying
+                <b>percentage</b> of earned points with its <b>weight</b>. Percentage can be seen in charts below.</p>"
+        ></i>
+    </h2>
     <div class="card-body">
         <p class="text-center">These indicators show how easy it is to reuse available data</p>
         <div class="d-flex flex-row flex-wrap justify-content-center">
             <% if(chart.max_license> 0) { %>
-                <div><canvas id="licenseChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="licenseTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks if datasets have been published under any open
+                            <b>licenses</b>.<br/><b>weight</b> = 25 points</p>"
+                    ></i>
+                    <div><canvas id="licenseChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
             <% if(chart.max_basic_info> 0) { %>
-                <div><canvas id="basicInfoChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="basicInfoTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks if metadata contains <b>basic informations</b> about
+                            portals, datasets, organizations and resources.<br/><b>weight</b> = 20 points</p>"
+                    ></i>
+                    <div><canvas id="basicInfoChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
             <% if(chart.max_extras> 0) { %>
-                <div><canvas id="extrasChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="extrasTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks metadata for <b>extra informations</b> about
+                            datasets and organizations.<br/><b>weight</b> = 20 points</p>"
+                    ></i>
+                    <div><canvas id="extrasChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
             <% if(chart.max_publisher> 0) { %>
-                <div><canvas id="publisherChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="publisherTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks metadata for informations about <b>publishers (authors)</b>
+                            of datasets.<br/><b>weight</b> = 5 points</p>"
+                    ></i>
+                    <div><canvas id="publisherChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
         </div>
     </div>

@@ -35,3 +35,7 @@ canvas.smaller-chart {
     max-height: 300px;
     min-width: 75%;
 }
+
+#ratingTooltip {
+    min-width: 500px;
+}

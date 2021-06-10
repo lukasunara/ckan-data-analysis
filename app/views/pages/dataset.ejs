@@ -3,7 +3,7 @@
 
 <head>
     <%- include('../partials/basics/head'); %>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <%- include('../partials/basics/header_external_scripts'); %>
 </head>
 
 <body class="lightblue-bg">
@@ -15,7 +15,7 @@
             <%= objectData.title ? objectData.title : "Dataset ID: " + objectData.object_id %>
         </h1></div>
         <%- include('../partials/charts/charts', { typeOfObject: 'dataset' }); %>
-
+        
         <%- include('../partials/charts/accordion_list', { list: objectData.resources, typeOfObject: 'resource' }); %>
     </main>
     

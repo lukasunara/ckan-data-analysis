@@ -1,19 +1,45 @@
 <div class="card align-items-center justify-content-center bg-light rounded-3 m-1 w-100">
-    <h2 class="class-title">Findability</h2>
+    <h2 class="class-title">
+        Findability
+        <i id="findTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+            title="<p class='text-start'>Calculates number of earned points for each indicator by multiplying
+                <b>percentage</b> of earned points with its <b>weight</b>. Percentage can be seen in charts below.</p>"
+        ></i>
+    </h2>
     <div class="card-body">
         <p class="text-center">These indicators show how easy it is for people and machines to find data</p>
         <div class="d-flex flex-row flex-wrap justify-content-center">
             <% if(chart.max_id> 0) { %>
-                <div><canvas id="identificationChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="idTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks if <b>identifikators</b> from metadata are filled in correctly.<br/><b>weight</b> = 30 points</p>"
+                    ></i>
+                    <div><canvas id="identificationChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
             <% if(chart.max_key> 0) { %>
-                <div><canvas id="keywordsChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="keywordsTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks number of <b>keywords</b> for datasets.<br/><b>weight</b> = 30 points</p>"
+                    ></i>
+                    <div><canvas id="keywordsChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
             <% if(chart.max_cat> 0) { %>
-                <div><canvas id="categoriesChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="categoriesTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks if datasets are divided by <b>theme groups</b>.<br/><b>weight</b> = 30 points</p>"
+                    ></i>
+                    <div><canvas id="categoriesChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
             <% if(chart.max_state> 0) { %>
-                <div><canvas id="stateChart" class="smaller-chart"></canvas></div>
+                <div class="d-flex align-items-center">
+                    <i id="stateTooltip" class="bi-patch-question" data-bs-toggle="tooltip" data-bs-html="true"
+                        title="<p class='text-start'>Checks if datasets are <b>active</b> or not.<br/><b>weight</b> = 10 points</p>"
+                    ></i>
+                    <div><canvas id="stateChart" class="smaller-chart"></canvas></div>
+                </div>
             <% } %>
         </div>
     </div>
