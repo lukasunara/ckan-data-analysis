@@ -4,8 +4,8 @@ const { Pool } = require("pg");
 const pool = new Pool({
     user: 'postgres', // here should be postgres or name of user which has access to database 
     host: 'localhost', // here should be localhost
-    database: 'ckan-data-analysis', // here comes database name
-    password: 'bazepodataka', // here comes database password
+    database: 'name', // here comes database name
+    password: 'password', // here comes database password
     port: 5432,
 });
 
