@@ -75,13 +75,13 @@ module.exports = class AnalysisResult {
 
         let percentageTotal = totalEarnedWeight / totalWeight * 100;
         let grade = null;
-        if (percentageTotal >= 91) {
+        if (percentageTotal >= 90) {
             grade = 'EXCELLENT';
-        } else if (percentageTotal >= 77) {
+        } else if (percentageTotal >= 75) {
             grade = 'VERY GOOD';
-        } else if (percentageTotal >= 52) {
+        } else if (percentageTotal >= 55) {
             grade = 'GOOD';
-        } else if (percentageTotal >= 36) {
+        } else if (percentageTotal >= 40) {
             grade = 'BAD';
         } else {
             grade = 'VERY BAD';

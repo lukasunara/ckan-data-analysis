@@ -23,11 +23,11 @@ var parseExcelFile = (data, extension) => {
             try {
                 analyseFile(worksheetJSON);
             } catch (err) {
-                console.log(err);
+                // console.log(err);
             }
         });
     } catch (err) {
-        console.log(err);
+        // console.log(err);
     }
     // console.log(blankRows + '/' + numOfRows + '\n');
 
@@ -45,7 +45,7 @@ var parseJSONFile = (jsonData) => {
     try {
         analyseFile(jsonData);
     } catch (err) {
-        console.log(err);
+        // console.log(err);
     }
 
     return {

@@ -55,7 +55,7 @@ router.get('/', function (req, res) {
                 portalName: req.params.portalName,
                 objectData: portal,
                 overallResults: portal.result.getOverallRating(),
-                urlForUpdate: '/update/portal/' + portalName
+                urlForUpdate: '/update/portal/' + req.params.portalName
             });
         }
     })();
